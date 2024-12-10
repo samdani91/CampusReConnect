@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios'
+import Footer from '../Home/Footer.js';
 
 export default function Signup() {
     const [name,setName] = useState();
@@ -27,36 +28,36 @@ export default function Signup() {
 
     return (
         <>
-            <div className="d-flex justify-content-center align-items-center bg-secondary vh-100">
-                <div className="bg-white p-3 rounded w-25">
+            <div className="d-flex justify-content-center align-items-center  vh-100">
+                <div className="bg-white p-3 rounded-2 mx-3">
                     <h2>Register</h2>
                     <form onSubmit={handleRegister}>
                         <div className="mb-3">
                             <label htmlFor="email">
                                 <strong>Name</strong>
                             </label>
-                            <input type="text" placeholder="Enter name" autoComplete="off" name="name" className="form-control rounded-0" onChange={(e)=> setName(e.target.value)}/>
+                            <input type="text" placeholder="Enter name" autoComplete="off" name="name" className="form-control-lg rounded-2 w-100 custom-input" onChange={(e)=> setName(e.target.value)}/>
                         </div>
 
                         <div className="mb-3">
                             <label htmlFor="email">
                                 <strong>Email</strong>
                             </label>
-                            <input type="text" placeholder="Enter instituional email" autoComplete="off" name="email" className="form-control rounded-0" onChange={(e)=> setEmail(e.target.value)}/>
+                            <input type="text" placeholder="Enter instituional email" autoComplete="off" name="email" className="form-control-lg rounded-2 w-100 custom-input" onChange={(e)=> setEmail(e.target.value)}/>
                         </div>
 
                         <div className="mb-3">
                             <label htmlFor="email">
                                 <strong>Password</strong>
                             </label>
-                            <input type="password" placeholder="Enter password" autoComplete="off" name="password" className="form-control rounded-0" onChange={(e)=> setPassword(e.target.value)}/>
+                            <input type="password" placeholder="Enter password" autoComplete="off" name="password" className="form-control-lg rounded-2 w-100 custom-input" onChange={(e)=> setPassword(e.target.value)}/>
                         </div>
 
                         <div className="mb-3">
                             <label htmlFor="email">
                                 <strong>Confirm Password</strong>
                             </label>
-                            <input type="password" placeholder="Re enter password" autoComplete="off" name="password" className="form-control rounded-0" onChange={(e)=> setPassword2(e.target.value)}/>
+                            <input type="password" placeholder="Re enter password" autoComplete="off" name="password" className="form-control-lg rounded-2 w-100 custom-input" onChange={(e)=> setPassword2(e.target.value)}/>
                         </div>
 
                         {error && <p className="text-danger">{error}</p>}
@@ -69,6 +70,8 @@ export default function Signup() {
 
                 </div>
             </div>
+
+            <Footer/>
 
         </>
     )

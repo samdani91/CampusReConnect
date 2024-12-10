@@ -1,7 +1,106 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    background-color: #deeaee !important;
+}
+.projectDes{
+    font-family: "Nunito", sans-serif;
+}
 .hover-underline {
     text-decoration: none; /* No underline by default */
 }
 
 .hover-underline:hover {
     text-decoration: underline; /* Underline on hover */
+}
+
+.custom-input {
+    border: 1px solid #ccc;
+}
+
+
+
+.footerArea{
+    margin-top: auto;
+    background: #051129;
+}
+
+footer .line{
+    height: 2px !important;
+    background-color: white !important;
+    width: 100%;
+}
+footer .footer-social{
+    background: transparent !important;
+}
+
+.social a {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px;
+    height: 35px;
+    background: transparent;
+    border: 2px solid #0ef;
+    border-radius: 50%;
+    font-size: 15px;
+    color: #0ef;
+    text-decoration: none;
+    margin: 30px 15px 30px 0;
+    transition: .5s ease;
+    /* opacity: 0; */
+
+    animation: slideTop 1s ease forwards;
+    animation-delay: 0.5;
+}
+
+.social a:hover {
+    background: #0ef;
+    color: #081b29;
+    box-shadow: 0 0 20px #0ef;
+}
+
+section{
+    display: flex;
+    flex-direction: column;
+}
+
+.carousel-container {
+    overflow: hidden;
+    width: 600px; /* Set the desired width */
+    height: 400px; /* Set the desired height */
+    position: relative;
+}
+
+.carousel {
+    display: flex;
+    position: absolute;
+    animation: slide 10s infinite linear;
+}
+
+.carousel img {
+    width: 600px;
+    height: 400px;
+    object-fit: cover;
+}
+
+@keyframes slide {
+    0% {
+        transform: translateX(0);
+    }
+    33% {
+        transform: translateX(-100%);
+    }
+    66% {
+        transform: translateX(-200%);
+    }
+    100% {
+        transform: translateX(-300%);
+    }
 }
