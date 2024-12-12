@@ -19,7 +19,7 @@ app.post('/register', async (req, res) => {
         // Call the checkSignUp function and handle the response
         await checkSignUp(name, email, department, role, password, res);
     } catch (err) {
-        console.error('Error in registration:', err);
+        // console.error('Error in registration:', err);
         res.status(500).json({ message: 'Internal server error', error: err.message });
     }
 
@@ -46,7 +46,7 @@ app.post('/forgot-password', async (req, res) => {
     try {
         await sendCode(email, res);
     } catch (err) {
-        console.log(err);
+        // console.log(err);
         res.status(500).json({ message: 'Internal server error', error: err.message });
     }
 });
@@ -55,15 +55,19 @@ app.post('/verify-code', async (req, res) => {
     const { email, code } = req.body;
 
     if (!email || !code) {
+        // console.log('Missing email or code:', { email, code });
         return res.status(400).json({ message: 'Email and code are required' });
     }
 
     try {
         if (!verificationCodes.has(email)) {
+            // console.log('Verification code not found for email:', email);
             return res.status(400).json({ message: 'Verification code not found or expired' });
         }
 
         const storedCode = verificationCodes.get(email).code;
+
+        // console.log('Stored code:', storedCode, 'Received code:', code);
 
         if (storedCode === code) {
             verificationCodes.delete(email);
@@ -78,11 +82,13 @@ app.post('/verify-code', async (req, res) => {
 });
 
 
-app.post('/reset-password', async (req, res) => {
-    const { email, newPassord } = req.body;
 
+app.post('/reset-password', async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    // console.log('email and password:',{email,newPassword});
     try {
-        await passwordReset(email, newPassord, res);
+        await passwordReset(email, newPassword, res);
     } catch (err) {
         res.status(500).json({ message: 'Internal server error', error: err.message });
     }

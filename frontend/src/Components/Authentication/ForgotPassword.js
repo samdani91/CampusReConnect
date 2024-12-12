@@ -14,9 +14,11 @@ export default function ForgotPassword({ onBack }) {
         // Call backend API to send the verification code
         axios.post('http://localhost:3001/forgot-password', { email })
             .then((result) => {
-                if (result.data === 'Verification email sent') {
-                    setVerificationMessage('A verification code has been sent to your email.');
-                    navigate('/verify-code');
+                if (result.data.message === 'Verification email sent') {
+                    setVerificationMessage('A verification code has been sent to your email.Please Wait...');
+                    setTimeout(() => {
+                        navigate('/verify-code', { state: { email } });
+                    }, 2000);
                 }
             })
             .catch((err) => {
@@ -52,11 +54,11 @@ export default function ForgotPassword({ onBack }) {
                         <button type="submit" className="btn btn-primary w-100 rounded-0">
                             Send Verification Code
                         </button>
-                        <p className="text-success mt-3">{verificationMessage}</p>
+                        <p className={`mt-3 ${verificationMessage === 'A verification code has been sent to your email.Please Wait...' ? 'text-success' : 'text-danger'}`}>{verificationMessage}</p>
 
                         <button
                             type="button"
-                            className="btn btn-secondary w-100 rounded-0 mt-3"
+                            className="btn btn-secondary w-100 rounded-0 mt-0"
                             onClick={onBack}
                         >
                             Back to Login

@@ -7,6 +7,7 @@ import ForgotPassword from './ForgotPassword';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
 
@@ -17,18 +18,20 @@ export default function Login() {
         axios.post('http://localhost:3001/login', { email, password })
             .then((result) => {
                 if (result.data.message === 'Login Successful') {
-                    alert('Login Successful');
-                    navigate('/home');
+                    setMessage('Login Successful');
+                    setTimeout(() => {
+                        navigate('/home');
+                    }, 1000);
                 }
             })
             .catch((err) => {
                 if (err.response && err.response.status === 401) {
                     // Handle credentials mismatch specifically
-                    alert('Credentials Mismatch');
+                    setMessage('Credentials Mismatch');
                 } else {
                     // Handle all other errors
                     // console.error(err);
-                    alert('An error occurred during login.');
+                    setMessage('An error occurred during login.');
                 }
             });
     };
@@ -75,9 +78,11 @@ export default function Login() {
                                     Login
                                 </button>
 
+                                <p className={`mt-3 ${message === 'Login Successful' ? 'text-success' : 'text-danger'}`}>{message}</p>
+
                                 <button
                                     type="button"
-                                    className="btn btn-link w-100 mt-3 text-center"
+                                    className="btn btn-link w-100 mt-0 text-center"
                                     onClick={() => navigate('/forgot-password')}
                                 >
                                     Forgot Password?

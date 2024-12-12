@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Footer from '../Home/Footer.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function EnterVerificationCode({ email, onCodeVerified }) {
+export default function EnterVerificationCode({ onCodeVerified }) {
+    const location = useLocation();
+    const email = location.state?.email || '';
     const [code, setCode] = useState('');
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
@@ -14,14 +16,19 @@ export default function EnterVerificationCode({ email, onCodeVerified }) {
         axios.post('http://localhost:3001/verify-code', { email, code })
             .then((response) => {
                 if (response.data.message === 'Code verified') {
-                    navigate('/reset-password'); // Navigate only after code is verified
-                } else {
-                    setMessage('Invalid code. Please try again.');
+                    setMessage('Code Matched!');
+                    setTimeout(() => {
+                        navigate('/reset-password',{ state: { email } });
+                    }, 2000);
                 }
             })
             .catch((err) => {
                 console.error(err);
-                setMessage('An error occurred. Please try again.');
+
+                if (err.response && err.response.status === 400) {
+                    setMessage(err.response.data.message)
+                }
+                else setMessage('An error occurred. Please try again.');
             });
 
     };
@@ -48,7 +55,9 @@ export default function EnterVerificationCode({ email, onCodeVerified }) {
                         <button type="submit" className="btn btn-primary w-100 rounded-0">
                             Verify Code
                         </button>
-                        <p className="text-danger mt-3">{message}</p>
+                        <p className={`mt-3 ${message === 'Code Matched!' ? 'text-success' : 'text-danger'}`}>
+                            {message}
+                        </p>
                     </form>
                 </div>
             </div>

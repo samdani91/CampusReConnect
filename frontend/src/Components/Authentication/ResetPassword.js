@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Footer from '../Home/Footer.js';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-export default function ResetPassword({ email, onPasswordReset }) {
+export default function ResetPassword({ onPasswordReset }) {
+    const location = useLocation();
+    const email = location.state?.email || '';
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [message, setMessage] = useState('');
+    const navigate = useNavigate();
 
     const handlePasswordReset = (e) => {
         e.preventDefault();
@@ -17,16 +21,19 @@ export default function ResetPassword({ email, onPasswordReset }) {
 
         axios.post('http://localhost:3001/reset-password', { email, newPassword })
             .then((response) => {
-                if (response.data === 'Password updated') {
+                if (response.data.message === 'Password updated') {
                     setMessage('Password successfully updated.');
-                    onPasswordReset(); // Redirect or show a success message
-                } else {
-                    setMessage(response.data.error || 'An error occurred.');
+                    setTimeout(() => {
+                        navigate('/login');
+                    }, 1000);
                 }
             })
             .catch((err) => {
                 console.error(err);
-                setMessage('An error occurred. Please try again.');
+                if (err.response && err.response.status === 400) {
+                    setMessage(err.response.data.message)
+                }
+                else setMessage('An error occurred. Please try again.');
             });
     };
 
@@ -65,7 +72,7 @@ export default function ResetPassword({ email, onPasswordReset }) {
                         <button type="submit" className="btn btn-success w-100 rounded-0">
                             Update Password
                         </button>
-                        <p className="text-danger mt-3">{message}</p>
+                        <p className={`mt-3 ${message === 'Password successfully updated.' ? 'text-success' : 'text-danger'}`}>{message}</p>
                     </form>
                 </div>
 

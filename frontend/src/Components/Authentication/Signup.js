@@ -11,6 +11,7 @@ export default function Signup() {
     const [password, setPassword] = useState();
     const [password2, setPassword2] = useState();
     const [error, setError] = useState();
+    const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
     const handleRegister = (e) => {
@@ -18,18 +19,20 @@ export default function Signup() {
         if (password !== password2) {
             setError("Passwords do not match");
         }  else {
-            setError(""); // Clear any previous errors
+            setError(""); 
     
             axios.post('http://localhost:3001/register', { name, email, department, role, password })
                 .then(response => {
-                    alert(response.data.message); // Display the success message from backend
-                    navigate('/home'); // Redirect to login on successful registration
+                    setMessage(response.data.message); 
+                    setTimeout(() => {
+                        navigate('/home');
+                    }, 1000);
                 })
                 .catch(error => {
                     if (error.response && error.response.data && error.response.data.message) {
-                        alert(error.response.data.message); // Display the error message from backend
+                        setMessage(error.response.data.message); 
                     } else {
-                        alert("An unexpected error occurred. Please try again.");
+                        setMessage("An unexpected error occurred. Please try again.");
                     }
                 });
         }
@@ -111,6 +114,9 @@ export default function Signup() {
 
                         <button type="submit" className="btn btn-success w-100 rounded-0">Register</button>
                     </form>
+
+                    <p className={`mt-3 ${message === 'Registration Successful' ? 'text-success' : 'text-danger'}`}>{message}</p>
+
                     <p>Already have an account?</p>
                     <Link to="/login" className="btn btn-default border w-100 bg-light rounded-0 text-decoration-none">Login</Link>
 

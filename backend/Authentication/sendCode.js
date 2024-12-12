@@ -2,7 +2,7 @@ const { isEmailExist, isStudentEmail, isFacultyEmail } = require('./checkExist')
 const crypto = require('crypto');
 const sendgrid = require('@sendgrid/mail');
 
-sendgrid.setApiKey('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');
+sendgrid.setApiKey('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');
 
 const verificationCodes = new Map();
 
@@ -30,7 +30,7 @@ function sendCode(email, res) {
         // Send the verification email
         const message = {
             to: email,
-            from: 'samdanimozumder3030@gmail.com',
+            from: 'campusreconnectdu@gmail.com',
             subject: 'CampusReConnect Password Reset Verification Code',
             text: `Your verification code is: ${verificationCode}`,
             html: `<p>Your verification code is: <strong>${verificationCode}</strong></p>`
@@ -40,11 +40,11 @@ function sendCode(email, res) {
         sendgrid
             .send(message)
             .then(() => {
-                res.status(200).json({ message: 'Verification email sent' });
+                return res.status(200).json({ message: 'Verification email sent' });
             })
             .catch((emailErr) => {
                 console.error('Error sending email:', emailErr);
-                res.status(500).json({ message: 'Error sending verification email' });
+                return res.status(500).json({ message: 'Error sending verification email' });
             });
     });
 }
