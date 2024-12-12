@@ -17,13 +17,15 @@ export default function ForgotPassword({ onBack }) {
                 if (result.data === 'Verification email sent') {
                     setVerificationMessage('A verification code has been sent to your email.');
                     navigate('/verify-code');
-                } else {
-                    setVerificationMessage("User doesn't exist or an error occurred.");
                 }
             })
             .catch((err) => {
                 console.error(err);
-                setVerificationMessage('Error sending verification email. Please try again.');
+
+                if (err.response && err.response.status === 400) {
+                    setVerificationMessage(err.response.data.message)
+                }
+                else setVerificationMessage('Error sending verification email. Please try again.');
             });
     };
 
@@ -42,7 +44,7 @@ export default function ForgotPassword({ onBack }) {
                                 placeholder="Enter your registered email"
                                 autoComplete="off"
                                 name="email"
-                                className="form-control-lg rounded-2 w-100 custom-input"
+                                className="form-control-sm rounded-2 w-100 custom-input"
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>

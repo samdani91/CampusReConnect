@@ -41,7 +41,7 @@ export default function EnterVerificationCode({ email, onCodeVerified }) {
                                 placeholder="Enter the code"
                                 autoComplete="off"
                                 name="code"
-                                className="form-control-lg rounded-2 w-100 custom-input"
+                                className="form-control-sm rounded-2 w-100 custom-input"
                                 onChange={(e) => setCode(e.target.value)}
                             />
                         </div>

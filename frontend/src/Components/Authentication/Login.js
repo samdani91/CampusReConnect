@@ -13,12 +13,24 @@ export default function Login() {
     // Login handler
     const handleLogin = (e) => {
         e.preventDefault();
-
+    
         axios.post('http://localhost:3001/login', { email, password })
             .then((result) => {
-                if (result.data === 'Success') navigate('/home');
+                if (result.data.message === 'Login Successful') {
+                    alert('Login Successful');
+                    navigate('/home');
+                }
             })
-            .catch((err) => console.error(err));
+            .catch((err) => {
+                if (err.response && err.response.status === 401) {
+                    // Handle credentials mismatch specifically
+                    alert('Credentials Mismatch');
+                } else {
+                    // Handle all other errors
+                    // console.error(err);
+                    alert('An error occurred during login.');
+                }
+            });
     };
 
     return (
@@ -40,7 +52,7 @@ export default function Login() {
                                         placeholder="Enter institutional email"
                                         autoComplete="off"
                                         name="email"
-                                        className="form-control-lg rounded-2 w-100 custom-input"
+                                        className="form-control-sm rounded-2 w-100 custom-input"
                                         onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
@@ -54,7 +66,7 @@ export default function Login() {
                                         placeholder="Enter password"
                                         autoComplete="off"
                                         name="password"
-                                        className="form-control-lg rounded-2 w-100 custom-input"
+                                        className="form-control-sm rounded-2 w-100 custom-input"
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
                                 </div>

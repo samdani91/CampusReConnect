@@ -45,7 +45,7 @@ export default function ResetPassword({ email, onPasswordReset }) {
                                 placeholder="Enter new password"
                                 autoComplete="off"
                                 name="newPassword"
-                                className="form-control-lg rounded-2 w-100 custom-input"
+                                className="form-control-sm rounded-2 w-100 custom-input"
                                 onChange={(e) => setNewPassword(e.target.value)}
                             />
                         </div>
@@ -58,7 +58,7 @@ export default function ResetPassword({ email, onPasswordReset }) {
                                 placeholder="Confirm new password"
                                 autoComplete="off"
                                 name="confirmPassword"
-                                className="form-control-lg rounded-2 w-100 custom-input"
+                                className="form-control-sm rounded-2 w-100 custom-input"
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                             />
                         </div>

@@ -1,127 +1,97 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const cors = require("cors")
-const UserModel = require('./db/user')
-const sendgrid = require('@sendgrid/mail');
+const cors = require('cors');
+const checkSignUp = require('./Authentication/checkSignUp');
+const checkLogin = require('./Authentication/checkLogin');
+const {sendCode,verificationCodes} = require('./Authentication/sendCode');
+const passwordReset = require('./Authentication/passwordReset');
 
-const app = express();
-app.use(express.json())
-app.use(cors())
 
 const PORT = 3001;
-sendgrid.setApiKey('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');
-let verificationCode;
 
-mongoose.connect("mongodb://127.0.0.1:27017/SPL2");
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-app.post('/register', (req, res) => {
-    UserModel.create(req.body)
-        .then(users => res.json(users))
-        .catch(err => res.json(err))
-})
-
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-    UserModel.findOne({ email: email })
-        .then(user => {
-            if (user) {
-                if (user.password === password) {
-                    res.json("Success");
-                } else {
-                    res.json("Incorrect Password");
-                }
-            } else {
-                res.json("User doesn't exist");
-            }
-        })
-})
-
-app.post('/forgot-password', (req, res) => {
-    const { email } = req.body;
-
-    verificationCode = Math.floor(100000 + Math.random() * 900000); // Generate a random 6-digit code
-
-    const msg = {
-        to: email,
-        from: 'samdanimozumder3030@gmail.com',
-        subject: 'Password Reset Verification Code of CampusReConnect',
-        text: `Your verification code is ${verificationCode}.`,
-        html: `<strong>Your verification code is ${verificationCode}.</strong>`,
-    };
-
-    UserModel.findOne({ email: email })
-        .then(user => {
-            if (user) {
-                // console.log(user)
-                sendgrid
-                    .send(msg)
-                    .then(() => {
-                        res.status(200).send('Verification email sent');
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                        res.status(500).send('Error sending verification email');
-                    });
-            } else {
-                res.json("User doesn't exist");
-            }
-        })
-
-
-
-
-});
-
-app.post('/verify-code', (req, res) => {
-    const { email, code } = req.body;
-
-    UserModel.findOne({ email })
-        .then((user) => {
-            if (user && verificationCode === parseInt(code)) { // Ensure code comparison is type-safe
-                res.status(200).json({ message: 'Code verified' }); // Respond with JSON
-            } else {
-                res.status(400).json({ message: 'Invalid code' });
-            }
-        })
-        .catch((err) => res.status(500).json({ message: 'Error verifying code' }));
-});
-
-
-app.post('/reset-password', async (req, res) => {
-    const { email, newPassword } = req.body;
+app.post('/register', async (req, res) => {
+    const { name, email, department, role, password } = req.body;
 
     try {
-        // Find the user by email
-        const user = await UserModel.findOne({ email });
+        // Call the checkSignUp function and handle the response
+        await checkSignUp(name, email, department, role, password, res);
+    } catch (err) {
+        console.error('Error in registration:', err);
+        res.status(500).json({ message: 'Internal server error', error: err.message });
+    }
 
-        if (!user) {
-            return res.status(404).send('User not found');
+});
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    checkLogin(email, password, (err, isValid) => {
+        if (err) {
+            return res.status(500).json({ error: 'Internal server error' });
         }
 
-        // Compare the new password with the current password (not hashed)
-        if (newPassword === user.password) {
-            return res.status(400).send('New password cannot be the same as the old password');
+        if (isValid) {
+            return res.status(200).json({ message: 'Login Successful' });
+        } else {
+            return res.status(401).json({ message: 'Credentials Mismatch' });
+        }
+    });
+});
+
+app.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        await sendCode(email, res);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: 'Internal server error', error: err.message });
+    }
+});
+
+app.post('/verify-code', async (req, res) => {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+        return res.status(400).json({ message: 'Email and code are required' });
+    }
+
+    try {
+        if (!verificationCodes.has(email)) {
+            return res.status(400).json({ message: 'Verification code not found or expired' });
         }
 
-        // Update the user's password
-        user.password = newPassword;
+        const storedCode = verificationCodes.get(email).code;
 
-        await user.save();
-
-        res.status(200).send('Password updated');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error resetting password');
+        if (storedCode === code) {
+            verificationCodes.delete(email);
+            return res.status(200).json({ message: 'Code verified' });
+        } else {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        }
+    } catch (err) {
+        console.error('Error verifying code:', err);
+        res.status(500).json({ message: 'Internal server error', error: err.message });
     }
 });
 
 
-app.get('/', (req, res) => {
-    res.send('Backend Server Running')
+app.post('/reset-password', async (req, res) => {
+    const { email, newPassord } = req.body;
 
+    try {
+        await passwordReset(email, newPassord, res);
+    } catch (err) {
+        res.status(500).json({ message: 'Internal server error', error: err.message });
+    }
+});
+
+app.get('/', (req, res) => {
+    res.send('Backend Server Running');
 });
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
