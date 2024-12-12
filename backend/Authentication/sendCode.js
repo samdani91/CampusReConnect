@@ -2,7 +2,7 @@ const { isEmailExist, isStudentEmail, isFacultyEmail } = require('./checkExist')
 const crypto = require('crypto');
 const sendgrid = require('@sendgrid/mail');
 
-sendgrid.setApiKey('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');
+sendgrid.setApiKey('');
 
 const verificationCodes = new Map();
 
