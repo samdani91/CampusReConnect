@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Carousel from './Carousel';
 import Footer from './Footer';
-import TopicSection from './TopicSection';
 
 export default function Landing() {
     return (
@@ -48,11 +47,6 @@ export default function Landing() {
                 </div>
             </section>
 
-            <section>
-            <div className="container-md my-5 bg-body-tertiary">
-                    {/* <TopicSection></TopicSection> */}
-                </div>
-            </section>
             <Footer/>
         </>
     );
