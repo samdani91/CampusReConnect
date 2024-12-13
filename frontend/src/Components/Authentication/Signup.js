@@ -25,7 +25,7 @@ export default function Signup() {
                 .then(response => {
                     setMessage(response.data.message); 
                     setTimeout(() => {
-                        navigate('/home');
+                        navigate('/feed');
                     }, 1000);
                 })
                 .catch(error => {
