@@ -20,7 +20,7 @@ export default function Login() {
                 if (result.data.message === 'Login Successful') {
                     setMessage('Login Successful');
                     setTimeout(() => {
-                        navigate('/home');
+                        navigate('/feed');
                     }, 1000);
                 }
             })
