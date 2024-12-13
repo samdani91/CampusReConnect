@@ -90,6 +90,10 @@ section{
     object-fit: cover;
 }
 
+.bx{
+    font-size: 1.5rem;
+}
+
 @keyframes slide {
     0% {
         transform: translateX(0);

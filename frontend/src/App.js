@@ -7,6 +7,7 @@ import Landing from './Components/Home/Landing';
 import ForgotPassword from './Components/Authentication/ForgotPassword'
 import EnterVerificationCode from './Components/Authentication/EnterVerificationCode';
 import ResetPassword from './Components/Authentication/ResetPassword';
+import Feed from './Components/ContentFeed/Feed'
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
 				<Route path="/forgot-password" element={<ForgotPassword />} />
 				<Route path="/verify-code" element={<EnterVerificationCode />} />
 				<Route path="/reset-password" element={<ResetPassword />}/>
+				<Route path="/feed" element={<Feed />}/>
 			</Routes>
 
 		</BrowserRouter>
