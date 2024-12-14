@@ -4,7 +4,7 @@ import axios from 'axios';
 import Footer from '../Home/Footer.js';
 import ForgotPassword from './ForgotPassword';
 
-export default function Login() {
+export default function Login({ onLogin }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -14,23 +14,23 @@ export default function Login() {
     // Login handler
     const handleLogin = (e) => {
         e.preventDefault();
-    
+
         axios.post('http://localhost:3001/login', { email, password })
             .then((result) => {
                 if (result.data.message === 'Login Successful') {
                     setMessage('Login Successful');
+                    onLogin(true); // Notify App of successful login
                     setTimeout(() => {
                         navigate('/feed');
                     }, 1000);
+                } else {
+                    setMessage(result.data.message || 'An error occurred.');
                 }
             })
             .catch((err) => {
                 if (err.response && err.response.status === 401) {
-                    // Handle credentials mismatch specifically
                     setMessage('Credentials Mismatch');
                 } else {
-                    // Handle all other errors
-                    // console.error(err);
                     setMessage('An error occurred during login.');
                 }
             });
@@ -78,7 +78,15 @@ export default function Login() {
                                     Login
                                 </button>
 
-                                <p className={`mt-3 ${message === 'Login Successful' ? 'text-success' : 'text-danger'}`}>{message}</p>
+                                <p
+                                    className={`mt-3 ${
+                                        message === 'Login Successful'
+                                            ? 'text-success'
+                                            : 'text-danger'
+                                    }`}
+                                >
+                                    {message}
+                                </p>
 
                                 <button
                                     type="button"
