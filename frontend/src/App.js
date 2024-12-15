@@ -10,7 +10,8 @@ import EnterVerificationCode from './Components/Authentication/EnterVerification
 import ResetPassword from './Components/Authentication/ResetPassword';
 import Feed from './Components/ContentFeed/Feed'
 import ProtectedRoutes from './Components/ProtectedRoutes';
-
+import Notification from "./Components/Notification";
+import { NotificationProvider } from "./Components/Context/NotificationContext";
 
 function App() {
 	const [user, setUser] = useState(null); // User state
@@ -20,6 +21,7 @@ function App() {
 		setUser(isLoggedIn); // Set user to true when logged in
 	};
 	return (
+		<NotificationProvider>
 		<BrowserRouter>
 			<Routes>
 				<Route path='/' element={<Landing />}></Route>
@@ -34,10 +36,15 @@ function App() {
 				</Route> */}
 
 				<Route path="/feed" element={<Feed />} />
+				
+					<Route path="/notifications" element={<Notification />} />
+				
+				
 
 			</Routes>
 
 		</BrowserRouter>
+		</NotificationProvider>
 	);
 }
 
