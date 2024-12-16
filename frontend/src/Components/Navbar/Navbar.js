@@ -12,6 +12,10 @@ export default function Navbar() {
         navigate("/notifications");
     };
 
+    const handleMessageClick = () => {
+        navigate("/message");
+    }
+
     return (
         <>
             <nav className="navbar navbar-expand-md navbar-light bg-light">
@@ -76,7 +80,7 @@ export default function Navbar() {
                             </button>
 
                             {/* Other Icons */}
-                            <button className="btn me-2">
+                            <button className="btn me-2"  onClick={handleMessageClick}>
                                 <i className="bx bx-envelope"></i>
                             </button>
                             <button className="btn me-2">
