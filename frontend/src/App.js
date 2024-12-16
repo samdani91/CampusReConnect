@@ -12,6 +12,7 @@ import Feed from './Components/ContentFeed/Feed'
 import ProtectedRoutes from './Components/ProtectedRoutes';
 import Notification from "./Components/Notification";
 import { NotificationProvider } from "./Components/Context/NotificationContext";
+import Chat from './Components/Chat/Chat';
 
 function App() {
 	const [user, setUser] = useState(null); // User state
@@ -37,7 +38,9 @@ function App() {
 
 				<Route path="/feed" element={<Feed />} />
 				
-					<Route path="/notifications" element={<Notification />} />
+				<Route path="/notifications" element={<Notification />} />
+
+				<Route path="/message" element={<Chat />} />
 				
 				
 
