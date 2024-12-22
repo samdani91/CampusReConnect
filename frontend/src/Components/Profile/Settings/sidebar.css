@@ -1,0 +1,11 @@
+.nav-link-active {
+    font-weight: bold;
+    color: #0056b3;
+  }
+  .sidebar {
+    height: 30vh; /* Full viewport height */
+    /* position: sticky; */
+    top: 0; /* Ensures it sticks while scrolling */
+    width: 100%;
+  }
+  

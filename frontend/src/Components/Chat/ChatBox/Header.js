@@ -14,26 +14,15 @@ import {
       <Card
         sx={{
           borderRadius: 0,
+          bgcolor:"primary.main",
+          color:"white"
         }}
         elevation={0}
       >
         <CardHeader
           avatar={
             <>
-              <Button sx={{ minWidth: "auto", mr: 1 }}>
-                <ArrowBackIcon />
-              </Button>
               <Avatar>R</Avatar>
-            </>
-          }
-          action={
-            <>
-              <IconButton>
-                <VideoCallIcon />
-              </IconButton>
-              <IconButton>
-                <CallIcon />
-              </IconButton>
             </>
           }
         //   title={roomData.receiver.name}

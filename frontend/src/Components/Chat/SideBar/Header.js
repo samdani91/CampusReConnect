@@ -11,10 +11,11 @@ const Header = () => {
     return (
         <Card
             sx={{
-                bgcolor: "primary.main",
+                bgcolor: "green",
                 borderRadius: 0,
                 color: "primary.contrastText",
             }}
+            elevation={0}
         >
             <CardHeader
                 avatar={<Avatar>A</Avatar>}
@@ -26,8 +27,8 @@ const Header = () => {
                         <MoreVertIcon />
                     </IconButton>
                 }
-                title="A. M Samdani Mozumder"
-                subheader={<Typography variant="caption">UI Frontend Developer</Typography>}
+                title="Message"
+                // subheader={<Typography variant="caption">UI Frontend Developer</Typography>}
             />
         </Card>
     );

@@ -16,6 +16,10 @@ export default function Navbar() {
         navigate("/message");
     }
 
+    const handleSettings = () => {
+        navigate("/settings");
+    }
+
     return (
         <>
             <nav className="navbar navbar-expand-md navbar-light bg-light">
@@ -99,9 +103,9 @@ export default function Navbar() {
                                         </a>
                                     </li>
                                     <li>
-                                        <a className="dropdown-item" href="#">
+                                        <button className="dropdown-item" onClick={handleSettings}>
                                             Settings
-                                        </a>
+                                        </button>
                                     </li>
                                     <li>
                                         <hr className="dropdown-divider" />
