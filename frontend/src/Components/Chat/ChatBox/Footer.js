@@ -1,5 +1,5 @@
 import { Box, Button, TextField } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import { useState } from "react";
 const Footer = () => {
@@ -18,10 +18,7 @@ const Footer = () => {
     <Box sx={{ p: 1, display: "flex" }}>
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Button sx={{ minWidth: "auto", mr: 1 }}>
-          <MoreVertIcon />
-        </Button>
-        <Button sx={{ minWidth: "auto", mr: 1 }}>
-          <InsertEmoticonIcon />
+          <AttachFileIcon />
         </Button>
       </Box>
       <Box
@@ -34,7 +31,7 @@ const Footer = () => {
           size="small"
           sx={{
             "& .MuiInputBase-root": {
-              borderRadius: 0,
+              borderRadius: 2,
               borderRight: 0,
             },
           }}
@@ -45,7 +42,7 @@ const Footer = () => {
         <Button
           type="submit"
           variant="outlined"
-          sx={{ borderRadius: 0, minWidth: "auto", height: "100%" }}
+          sx={{ borderRadius: 2, minWidth: "auto", height: "100%",bgcolor:"green", color:"white",marginLeft:"0.5rem" }}
         >
           Send
         </Button>

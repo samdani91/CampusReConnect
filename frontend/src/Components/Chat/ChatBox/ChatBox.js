@@ -13,7 +13,9 @@ const ChatBox = () => {
         flexDirection: "column",
       }}
     >
-        <span className="text-center">Chat Area</span>
+      <Header/>
+      <ChatArea/>
+      <Footer/>
       {/* {roomData.room ? (
         <>
           <Header roomData={roomData} />

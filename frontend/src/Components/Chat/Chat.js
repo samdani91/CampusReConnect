@@ -7,8 +7,8 @@ export default function Chat() {
     return (
         <>
         <Navbar />
-        <div className="container mt-4">
-            <Paper square elevation={0}  sx={{ height: "100vh", display: "flex" }}>
+        <div className="container mt-3">
+            <Paper square elevation={0}  sx={{ height: "86vh", display: "flex" }}>
                 <SideBar />
                 <ChatBox/>
             </Paper>
