@@ -25,7 +25,7 @@ export default function Navbar() {
             <nav className="navbar navbar-expand-md navbar-light bg-light">
                 <div className="container-fluid">
                     {/* Brand */}
-                    <a className="navbar-brand fw-bold fs-3" href="#">
+                    <a className="navbar-brand fw-bold fs-3 me-5" href="#">
                         CampusReConnect
                     </a>
 
@@ -61,7 +61,7 @@ export default function Navbar() {
                         {/* Search Bar for Larger Screens */}
                         <form className="d-none d-md-flex flex-grow-1 me-2 align-items-center justify-content-center">
                             <input
-                                className="form-control w-75"
+                                className="form-control w-50"
                                 type="search"
                                 placeholder="Search for research, journals, people, etc."
                                 aria-label="Search"
