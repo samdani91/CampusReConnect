@@ -1,11 +1,23 @@
-.nav-link-active {
-    font-weight: bold;
-    color: #0056b3;
-  }
-  .sidebar {
-    height: 30vh; /* Full viewport height */
-    /* position: sticky; */
-    top: 0; /* Ensures it sticks while scrolling */
-    width: 100%;
-  }
-  
+.sidebar {
+  height: auto; /* Adjust to take full height */
+  /* min-height: 30vh;  */
+  width: 100%;
+  background-color: #f8f9fa; /* Make sure to define a background color */
+  position: relative; /* Ensures proper positioning */
+  box-sizing: border-box; /* Includes padding and borders in the height/width calculations */
+}
+
+.sidebar .btn {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar .btn i {
+  font-size: 1.25rem; /* Adjust icon size if needed */
+  margin-right: 0.5rem; /* Add spacing between the icon and text */
+}
+
+.sidebar li.active {
+  border-left: 4px solid blue; /* Blue bar on the left */
+
+}

@@ -4,7 +4,7 @@ import "./profile.css"
 export default function Profile() {
     return (
         <div className="container">
-            <div className="card">
+            <div className="card border border-light">
                 <div className="card-body">
                     <h5 className="card-title mb-4 p-2">Profile settings</h5>
                     <hr></hr>

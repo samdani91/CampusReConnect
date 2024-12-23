@@ -14,6 +14,8 @@ import Notification from "./Components/Notification";
 import { NotificationProvider } from "./Components/Context/NotificationContext";
 import Chat from './Components/Chat/Chat';
 import Setting from './Components/Profile/Settings/Setting';
+import Account from './Components/Profile/Settings/Account';
+import Profile from './Components/Profile/Settings/Profile';
 
 function App() {
 	const [user, setUser] = useState(null); // User state
@@ -44,6 +46,9 @@ function App() {
 				<Route path="/message" element={<Chat />} />
 
 				<Route path="/settings" element={<Setting/>} />
+
+				{/* <Route path="/accountSettings" element={<Account/>} />
+				<Route path="/profileSettings" element={<Profile/>} /> */}
 				
 
 			</Routes>
