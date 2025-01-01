@@ -16,6 +16,7 @@ import Chat from './Components/Chat/Chat';
 import Setting from './Components/Profile/Settings/Setting';
 import Account from './Components/Profile/Settings/Account';
 import Profile from './Components/Profile/Settings/Profile';
+import ViewProfile from './Components/Profile/ViewProfile/ViewProfile';
 
 function App() {
 	const [user, setUser] = useState(null); // User state
@@ -46,6 +47,7 @@ function App() {
 				<Route path="/message" element={<Chat />} />
 
 				<Route path="/settings" element={<Setting/>} />
+				<Route path="/view-profile" element={<ViewProfile/>} />
 
 				{/* <Route path="/accountSettings" element={<Account/>} />
 				<Route path="/profileSettings" element={<Profile/>} /> */}
