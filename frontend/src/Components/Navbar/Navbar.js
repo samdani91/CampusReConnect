@@ -20,6 +20,10 @@ export default function Navbar() {
         navigate("/settings");
     }
 
+    const handleViewProfile = () => {
+        navigate("/view-profile");
+    }
+
     return (
         <>
             <nav className="navbar navbar-expand-md navbar-light bg-light">
@@ -98,9 +102,9 @@ export default function Navbar() {
                                 </button>
                                 <ul className="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a className="dropdown-item" href="#">
+                                        <button className="dropdown-item" onClick={handleViewProfile}>
                                             Your Profile
-                                        </a>
+                                        </button>
                                     </li>
                                     <li>
                                         <button className="dropdown-item" onClick={handleSettings}>
