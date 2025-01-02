@@ -26,7 +26,7 @@ const ViewProfile = () => {
 		<>
 			<Navbar />
 			<div className="container profile-container">
-				<div className="profile-card card shadow-lg">
+				<div className="profile-card card ">
 					<div className="card-body">
 						<div className="d-flex align-items-center justify-content-between">
 							<div className="d-flex align-items-center">
