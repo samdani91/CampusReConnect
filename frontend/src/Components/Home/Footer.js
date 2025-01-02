@@ -1,7 +1,7 @@
 export default function Footer(){
     return(
         <>
-        <div className="container-fluid footerArea">
+        <div className="container-fluid footerArea mt-5">
                 <div className="container-md">
                     <footer className="text-center text-white mb-0">
                         <div className="container p-4 pb-0">
