@@ -40,10 +40,10 @@ const ViewProfile = () => {
 								<div className="ms-4">
 									<h4 className="fw-bold mb-1">A. M Samdani Mozumder</h4>
 									<p className="mb-1 text-muted">
-										Degree · Position · <span className="text-primary">University of Dhaka</span>
+										Degree · <span className="text-primary">University of Dhaka</span>
 									</p>
 									<p className="text-muted small">
-										Bangladesh | <a href="#" className="text-primary">Website</a>
+										Bangladesh
 									</p>
 								</div>
 							</div>
