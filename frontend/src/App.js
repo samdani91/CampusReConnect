@@ -1,63 +1,92 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import { useState } from 'react'
+import { useState, useEffect } from 'react';
 import Signup from './Components/Authentication/Signup';
 import Login from './Components/Authentication/Login';
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Landing from './Components/Home/Landing';
-import ForgotPassword from './Components/Authentication/ForgotPassword'
+import ForgotPassword from './Components/Authentication/ForgotPassword';
 import EnterVerificationCode from './Components/Authentication/EnterVerificationCode';
 import ResetPassword from './Components/Authentication/ResetPassword';
-import Feed from './Components/ContentFeed/Feed'
+import Feed from './Components/ContentFeed/Feed';
 import ProtectedRoutes from './Components/ProtectedRoutes';
-import Notification from "./Components/Notification";
-import { NotificationProvider } from "./Components/Context/NotificationContext";
+import Notification from './Components/Notification';
+import { NotificationProvider } from './Components/Context/NotificationContext';
 import Chat from './Components/Chat/Chat';
 import Setting from './Components/Profile/Settings/Setting';
-import Account from './Components/Profile/Settings/Account';
-import Profile from './Components/Profile/Settings/Profile';
 import ViewProfile from './Components/Profile/ViewProfile/ViewProfile';
+import Navbar from './Components/Navbar/Navbar'; // Import Navbar
+import axios from 'axios';
 
 function App() {
-	const [user, setUser] = useState(null); // User state
+    const [user, setUser] = useState(null); // User state to track login
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Track if auth check is in progress
+    const [showNavbar, setShowNavbar] = useState(false); // State to control navbar rendering
 
-	// Handle login state
-	const handleLogin = (isLoggedIn) => {
-		setUser(isLoggedIn); // Set user to true when logged in
-	};
-	return (
-		<NotificationProvider>
-		<BrowserRouter>
-			<Routes>
-				<Route path='/' element={<Landing />}></Route>
-				<Route path='/register' element={<Signup />}></Route>
-				<Route path='/login' element={<Login onLogin={handleLogin} />}></Route>
-				<Route path="/forgot-password" element={<ForgotPassword />} />
-				<Route path="/verify-code" element={<EnterVerificationCode />} />
-				<Route path="/reset-password" element={<ResetPassword />} />
+    // Check if the user is authenticated on system startup
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001/check-auth", {
+                    withCredentials: true, // Include cookies
+                });
+                if (response.data.isAuthenticated) {
+                    setUser(true); // User is logged in
+                } else {
+                    setUser(false); // User is not logged in
+                }
+            } catch (error) {
+                setUser(false); // In case of error, consider the user not logged in
+            } finally {
+                setIsCheckingAuth(false); // Mark the auth check as complete
+            }
+        };
 
-				{/* <Route element={<ProtectedRoutes user={user}/>}>
-					<Route path="/feed" element={<Feed />}/>
-				</Route> */}
+        checkAuth();
+    }, []);
 
-				<Route path="/feed" element={<Feed />} />
-				
-				<Route path="/notifications" element={<Notification />} />
+    // Delay rendering of Navbar by 1 seconds after user becomes true
+    useEffect(() => {
+        if (user) {
+            const timer = setTimeout(() => {
+                setShowNavbar(true);
+            }, 1000);
+            return () => clearTimeout(timer); // Cleanup the timer on unmount
+        } else {
+            setShowNavbar(false); // Hide Navbar if user is false
+        }
+    }, [user]);
 
-				<Route path="/message" element={<Chat />} />
+    // Show a loading screen while checking authentication
+    if (isCheckingAuth) {
+        return <div>Loading...</div>;
+    }
 
-				<Route path="/settings" element={<Setting/>} />
-				<Route path="/view-profile" element={<ViewProfile/>} />
+    return (
+        <NotificationProvider>
+            <BrowserRouter>
+                {showNavbar && <Navbar setUser={setUser} />}
+                <Routes>
+                    {/* Redirect to feed if user is logged in */}
+                    <Route path="/" element={user ? <Feed /> : <Landing />} />
+                    <Route path="/register" element={<Signup />} />
+                    <Route path="/login" element={<Login onLogin={() => setUser(true)} />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/verify-code" element={<EnterVerificationCode />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
 
-				{/* <Route path="/accountSettings" element={<Account/>} />
-				<Route path="/profileSettings" element={<Profile/>} /> */}
-				
-
-			</Routes>
-
-		</BrowserRouter>
-		</NotificationProvider>
-	);
+                    {/* Protected routes */}
+                    <Route element={<ProtectedRoutes />}>
+                        <Route path="/feed" element={<Feed />} />
+                        <Route path="/notifications" element={<Notification />} />
+                        <Route path="/message" element={<Chat />} />
+                        <Route path="/settings" element={<Setting />} />
+                        <Route path="/view-profile" element={<ViewProfile />} />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </NotificationProvider>
+    );
 }
 
 export default App;

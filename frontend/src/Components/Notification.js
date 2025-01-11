@@ -1,13 +1,11 @@
 import React, { useContext } from "react";
 import { NotificationContext } from "./Context/NotificationContext";
-import Navbar from './Navbar/Navbar'
 
 const Notification = () => {
     const { notifications } = useContext(NotificationContext);
 
     return (
         <>
-            <Navbar />
             <div className="container mt-4">
                 <h1 className="mb-4">Notifications</h1>
 

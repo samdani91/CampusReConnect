@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
-import Navbar from '../../Navbar/Navbar';
 import Profile from './Profile';
 import Footer from '../../Home/Footer';
 import Account from './Account';
@@ -10,7 +9,6 @@ export default function Setting() {
 
     return (
         <>
-            <Navbar />
             <div className="container-md mt-3 d-flex justify-content-center vh-100">
                 <div className="w-40">
                     {/* Pass setActiveComponent to Sidebar */}

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import ProfileTab from "./ProfileTab";
 import ResearchTab from "./ResearchTab";
 import StatsTab from "./StatsTab";
-import Navbar from '../../Navbar/Navbar';
 import Footer from '../../Home/Footer';
 import "./style.css"; // External CSS for styling
 
@@ -24,7 +23,6 @@ const ViewProfile = () => {
 
 	return (
 		<>
-			<Navbar />
 			<div className="container profile-container">
 				<div className="profile-card card ">
 					<div className="card-body">
