@@ -33,6 +33,10 @@ function authenticateToken(req, res, next) {
     }
 }
 
+app.get('/check-auth', authenticateToken, (req, res) => {
+    return res.status(200).json({ isAuthenticated: true });
+});
+
 // Registration Endpoint
 app.post('/register', async (req, res) => {
     const { name, email, department, role, password } = req.body;
@@ -121,7 +125,7 @@ app.post('/reset-password', async (req, res) => {
 // Update User Endpoint
 app.put('/update-user-details', authenticateToken, (req, res) => {
     const user_id = req.user_id; // Extracted from token
-    const { field, value } = req.body;
+    var { field, value } = req.body;
 
     const allowedFields = ['full_name', 'degree', 'department'];
     if (!allowedFields.includes(field)) {
@@ -136,6 +140,7 @@ app.put('/update-user-details', authenticateToken, (req, res) => {
         }
 
         if (result.affectedRows > 0) {
+            if(field === "full_name") field="Name";
             return res.status(200).json({ message: `${field} updated successfully` });
         } else {
             return res.status(404).json({ message: 'User not found' });
@@ -200,6 +205,11 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
             return res.status(200).json({ message: 'Account deleted successfully' });
         });
     });
+});
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('authToken', { httpOnly: true, secure: false }); // Clear the authToken cookie
+    return res.status(200).json({ message: 'Logged out successfully' });
 });
 
 // Root Endpoint

@@ -1,28 +1,44 @@
-import React,{ useContext }from "react";
+import React, { useContext } from "react";
 import "./Navbar.css";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { NotificationContext } from "../Context/NotificationContext";
 
-export default function Navbar() {
+export default function Navbar({ setUser }) {
     const { hasUnseenNotifications, markNotificationsAsSeen } = useContext(NotificationContext);
     const navigate = useNavigate();
 
     const handleNotificationClick = () => {
-        markNotificationsAsSeen(); 
+        markNotificationsAsSeen();
         navigate("/notifications");
     };
 
     const handleMessageClick = () => {
         navigate("/message");
-    }
+    };
 
     const handleSettings = () => {
         navigate("/settings");
-    }
+    };
 
     const handleViewProfile = () => {
         navigate("/view-profile");
-    }
+    };
+
+    const handleLogout = async () => {
+        try {
+            // Call API to clear the cookie on the server
+            await axios.post("http://localhost:3001/logout", {}, { withCredentials: true });
+
+            // Update the user state to indicate the user is logged out
+            setUser(false);
+
+            // Redirect to the landing page
+            navigate("/");
+        } catch (error) {
+            console.error("Error during logout:", error);
+        }
+    };
 
     return (
         <>
@@ -55,7 +71,7 @@ export default function Navbar() {
                                 type="search"
                                 placeholder="Search for research, journals, people, etc."
                                 aria-label="Search"
-                                style={{ outline: 'none', boxShadow: 'none' }}
+                                style={{ outline: "none", boxShadow: "none" }}
                             />
                             <button type="submit" className="btn btn-light ms-2">
                                 <i className="bx bx-search"></i>
@@ -69,7 +85,7 @@ export default function Navbar() {
                                 type="search"
                                 placeholder="Search for research, journals, people, etc."
                                 aria-label="Search"
-                                style={{ outline: 'none', boxShadow: 'none' }}
+                                style={{ outline: "none", boxShadow: "none" }}
                             />
                             <button type="submit" className="btn btn-light ms-2">
                                 <i className="bx bx-search"></i>
@@ -88,7 +104,7 @@ export default function Navbar() {
                             </button>
 
                             {/* Other Icons */}
-                            <button className="btn me-2"  onClick={handleMessageClick}>
+                            <button className="btn me-2" onClick={handleMessageClick}>
                                 <i className="bx bx-envelope"></i>
                             </button>
                             <button className="btn me-2">
@@ -115,7 +131,9 @@ export default function Navbar() {
                                         <hr className="dropdown-divider" />
                                     </li>
                                     <li>
-                                        <button className="btn btn-danger ms-3">Log Out</button>
+                                        <button className="btn btn-danger ms-3" onClick={handleLogout}>
+                                            Log Out
+                                        </button>
                                     </li>
                                 </ul>
                             </div>
