@@ -1,4 +1,4 @@
-const db = require("./db");
+const db = require("../db");
 
 function isFacultyEmail(email) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@it\.du\.ac\.bd$/;    ;
