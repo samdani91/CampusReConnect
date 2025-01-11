@@ -29,7 +29,7 @@ export default function Profile() {
                             <span>A. M Samdani Mozumder</span>
                             <button
                                 className="btn btn-primary btn-sm ms-3"
-                                onClick={() => openModal("name")}
+                                onClick={() => openModal("full_name")}
                             >
                                 Edit name
                             </button>
