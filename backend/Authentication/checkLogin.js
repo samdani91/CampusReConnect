@@ -1,7 +1,6 @@
-const db = require("./db");
+const db = require('../db');
 
 function checkLogin(email, password, callback) {
-    // SQL query to check if email and password exist in the database
     const sql = 'SELECT * FROM user WHERE email = ? AND passwords = ?';
 
     db.query(sql, [email, password], (err, results) => {
@@ -11,13 +10,12 @@ function checkLogin(email, password, callback) {
         }
 
         if (results.length > 0) {
-            // If credentials match
-            callback(null, true);
+            const user = results[0]; // Get user details from the result
+            callback(null, true, user); // Pass user details to the callback
         } else {
-            // If no match is found
-            callback(null, false);
+            callback(null, false, null); // No user found
         }
     });
 }
 
-module.exports= checkLogin;
+module.exports = checkLogin;

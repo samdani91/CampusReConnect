@@ -15,11 +15,19 @@ export default function Login({ onLogin }) {
     const handleLogin = (e) => {
         e.preventDefault();
 
-        axios.post('http://localhost:3001/login', { email, password })
+        axios.post(
+            'http://localhost:3001/login',
+            { email, password },
+            {
+                withCredentials: true, // Allow cookies to be sent and received
+            }
+        )
             .then((result) => {
                 if (result.data.message === 'Login Successful') {
                     setMessage('Login Successful');
                     onLogin(true); // Notify App of successful login
+
+                    // Navigate to feed after login
                     setTimeout(() => {
                         navigate('/feed');
                     }, 1000);
