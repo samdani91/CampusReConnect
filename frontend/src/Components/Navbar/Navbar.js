@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { NotificationContext } from "../Context/NotificationContext";
 
-export default function Navbar({ setUser }) {
+export default function Navbar({ setUser,setShowNavbar }) {
     const { hasUnseenNotifications, markNotificationsAsSeen } = useContext(NotificationContext);
     const navigate = useNavigate();
 
@@ -32,6 +32,7 @@ export default function Navbar({ setUser }) {
 
             // Update the user state to indicate the user is logged out
             setUser(false);
+            setShowNavbar(false);
 
             // Redirect to the landing page
             navigate("/");
@@ -106,9 +107,6 @@ export default function Navbar({ setUser }) {
                             {/* Other Icons */}
                             <button className="btn me-2" onClick={handleMessageClick}>
                                 <i className="bx bx-envelope"></i>
-                            </button>
-                            <button className="btn me-2">
-                                <i className="bx bx-comment-detail"></i>
                             </button>
 
                             {/* User Dropdown */}

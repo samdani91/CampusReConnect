@@ -22,6 +22,7 @@ function App() {
     const [user, setUser] = useState(null); // User state to track login
     const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Track if auth check is in progress
     const [showNavbar, setShowNavbar] = useState(false); // State to control navbar rendering
+    const [loggedInOnce, setLoggedInOnce] = useState(false); // Track if user has logged in at least once
 
     // Check if the user is authenticated on system startup
     useEffect(() => {
@@ -32,6 +33,7 @@ function App() {
                 });
                 if (response.data.isAuthenticated) {
                     setUser(true); // User is logged in
+                    setShowNavbar(true); // Immediately show Navbar if already logged in
                 } else {
                     setUser(false); // User is not logged in
                 }
@@ -45,17 +47,20 @@ function App() {
         checkAuth();
     }, []);
 
-    // Delay rendering of Navbar by 1 seconds after user becomes true
+    // Delay rendering Navbar after login
     useEffect(() => {
-        if (user) {
+        if (user && !loggedInOnce) {
+            // First-time login, add delay
             const timer = setTimeout(() => {
                 setShowNavbar(true);
+                setLoggedInOnce(true); // Mark as logged in
             }, 1000);
             return () => clearTimeout(timer); // Cleanup the timer on unmount
-        } else {
-            setShowNavbar(false); // Hide Navbar if user is false
+        } else if (user) {
+            // If user is already logged in, show Navbar immediately
+            setShowNavbar(true);
         }
-    }, [user]);
+    }, [user, loggedInOnce]);
 
     // Show a loading screen while checking authentication
     if (isCheckingAuth) {
@@ -65,7 +70,7 @@ function App() {
     return (
         <NotificationProvider>
             <BrowserRouter>
-                {showNavbar && <Navbar setUser={setUser} />}
+                {showNavbar && <Navbar setUser={setUser} setShowNavbar={setShowNavbar}/>}
                 <Routes>
                     {/* Redirect to feed if user is logged in */}
                     <Route path="/" element={user ? <Feed /> : <Landing />} />
