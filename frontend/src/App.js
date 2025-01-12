@@ -59,13 +59,15 @@ function App() {
         } else if (user) {
             // If user is already logged in, show Navbar immediately
             setShowNavbar(true);
+        }else{
+            setLoggedInOnce(false);
         }
     }, [user, loggedInOnce]);
 
     // Show a loading screen while checking authentication
-    if (isCheckingAuth) {
-        return <div>Loading...</div>;
-    }
+    // if (isCheckingAuth) {
+    //     return <div>Loading...</div>;
+    // }
 
     return (
         <NotificationProvider>
