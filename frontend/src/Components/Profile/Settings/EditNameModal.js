@@ -1,8 +1,8 @@
 import React, { useState,useEffect } from "react";
-import axios from "axios";
 import "./EditNameModal.css";
+import axios from "axios";
 
-export default function EditNameModal({ show, handleClose, type }) {
+export default function EditNameModal({ show, handleClose, type, onSave }) {
     const [newValue, setNewValue] = useState(""); // State to store the updated value
     const [message, setMessage] = useState(""); // State to store success/error messages
 
@@ -11,59 +11,50 @@ export default function EditNameModal({ show, handleClose, type }) {
             setNewValue(""); // Clear the input field
         }
     }, [show, type]);
+    if (!show) return null;
 
-    if (!show) return null; // Do not render the modal if `show` is false
-
-    // Determine the content based on the `type` prop
     const contentMap = {
         full_name: {
             title: "Edit Name",
-            paragraph: "Enter your full name without academic titles or abbreviations.",
             label: "Full Name",
-            placeholder: "Enter full name",
+            placeholder: "Enter your full name",
         },
         degree: {
             title: "Edit Degree",
-            paragraph: "Enter your degree. This information will be displayed on your profile.",
             label: "Degree",
             placeholder: "Enter your degree",
         },
         department: {
             title: "Edit Department",
-            paragraph: "Enter your department. This helps us provide relevant connections.",
             label: "Department",
             placeholder: "Enter your department",
         },
     };
 
-    const content = contentMap[type] || contentMap.full_name; // Fallback to 'name' if `type` is not provided
+    const content = contentMap[type] || contentMap.full_name;
 
-    // Handle form submission
-    const handleSaveChanges = (e) => {
+    const handleSaveChanges = async (e) => {
         e.preventDefault();
 
-        axios.put(
-            "http://localhost:3001/update-user-details",
-            {
-                field: type, // Field being updated (e.g., 'name', 'degree', 'department')
-                value: newValue, // New value entered by the user
-            },
-            {
-                withCredentials: true, // Include cookies in the request
-            }
-        )
-            .then((response) => {
-                setMessage(response.data.message); // Display success message
-                setTimeout(() => {
-                    setMessage("");
-                    handleClose(); // Close the modal after success
-                }, 2000);
-            })
-            .catch((error) => {
-                setMessage(
-                    error.response?.data?.message || "An error occurred. Please try again."
-                ); // Display error message
-            });
+        try {
+            // Send update request to backend
+            const response = await axios.put(
+                "http://localhost:3001/update-user-details",
+                { field: type, value: newValue },
+                { withCredentials: true }
+            );
+            setMessage(response.data.message); // Display success message
+
+            // Call onSave to update the parent component
+            onSave(type, newValue);
+
+            setTimeout(() => {
+                setMessage("");
+                handleClose(); // Close the modal after success
+            }, 1000);
+        } catch (error) {
+            setMessage(error.response?.data?.message || "An error occurred. Please try again.");
+        }
     };
 
     return (
@@ -72,7 +63,6 @@ export default function EditNameModal({ show, handleClose, type }) {
                 <div className="modal-header">
                     <h5 className="modal-title mb-3">{content.title}</h5>
                 </div>
-                <p>{content.paragraph}</p>
                 <div className="modal-body">
                     <form onSubmit={handleSaveChanges}>
                         <div className="mb-3">
@@ -82,7 +72,7 @@ export default function EditNameModal({ show, handleClose, type }) {
                                 className="form-control rounded-2 w-100"
                                 placeholder={content.placeholder}
                                 value={newValue}
-                                onChange={(e) => setNewValue(e.target.value)} // Update state with input value
+                                onChange={(e) => setNewValue(e.target.value)}
                             />
                         </div>
 

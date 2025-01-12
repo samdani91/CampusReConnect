@@ -1,14 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./profile.css";
-import EditNameModal from "./EditNameModal"; 
+import EditNameModal from "./EditNameModal";
+import axios from "axios";
 
 export default function Profile() {
+    const [profileData, setProfileData] = useState({
+        full_name: "",
+        degree: "",
+        department: "",
+    }); // State to hold profile data
     const [showModal, setShowModal] = useState(false);
-    const [modalType, setModalType] = useState(""); 
+    const [modalType, setModalType] = useState("");
+
+    // Fetch profile data from the database on component load
+    useEffect(() => {
+        const fetchProfileData = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001/get-profile", {
+                    withCredentials: true, // Include cookies for authentication
+                });
+                setProfileData(response.data); // Set profile data
+            } catch (error) {
+                console.error("Error fetching profile data:", error);
+            }
+        };
+        fetchProfileData();
+    }, []);
+
+    // Update the profile data after editing
+    const handleUpdate = (field, newValue) => {
+        setProfileData((prevData) => ({
+            ...prevData,
+            [field]: newValue, // Update only the edited field
+        }));
+    };
 
     const openModal = (type) => {
-        setModalType(type); 
-        setShowModal(true); 
+        setModalType(type);
+        setShowModal(true);
     };
     const closeModal = () => setShowModal(false);
 
@@ -26,7 +55,7 @@ export default function Profile() {
                         </p>
                         <h6 className="mt-2">Name</h6>
                         <div className="d-flex justify-content-between align-items-center">
-                            <span>A. M Samdani Mozumder</span>
+                            <span>{profileData.full_name || "N/A"}</span>
                             <button
                                 className="btn btn-primary btn-sm ms-3"
                                 onClick={() => openModal("full_name")}
@@ -40,7 +69,7 @@ export default function Profile() {
                     <div className="mb-4 p-2">
                         <h6 className="mt-2">Degree</h6>
                         <div className="d-flex justify-content-between align-items-center">
-                            <span>Bsc</span>
+                            <span>{profileData.degree || "N/A"}</span>
                             <button
                                 className="btn btn-primary btn-sm ms-3"
                                 onClick={() => openModal("degree")}
@@ -63,7 +92,7 @@ export default function Profile() {
                             <strong>Department</strong>
                             <br />
                             <div className="d-flex justify-content-between align-items-center">
-                                <span>Institute of Information Technology</span>
+                                <span>{profileData.department || "N/A"}</span>
                                 <button
                                     className="btn btn-primary btn-sm ms-3"
                                     onClick={() => openModal("department")}
@@ -76,7 +105,12 @@ export default function Profile() {
                 </div>
             </div>
 
-            <EditNameModal show={showModal} handleClose={closeModal} type={modalType} />
+            <EditNameModal
+                show={showModal}
+                handleClose={closeModal}
+                type={modalType}
+                onSave={handleUpdate} // Pass handleUpdate to the modal
+            />
         </div>
     );
 }
