@@ -212,6 +212,50 @@ app.post('/logout', (req, res) => {
     return res.status(200).json({ message: 'Logged out successfully' });
 });
 
+app.get('/user-list', authenticateToken, (req, res) => {
+    // SQL query to select only the required fields
+    const sql = `
+        SELECT 
+            user_id AS id, 
+            full_name AS name, 
+            department,
+            'https://example.com/default-avatar.jpg' AS avatar -- Replace with your actual avatar logic
+        FROM SPL2.User
+    `;
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error('Error fetching user list:', err);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+        // Respond with the list of users
+        return res.status(200).json(results);
+    });
+});
+
+app.get('/get-profile', authenticateToken, (req, res) => {
+    const user_id = req.user_id;
+
+    const sql = `
+        SELECT full_name, degree, department
+        FROM SPL2.User
+        WHERE user_id = ?
+    `;
+
+    db.query(sql, [user_id], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Error fetching profile data' });
+        }
+
+        if (results.length > 0) {
+            return res.status(200).json(results[0]);
+        } else {
+            return res.status(404).json({ message: 'User not found' });
+        }
+    });
+});
+
 // Root Endpoint
 app.get('/', (req, res) => {
     res.send('Backend Server Running');

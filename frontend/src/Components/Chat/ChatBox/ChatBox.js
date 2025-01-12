@@ -1,31 +1,27 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Header from "./Header";
 import ChatArea from "./ChatArea";
 import Footer from "./Footer";
 
-const ChatBox = () => {
-  return (
-    <Box
-      sx={{
-        width: "75vw",
-        display: "flex",
-        height: "100%",
-        flexDirection: "column",
-      }}
-    >
-      <Header/>
-      <ChatArea/>
-      <Footer/>
-      {/* {roomData.room ? (
-        <>
-          <Header roomData={roomData} />
-          <ChatArea allMsg={allMsg} user={user} handleDelete={handleDelete} />
-          <Footer handleSendMsg={handleSendMsg} />
-        </>
-      ) : (
-        <>Please select a user to chat</>
-      )} */}
-    </Box>
-  );
+const ChatBox = ({ selectedUser }) => {
+    if (!selectedUser) {
+        return (
+            <Box sx={{ flex: "1 0 0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Typography variant="h6" color="textSecondary">
+                    Select a user to start chatting
+                </Typography>
+            </Box>
+        );
+    }
+
+    return (
+        <Box sx={{ width: "75vw", display: "flex", height: "100%", flexDirection: "column" }}>
+            {/* Display selected user's name */}
+            <Header title={selectedUser.name} />
+            <ChatArea userId={selectedUser.id} />
+            <Footer userId={selectedUser.id} />
+        </Box>
+    );
 };
+
 export default ChatBox;

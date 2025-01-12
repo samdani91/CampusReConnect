@@ -1,17 +1,20 @@
-import { dividerClasses, Paper } from "@mui/material"
-import SideBar from "./SideBar/SideBar"
-import ChatBox from "./ChatBox/ChatBox"
+import { Paper } from "@mui/material";
+import { useState } from "react";
+import SideBar from "./SideBar/SideBar";
+import ChatBox from "./ChatBox/ChatBox";
 
 export default function Chat() {
+    const [selectedUser, setSelectedUser] = useState(null); // Track selected user
+
     return (
         <>
-        <div className="container mt-3">
-            <Paper square elevation={0}  sx={{ height: "86vh", display: "flex" }}>
-                <SideBar />
-                <ChatBox/>
-            </Paper>
-        </div>
+            <div className="container mt-3">
+                <Paper square elevation={0} sx={{ height: "86vh", display: "flex" }}>
+                    {/* Pass setSelectedUser to SideBar */}
+                    <SideBar onSelectUser={(user) => setSelectedUser(user)} />
+                    <ChatBox selectedUser={selectedUser} />
+                </Paper>
+            </div>
         </>
-
-    )
+    );
 }

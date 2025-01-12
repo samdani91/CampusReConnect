@@ -14,6 +14,7 @@ const Header = () => {
                 bgcolor: "green",
                 borderRadius: 0,
                 color: "primary.contrastText",
+                height:"8.4%"
             }}
             elevation={0}
         >
@@ -28,7 +29,6 @@ const Header = () => {
                     </IconButton>
                 }
                 title="Message"
-                // subheader={<Typography variant="caption">UI Frontend Developer</Typography>}
             />
         </Card>
     );

@@ -2,7 +2,6 @@ import {
     Avatar,
     Box,
     Divider,
-    dividerClasses,
     List,
     ListItem,
     ListItemAvatar,
@@ -11,281 +10,116 @@ import {
     Tabs,
     Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import Header from "./Header";
-import { Fragment, useState } from "react";
 import PersonIcon from "@mui/icons-material/Person";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
-// import axios from "axios"; // Commented out since we won't be using it
 
-const SideBar = () => {
+const SideBar = ({ onSelectUser }) => {
     const [value, setValue] = useState(0);
+    const [chatList, setChatList] = useState([]);
+    const [userList, setUserList] = useState([]);
+
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-    const handleChatRoom = () => {
 
+    const fetchChatList = async () => {
+        try {
+            const response = await axios.get("http://localhost:3001/chat-list", {
+                withCredentials: true,
+            });
+            setChatList(response.data);
+        } catch (error) {
+            console.error("Error fetching chat list:", error);
+        }
     };
 
+    const fetchUserList = async () => {
+        try {
+            const response = await axios.get("http://localhost:3001/user-list", {
+                withCredentials: true,
+            });
+            const sortedUsers = response.data.sort((a, b) =>
+                a.name.localeCompare(b.name) // Sort alphabetically by name
+            );
+            setUserList(sortedUsers); // Set the sorted user list
+        } catch (error) {
+            console.error("Error fetching user list:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchChatList();
+        fetchUserList();
+    }, []);
+
     return (
-        <div>
-            <Box sx={{
-                width: "25vw",
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-            }}>
-                <Header />
+        <Box sx={{ width: "25vw", display: "flex", flexDirection: "column", height: "100%" }}>
+            <Header />
 
-                <Tabs
-                    value={value}
-                    onChange={handleChange}
-                    aria-label="basic tabs example"
-                    variant="fullWidth"
-                >
-                    <Tab
-                        icon={<ChatBubbleOutlineIcon fontSize="small" />}
-                        iconPosition="start"
-                        label="Chat List"
-                        sx={{ minHeight: "inherit" }}
-                    />
-                    <Tab
-                        icon={<PersonIcon fontSize="medium" />}
-                        iconPosition="start"
-                        label="User List"
-                        sx={{ minHeight: "inherit" }}
-                    />
-                </Tabs>
+            <Tabs
+                value={value}
+                onChange={handleChange}
+                aria-label="basic tabs example"
+                variant="fullWidth"
+            >
+                <Tab
+                    icon={<ChatBubbleOutlineIcon fontSize="small" />}
+                    iconPosition="start"
+                    label="Chat List"
+                    sx={{ minHeight: "inherit" }}
+                />
+                <Tab
+                    icon={<PersonIcon fontSize="medium" />}
+                    iconPosition="start"
+                    label="User List"
+                    sx={{ minHeight: "inherit" }}
+                />
+            </Tabs>
 
-                {value === 0 && (
-                    <List sx={{ p: 0, overflowY: "auto", flex: "1 0 0" }}>
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
+            {/* Chat List */}
+            {value === 0 && (
+                <List sx={{ p: 0, overflowY: "auto", flex: "1 0 0" }}>
+                    {chatList.map((chat, index) => (
+                        <div key={chat.id}>
+                            <ListItem onClick={() => onSelectUser(chat)}>
+                                <ListItemAvatar>
+                                    <Avatar alt={chat.name} src={chat.avatar || "/default-avatar.jpg"} />
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={chat.name}
+                                    secondary={<Typography variant="caption">{chat.status}</Typography>}
                                 />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
+                            </ListItem>
+                            {index !== chatList.length - 1 && <Divider component="li" />}
+                        </div>
+                    ))}
+                </List>
+            )}
 
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
+            {/* User List */}
+            {value === 1 && (
+                <List sx={{ p: 0, overflowY: "auto", flex: "1 0 0" }}>
+                    {userList.map((user, index) => (
+                        <div key={user.id}>
+                            <ListItem button onClick={() => onSelectUser(user)}> {/* Make clickable */}
+                                <ListItemAvatar>
+                                    <Avatar alt={user.name} src={user.avatar || "/default-avatar.jpg"} />
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={user.name}
+                                    secondary={<Typography variant="caption">{user.department}</Typography>}
                                 />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-
-                        <ListItem
-                            alignItems="flex-start"
-                            onClick={() => handleChatRoom()}
-                        >
-                            <ListItemAvatar>
-                                <Avatar
-                                    alt="Remy Sharp"
-                                    src="/static/images/avatar/1.jpg"
-                                />
-                            </ListItemAvatar>
-                            <ListItemText
-                                // primary={item.name}
-                                primary="Mohammed Yasin"
-                                secondary={
-                                    <Typography variant="caption">SPL2 Teammate</Typography>
-                                }
-                            />
-                        </ListItem>
-                        <Divider component="li" />
-                    </List>
-                )}
-                {value === 1 && <div>1</div>}
-            </Box>
-        </div>
-
-    )
-
+                            </ListItem>
+                            {index !== userList.length - 1 && <Divider component="li" />}
+                        </div>
+                    ))}
+                </List>
+            )}
+        </Box>
+    );
 };
 
 export default SideBar;
