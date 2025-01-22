@@ -5,14 +5,14 @@ function MessageList({ messages}) {
   // let userId="U3"
   const [userId, setUserId] = useState(null);
   const messageEndRef = useRef(null);
-  console.log(messages);
-  console.log(userId);
+  // console.log(messages);
+  // console.log(userId);
   useEffect(() => {
     axios
       .get("http://localhost:3001/get-userId", { withCredentials: true })
       .then((response) => {
         setUserId(response.data.user_id);
-        console.log(response.data) // Assuming the backend returns { user_id: "U3" }
+        // console.log(response.data) // Assuming the backend returns { user_id: "U3" }
       })
       .catch((err) => {
         console.error("Failed to fetch user ID:", err);

@@ -291,7 +291,7 @@ app.get("/messages/:userId/:receiverId",authenticateToken, async (req, res) => {
     const { userId, receiverId } = req.params;
     const user_id = req.user_id;
 
-    console.log(user_id);
+    // console.log(user_id);
 
     try {
         const query = `
@@ -306,7 +306,7 @@ app.get("/messages/:userId/:receiverId",authenticateToken, async (req, res) => {
                 return res.status(500).json({ message: "Error fetching messages" });
             }
             res.status(200).json(results);
-            console.log(results)
+            // console.log(results)
         });
     } catch (error) {
         console.error(error);
@@ -353,7 +353,7 @@ io.on("connection",  (socket) => {
                 if (err) {
                   console.error("Error fetching updated messages:", err);
                 } else {
-                  io.to(socket.id).emit("receiveMessage", updatedMessages); // Emit to the sender
+                  io.emit("receiveMessage", updatedMessages); // Emit to the sender
                 }
               }
             );

@@ -27,16 +27,17 @@ function Chat() {
     if(socket === null){
       const socket = io('ws://localhost:4000',{withCredentials: true});
       setSocket(socket);
-    }else{
-      socket?.on("receiveMessage", (updatedMessages) => {
-        setMessages(updatedMessages); // Update messages dynamically from the server
-      });
+    }
+    socket?.on("receiveMessage", (updatedMessages) => {
+      console.log(updatedMessages);
+      setMessages(updatedMessages); // Update messages dynamically from the server
+    });
   
       // socket?.on("Hello", () => {
       //   console.log("Socket says hello");
       // })
-    }
-  }, []);
+    
+  }, [socket]);
 
   
 
@@ -48,7 +49,7 @@ function Chat() {
       sender_id: null,
       receiver_id: selectedUser.id,
     };
-    console.log("Message being sent to backend:", newMessage);
+    // console.log("Message being sent to backend:", newMessage);
   
     // Emit the message to the server
     socket?.emit("sendMessage", newMessage);
@@ -56,7 +57,7 @@ function Chat() {
     // Optimistically update the messages state
     setMessages((prevMessages) => [
       ...prevMessages,
-      { ...newMessage, message_id: `msg_${Date.now()}` }, // Add a temporary message ID
+      newMessage, // No need to modify the message structure
     ]);
   };
   
