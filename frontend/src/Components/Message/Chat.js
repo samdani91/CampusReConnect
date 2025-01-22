@@ -24,7 +24,7 @@ function Chat() {
 
   // Real-time listener for receiving updated messages
   useEffect(() => {
-    if(socket === null){
+    if(!socket){
       const socket = io('ws://localhost:4000',{withCredentials: true});
       setSocket(socket);
     }
@@ -86,7 +86,7 @@ function Chat() {
                   style={{ borderBottom: "1px solid #dee2e6", height: "70px" }}
                 >
                   <div
-                    className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center"
+                    className="rounded-circle bg-light text-black d-flex justify-content-center align-items-center"
                     style={{
                       width: "40px",
                       height: "40px",

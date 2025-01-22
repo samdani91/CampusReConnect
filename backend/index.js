@@ -19,7 +19,7 @@ app.use(cors({ credentials: true, origin: 'http://localhost:3000' })); // Allow 
 app.use(express.json());
 app.use(cookieParser());
 
-const io = new Server(4000, {cors:{ credentials: true, origin: 'http://localhost:3000' }});
+const io = new Server(4000, { cors: { credentials: true, origin: 'http://localhost:3000' } });
 
 // Middleware to authenticate and extract user_id from the token
 function authenticateToken(req, res, next) {
@@ -40,24 +40,24 @@ function authenticateToken(req, res, next) {
 
 io.use((socket, next) => {
     const token = socket.handshake.headers['cookie']
-      ?.split(';')
-      .find((c) => c.trim().startsWith('authToken='))
-      ?.split('=')[1];
+        ?.split(';')
+        .find((c) => c.trim().startsWith('authToken='))
+        ?.split('=')[1];
 
     // console.log("Token",token)
-  
+
     if (!token) {
-      return next(new Error('Authentication token is missing'));
+        return next(new Error('Authentication token is missing'));
     }
-  
+
     try {
-      const decoded = jwt.verify(token, SECRET_KEY);
-      socket.user_id = decoded.user_id;
-      next();
+        const decoded = jwt.verify(token, SECRET_KEY);
+        socket.user_id = decoded.user_id;
+        next();
     } catch (err) {
-      return next(new Error('Invalid or expired token'));
+        return next(new Error('Invalid or expired token'));
     }
-  });
+});
 
 app.get('/check-auth', authenticateToken, (req, res) => {
     return res.status(200).json({ isAuthenticated: true });
@@ -95,7 +95,7 @@ app.post('/login', async (req, res) => {
                 { expiresIn: '24h' }
             );
 
-            
+
             res.cookie('authToken', token, { httpOnly: true, secure: false }); // Use `secure: true` for HTTPS
             return res.status(200).json({ message: 'Login Successful' });
         } else {
@@ -179,7 +179,7 @@ app.put('/update-user-details', authenticateToken, (req, res) => {
 });
 
 app.put('/change-password', authenticateToken, (req, res) => {
-    const user_id = req.user_id; 
+    const user_id = req.user_id;
     const { passwords } = req.body;
 
     const sql = `UPDATE user SET passwords = ? WHERE user_id = ?`;
@@ -198,14 +198,14 @@ app.put('/change-password', authenticateToken, (req, res) => {
 });
 
 app.delete('/delete-account', authenticateToken, (req, res) => {
-    const user_id = req.user_id; 
+    const user_id = req.user_id;
     const { password } = req.body;
 
     if (!password) {
         return res.status(400).json({ message: 'Password is required' });
     }
 
-   
+
     const sqlGetPassword = 'SELECT passwords FROM user WHERE user_id = ?';
     db.query(sqlGetPassword, [user_id], (err, results) => {
         if (err) {
@@ -219,12 +219,12 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
         const storedPassword = results[0].passwords;
 
-        
+
         if (password !== storedPassword) {
             return res.status(401).json({ message: 'Incorrect password' });
         }
 
-        
+
         const sqlDeleteUser = 'DELETE FROM user WHERE user_id = ?';
         db.query(sqlDeleteUser, [user_id], (err, result) => {
             if (err) {
@@ -258,7 +258,7 @@ app.get('/user-list', authenticateToken, (req, res) => {
             console.error('Error fetching user list:', err);
             return res.status(500).json({ message: 'Internal server error' });
         }
-        
+
         return res.status(200).json(results);
     });
 });
@@ -287,7 +287,7 @@ app.get('/get-profile', authenticateToken, (req, res) => {
 });
 
 
-app.get("/messages/:userId/:receiverId",authenticateToken, async (req, res) => {
+app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => {
     const { userId, receiverId } = req.params;
     const user_id = req.user_id;
 
@@ -295,10 +295,13 @@ app.get("/messages/:userId/:receiverId",authenticateToken, async (req, res) => {
 
     try {
         const query = `
-            SELECT * FROM message 
-            WHERE (sender_id = ? AND receiver_id = ?)
-            OR (sender_id = ? AND receiver_id = ?)
-            ORDER BY message_id ASC
+            SELECT message_id, message_content, sender_id, receiver_id, 
+       (SELECT full_name FROM user WHERE user_id = sender_id) AS sender_name
+        FROM message
+        WHERE (sender_id = ? AND receiver_id = ?)
+        OR (sender_id = ? AND receiver_id = ?)
+        ORDER BY message_id ASC;
+
         `;
         db.query(query, [user_id, receiverId, receiverId, user_id], (err, results) => {
             if (err) {
@@ -306,7 +309,7 @@ app.get("/messages/:userId/:receiverId",authenticateToken, async (req, res) => {
                 return res.status(500).json({ message: "Error fetching messages" });
             }
             res.status(200).json(results);
-            // console.log(results)
+            console.log(results)
         });
     } catch (error) {
         console.error(error);
@@ -315,58 +318,58 @@ app.get("/messages/:userId/:receiverId",authenticateToken, async (req, res) => {
 });
 
 
-io.on("connection",  (socket) => {
+io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
     // socket.emit("Hello");
-  
+
     socket.on("sendMessage", (data) => {
         // console.log(data);
-      const { message_id,message_content, receiver_id } = data;
-      const sender_id = socket.user_id;
-    //   const message_id = uuidv4(); 
-  
-      
-      const query = `
+        const { message_id, message_content, receiver_id } = data;
+        const sender_id = socket.user_id;
+        //   const message_id = uuidv4(); 
+
+
+        const query = `
         INSERT INTO message (message_id, message_content, sender_id, receiver_id) 
         VALUES (?, ?, ?, ?)
       `;
-      db.query(
-        query,
-        [message_id, message_content, sender_id, receiver_id],
-        (err, result) => {
-          if (err) {
-            console.error("Error saving message:", err);
-          } else {
-            console.log("Message saved:", message_id);
-  
-            
-            const fetchQuery = `
+        db.query(
+            query,
+            [message_id, message_content, sender_id, receiver_id],
+            (err, result) => {
+                if (err) {
+                    console.error("Error saving message:", err);
+                } else {
+                    console.log("Message saved:", message_id);
+
+
+                    const fetchQuery = `
               SELECT * FROM message 
               WHERE (sender_id = ? AND receiver_id = ?)
               OR (sender_id = ? AND receiver_id = ?)
               ORDER BY message_id ASC
             `;
-            db.query(
-              fetchQuery,
-              [sender_id, receiver_id, receiver_id, sender_id],
-              (err, updatedMessages) => {
-                if (err) {
-                  console.error("Error fetching updated messages:", err);
-                } else {
-                  io.emit("receiveMessage", updatedMessages); // Emit to the sender
+                    db.query(
+                        fetchQuery,
+                        [sender_id, receiver_id, receiver_id, sender_id],
+                        (err, updatedMessages) => {
+                            if (err) {
+                                console.error("Error fetching updated messages:", err);
+                            } else {
+                                io.emit("receiveMessage", updatedMessages); // Emit to the sender
+                            }
+                        }
+                    );
                 }
-              }
-            );
-          }
-        }
-      );
+            }
+        );
     });
-  
+
     socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
+        console.log("User disconnected:", socket.id);
     });
-  });
-  
+});
+
 
 
 app.get('/', (req, res) => {
