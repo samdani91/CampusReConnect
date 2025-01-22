@@ -7,6 +7,9 @@ const checkLogin = require('./Authentication/checkLogin');
 const { sendCode, verificationCodes } = require('./Authentication/sendCode');
 const passwordReset = require('./Authentication/passwordReset');
 const db = require('./db'); // Assuming your database connection file is named db.js
+const { Server } = require('socket.io');
+const { v4: uuidv4 } = require('uuid');
+
 
 const SECRET_KEY = 'authTokenKey';
 const PORT = 3001;
@@ -15,6 +18,8 @@ const app = express();
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' })); // Allow credentials for cookies
 app.use(express.json());
 app.use(cookieParser());
+
+const io = new Server(4000, {cors:{ credentials: true, origin: 'http://localhost:3000' }});
 
 // Middleware to authenticate and extract user_id from the token
 function authenticateToken(req, res, next) {
@@ -33,8 +38,33 @@ function authenticateToken(req, res, next) {
     }
 }
 
+io.use((socket, next) => {
+    const token = socket.handshake.headers['cookie']
+      ?.split(';')
+      .find((c) => c.trim().startsWith('authToken='))
+      ?.split('=')[1];
+
+    // console.log("Token",token)
+  
+    if (!token) {
+      return next(new Error('Authentication token is missing'));
+    }
+  
+    try {
+      const decoded = jwt.verify(token, SECRET_KEY);
+      socket.user_id = decoded.user_id;
+      next();
+    } catch (err) {
+      return next(new Error('Invalid or expired token'));
+    }
+  });
+
 app.get('/check-auth', authenticateToken, (req, res) => {
     return res.status(200).json({ isAuthenticated: true });
+});
+
+app.get('/get-userId', authenticateToken, (req, res) => {
+    return res.status(200).json({ user_id: req.user_id });
 });
 
 // Registration Endpoint
@@ -49,7 +79,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-// Login Endpoint
+
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -65,7 +95,7 @@ app.post('/login', async (req, res) => {
                 { expiresIn: '24h' }
             );
 
-            // Set the token as an HTTP-only cookie
+            
             res.cookie('authToken', token, { httpOnly: true, secure: false }); // Use `secure: true` for HTTPS
             return res.status(200).json({ message: 'Login Successful' });
         } else {
@@ -74,7 +104,7 @@ app.post('/login', async (req, res) => {
     });
 });
 
-// Forgot Password Endpoint
+
 app.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
@@ -84,7 +114,7 @@ app.post('/forgot-password', async (req, res) => {
     }
 });
 
-// Verify Code Endpoint
+
 app.post('/verify-code', async (req, res) => {
     const { email, code } = req.body;
 
@@ -111,7 +141,7 @@ app.post('/verify-code', async (req, res) => {
     }
 });
 
-// Reset Password Endpoint
+
 app.post('/reset-password', async (req, res) => {
     const { email, newPassword } = req.body;
 
@@ -122,7 +152,7 @@ app.post('/reset-password', async (req, res) => {
     }
 });
 
-// Update User Endpoint
+
 app.put('/update-user-details', authenticateToken, (req, res) => {
     const user_id = req.user_id; // Extracted from token
     var { field, value } = req.body;
@@ -140,7 +170,7 @@ app.put('/update-user-details', authenticateToken, (req, res) => {
         }
 
         if (result.affectedRows > 0) {
-            if(field === "full_name") field="Name";
+            if (field === "full_name") field = "Name";
             return res.status(200).json({ message: `${field} updated successfully` });
         } else {
             return res.status(404).json({ message: 'User not found' });
@@ -149,7 +179,7 @@ app.put('/update-user-details', authenticateToken, (req, res) => {
 });
 
 app.put('/change-password', authenticateToken, (req, res) => {
-    const user_id = req.user_id; // Extracted from token
+    const user_id = req.user_id; 
     const { passwords } = req.body;
 
     const sql = `UPDATE user SET passwords = ? WHERE user_id = ?`;
@@ -168,14 +198,14 @@ app.put('/change-password', authenticateToken, (req, res) => {
 });
 
 app.delete('/delete-account', authenticateToken, (req, res) => {
-    const user_id = req.user_id; // Extracted from token
+    const user_id = req.user_id; 
     const { password } = req.body;
 
     if (!password) {
         return res.status(400).json({ message: 'Password is required' });
     }
 
-    // Retrieve the user's current password from the database
+   
     const sqlGetPassword = 'SELECT passwords FROM user WHERE user_id = ?';
     db.query(sqlGetPassword, [user_id], (err, results) => {
         if (err) {
@@ -189,12 +219,12 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
         const storedPassword = results[0].passwords;
 
-        // Compare the given password with the stored password
+        
         if (password !== storedPassword) {
             return res.status(401).json({ message: 'Incorrect password' });
         }
 
-        // Delete the user from the database
+        
         const sqlDeleteUser = 'DELETE FROM user WHERE user_id = ?';
         db.query(sqlDeleteUser, [user_id], (err, result) => {
             if (err) {
@@ -228,7 +258,7 @@ app.get('/user-list', authenticateToken, (req, res) => {
             console.error('Error fetching user list:', err);
             return res.status(500).json({ message: 'Internal server error' });
         }
-        // Respond with the list of users
+        
         return res.status(200).json(results);
     });
 });
@@ -256,12 +286,94 @@ app.get('/get-profile', authenticateToken, (req, res) => {
     });
 });
 
-// Root Endpoint
+
+app.get("/messages/:userId/:receiverId",authenticateToken, async (req, res) => {
+    const { userId, receiverId } = req.params;
+    const user_id = req.user_id;
+
+    console.log(user_id);
+
+    try {
+        const query = `
+            SELECT * FROM message 
+            WHERE (sender_id = ? AND receiver_id = ?)
+            OR (sender_id = ? AND receiver_id = ?)
+            ORDER BY message_id ASC
+        `;
+        db.query(query, [user_id, receiverId, receiverId, user_id], (err, results) => {
+            if (err) {
+                console.error("Error fetching messages:", err);
+                return res.status(500).json({ message: "Error fetching messages" });
+            }
+            res.status(200).json(results);
+            console.log(results)
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching messages" });
+    }
+});
+
+
+io.on("connection",  (socket) => {
+    console.log("User connected:", socket.id);
+    // socket.emit("Hello");
+  
+    socket.on("sendMessage", (data) => {
+        // console.log(data);
+      const { message_id,message_content, receiver_id } = data;
+      const sender_id = socket.user_id;
+    //   const message_id = uuidv4(); 
+  
+      
+      const query = `
+        INSERT INTO message (message_id, message_content, sender_id, receiver_id) 
+        VALUES (?, ?, ?, ?)
+      `;
+      db.query(
+        query,
+        [message_id, message_content, sender_id, receiver_id],
+        (err, result) => {
+          if (err) {
+            console.error("Error saving message:", err);
+          } else {
+            console.log("Message saved:", message_id);
+  
+            
+            const fetchQuery = `
+              SELECT * FROM message 
+              WHERE (sender_id = ? AND receiver_id = ?)
+              OR (sender_id = ? AND receiver_id = ?)
+              ORDER BY message_id ASC
+            `;
+            db.query(
+              fetchQuery,
+              [sender_id, receiver_id, receiver_id, sender_id],
+              (err, updatedMessages) => {
+                if (err) {
+                  console.error("Error fetching updated messages:", err);
+                } else {
+                  io.to(socket.id).emit("receiveMessage", updatedMessages); // Emit to the sender
+                }
+              }
+            );
+          }
+        }
+      );
+    });
+  
+    socket.on("disconnect", () => {
+      console.log("User disconnected:", socket.id);
+    });
+  });
+  
+
+
 app.get('/', (req, res) => {
     res.send('Backend Server Running');
 });
 
-// Start Server
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
