@@ -19,7 +19,7 @@ function MessageList({ messages }) {
 
   // Scroll to the bottom of the chatbox whenever messages are updated
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
