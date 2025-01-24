@@ -286,6 +286,47 @@ app.get('/get-profile', authenticateToken, (req, res) => {
     });
 });
 
+app.get('/get-profileTab', authenticateToken, (req, res) => {
+    const user_id = req.user_id;
+
+    const sql = `
+        SELECT email, introduction, disciplines, skillsExpertise, languages, twitter
+        FROM SPL2.User
+        WHERE user_id = ?
+    `;
+
+    db.query(sql, [user_id], (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Error fetching profile data' });
+        }
+
+        if (results.length > 0) {
+            return res.status(200).json(results[0]);
+        } else {
+            return res.status(404).json({ message: 'User not found' });
+        }
+    });
+});
+
+app.put("/update-profileTab", authenticateToken, (req, res) => {
+    const user_id = req.user_id;
+    const { introduction, disciplines, skillsExpertise, languages, email, twitter } = req.body;
+
+    const sql = `
+        UPDATE SPL2.User
+        SET introduction = ?, disciplines = ?, skillsExpertise = ?, languages = ?, email = ?, twitter = ?
+        WHERE user_id = ?
+    `;
+    db.query(sql, [introduction, disciplines, skillsExpertise, languages, email, twitter, user_id], (err, result) => {
+        if (err) {
+            console.error("Database error:", err);
+            return res.status(500).json({ message: "Error updating profile data" });
+        }
+        return res.status(200).json({ message: "Profile updated successfully" });
+    });
+});
+
 const userSockets = new Map();
 
 app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => {
