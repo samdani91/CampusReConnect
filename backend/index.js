@@ -286,6 +286,7 @@ app.get('/get-profile', authenticateToken, (req, res) => {
     });
 });
 
+const userSockets = new Map();
 
 app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => {
     const { userId, receiverId } = req.params;
@@ -295,12 +296,10 @@ app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => 
 
     try {
         const query = `
-            SELECT message_id, message_content, sender_id, receiver_id, 
-       (SELECT full_name FROM user WHERE user_id = sender_id) AS sender_name
-        FROM message
-        WHERE (sender_id = ? AND receiver_id = ?)
-        OR (sender_id = ? AND receiver_id = ?)
-        ORDER BY message_id ASC;
+             SELECT * FROM message 
+            WHERE (sender_id = ? AND receiver_id = ?)
+            OR (sender_id = ? AND receiver_id = ?)
+            ORDER BY message_id ASC
 
         `;
         db.query(query, [user_id, receiverId, receiverId, user_id], (err, results) => {
@@ -309,7 +308,7 @@ app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => 
                 return res.status(500).json({ message: "Error fetching messages" });
             }
             res.status(200).json(results);
-            console.log(results)
+            // console.log(results)
         });
     } catch (error) {
         console.error(error);
@@ -321,11 +320,14 @@ app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => 
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
     // socket.emit("Hello");
+    const user_id = socket.user_id;
+    userSockets.set(user_id, socket.id);
 
     socket.on("sendMessage", (data) => {
         // console.log(data);
         const { message_id, message_content, receiver_id } = data;
-        const sender_id = socket.user_id;
+        const sender_id = user_id;
+        
         //   const message_id = uuidv4(); 
 
 
@@ -356,7 +358,14 @@ io.on("connection", (socket) => {
                             if (err) {
                                 console.error("Error fetching updated messages:", err);
                             } else {
-                                io.emit("receiveMessage", updatedMessages); // Emit to the sender
+                                socket.emit("receiveMessage", updatedMessages); // Emit to the sender
+                                
+                                const receiverSocketId = userSockets.get(receiver_id);
+                                console.log(receiverSocketId);
+                                if (receiverSocketId) {
+                                    console.log("in")
+                                    io.emit("receiveMessage", updatedMessages);
+                                }
                             }
                         }
                     );

@@ -19,9 +19,8 @@ function MessageList({ messages }) {
 
   // Scroll to the bottom of the chatbox whenever messages are updated
   useEffect(() => {
-    // messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
   return (
     <div
       className="flex-grow-1 overflow-auto p-3"

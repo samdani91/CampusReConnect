@@ -4,13 +4,14 @@ import axios from "axios";
 import UserList from "./UserList";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
-import Footer from "../Home/Footer";
+// import Footer from "../Home/Footer";
 
 
 function Chat() {
   const [messages, setMessages] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [usId,setUsId] = useState(null);
 
 
   // Fetch messages
@@ -31,7 +32,12 @@ function Chat() {
     }
     socket?.on("receiveMessage", (updatedMessages) => {
       console.log(updatedMessages);
-      setMessages(updatedMessages); // Update messages dynamically from the server
+      // console.log(selectedUser?.id);
+      // setUsId(updatedMessages.receiver_id);
+      // if(updatedMessages.sender_id === selectedUser?.id || updatedMessages.receiver_id === selectedUser?.id){
+
+        setMessages(updatedMessages); // Update messages dynamically from the server
+      // }
     });
 
     // socket?.on("Hello", () => {
@@ -118,7 +124,7 @@ function Chat() {
           </div>
         </div>
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }
