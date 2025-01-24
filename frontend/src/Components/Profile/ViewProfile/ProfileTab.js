@@ -97,8 +97,8 @@ const ProfileTab = () => {
             <input
               type="text"
               className="form-control"
-              name="skills"
-              value={formData.skills}
+              name="skillsExpertise"
+              value={formData.skillsExpertise}
               onChange={handleInputChange}
               placeholder="Enter or select skills and expertise"
             />
@@ -118,11 +118,10 @@ const ProfileTab = () => {
             <label className="form-label">Email</label>
             <input
               type="email"
-              className="form-control"
+              className="form-control text-muted"
               name="email"
               value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter your email address"
+              readOnly
             />
           </div>
           <div className="mb-3">
@@ -157,7 +156,7 @@ const ProfileTab = () => {
           </div>
           <div className="mb-3">
             <h6>Skills and Expertise</h6>
-            <p>{formData.skills || "No skills and expertise provided"}</p>
+            <p>{formData.skillsExpertise || "No skills and expertise provided"}</p>
           </div>
           <div className="mb-3">
             <h6>Languages</h6>

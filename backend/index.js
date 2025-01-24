@@ -311,14 +311,15 @@ app.get('/get-profileTab', authenticateToken, (req, res) => {
 
 app.put("/update-profileTab", authenticateToken, (req, res) => {
     const user_id = req.user_id;
-    const { introduction, disciplines, skillsExpertise, languages, email, twitter } = req.body;
+    const { introduction, disciplines, skillsExpertise, languages, twitter } = req.body;
 
     const sql = `
         UPDATE SPL2.User
-        SET introduction = ?, disciplines = ?, skillsExpertise = ?, languages = ?, email = ?, twitter = ?
+        SET introduction = ?, disciplines = ?, skillsExpertise = ?, languages = ?,  twitter = ?
         WHERE user_id = ?
     `;
-    db.query(sql, [introduction, disciplines, skillsExpertise, languages, email, twitter, user_id], (err, result) => {
+
+    db.query(sql, [introduction, disciplines, skillsExpertise, languages, twitter, user_id], (err, result) => {
         if (err) {
             console.error("Database error:", err);
             return res.status(500).json({ message: "Error updating profile data" });
