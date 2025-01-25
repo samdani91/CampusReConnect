@@ -6,7 +6,7 @@ const AddPublication = () => {
     publicationType: "",
     file: null,
     title: "",
-    authors: ["A. M. Samdani Mozumder"],
+    authors: [""],
     date: {
       day: 2,
       month: "January",
@@ -94,6 +94,17 @@ const AddPublication = () => {
             onChange={handleInputChange}
             placeholder="Enter the title"
           />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Description</label>
+          <textarea
+            className="form-control"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            placeholder="Enter a brief description of your publication"
+            rows="4"
+          ></textarea>
         </div>
         <div className="mb-3">
           <label className="form-label">Authors</label>
