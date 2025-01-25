@@ -6,7 +6,7 @@ export default function ChangePassModal({ show, handleClose }) {
     const [password, setPassword] = useState();
     const [password2, setPassword2] = useState();
     const [message, setMessage] = useState("");
-    if (!show) return null; // Do not render the modal if show is false
+    if (!show) return null; 
 
     const handlePasswordChange = (e) => {
         e.preventDefault();
@@ -21,20 +21,20 @@ export default function ChangePassModal({ show, handleClose }) {
                     passwords: password2
                 },
                 {
-                    withCredentials: true, // Include cookies in the request
+                    withCredentials: true,
                 }
             )
                 .then((response) => {
-                    setMessage(response.data.message); // Display success message
+                    setMessage(response.data.message);
                     setTimeout(() => {
                         setMessage("");
-                        handleClose(); // Close the modal after success
+                        handleClose();
                     }, 2000);
                 })
                 .catch((error) => {
                     setMessage(
                         error.response?.data?.message || "An error occurred. Please try again."
-                    ); // Display error message
+                    );
                 });
         }
 

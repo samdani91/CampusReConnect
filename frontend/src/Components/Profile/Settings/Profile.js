@@ -8,18 +8,18 @@ export default function Profile() {
         full_name: "",
         degree: "",
         department: "",
-    }); // State to hold profile data
+    }); 
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState("");
 
-    // Fetch profile data from the database on component load
+
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
                 const response = await axios.get("http://localhost:3001/get-profile", {
-                    withCredentials: true, // Include cookies for authentication
+                    withCredentials: true, 
                 });
-                setProfileData(response.data); // Set profile data
+                setProfileData(response.data);
             } catch (error) {
                 console.error("Error fetching profile data:", error);
             }
@@ -27,11 +27,11 @@ export default function Profile() {
         fetchProfileData();
     }, []);
 
-    // Update the profile data after editing
+
     const handleUpdate = (field, newValue) => {
         setProfileData((prevData) => ({
             ...prevData,
-            [field]: newValue, // Update only the edited field
+            [field]: newValue,
         }));
     };
 
@@ -109,7 +109,7 @@ export default function Profile() {
                 show={showModal}
                 handleClose={closeModal}
                 type={modalType}
-                onSave={handleUpdate} // Pass handleUpdate to the modal
+                onSave={handleUpdate}
             />
         </div>
     );

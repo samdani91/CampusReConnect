@@ -4,7 +4,7 @@ import ProfileTab from "./ProfileTab";
 import ResearchTab from "./ResearchTab";
 import StatsTab from "./StatsTab";
 import Footer from '../../Home/Footer';
-import "./style.css"; // External CSS for styling
+import "./style.css";
 
 const ViewProfile = () => {
     const [activeTab, setActiveTab] = useState("Profile");

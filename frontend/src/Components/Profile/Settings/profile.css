@@ -4,6 +4,6 @@ h6{
 }
 
 .card {
-    width: 600px; /* Limit the card width to control the layout */
-    margin: auto;     /* Center the card horizontally */
+    width: 600px;
+    margin: auto;    
 }

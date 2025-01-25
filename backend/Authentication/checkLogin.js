@@ -10,10 +10,10 @@ function checkLogin(email, password, callback) {
         }
 
         if (results.length > 0) {
-            const user = results[0]; // Get user details from the result
-            callback(null, true, user); // Pass user details to the callback
+            const user = results[0]; 
+            callback(null, true, user);
         } else {
-            callback(null, false, null); // No user found
+            callback(null, false, null);
         }
     });
 }

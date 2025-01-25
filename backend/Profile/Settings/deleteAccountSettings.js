@@ -3,7 +3,6 @@ const db = require("../../db");
 const deleteAccountSettings = (user_id, password, callback) => {
     const sqlGetPassword = `SELECT passwords FROM user WHERE user_id = ?`;
 
-    // Step 1: Verify the password
     db.query(sqlGetPassword, [user_id], (err, results) => {
         if (err) {
             return callback(err, null);
@@ -19,7 +18,6 @@ const deleteAccountSettings = (user_id, password, callback) => {
             return callback(null, { incorrectPassword: true });
         }
 
-        // Step 2: Delete the user account
         const sqlDeleteUser = `DELETE FROM user WHERE user_id = ?`;
         db.query(sqlDeleteUser, [user_id], (err, result) => {
             if (err) {

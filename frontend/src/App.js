@@ -19,28 +19,28 @@ import Navbar from './Components/Navbar/Navbar'; // Import Navbar
 import axios from 'axios';
 
 function App() {
-    const [user, setUser] = useState(null); // User state to track login
-    const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Track if auth check is in progress
-    const [showNavbar, setShowNavbar] = useState(false); // State to control navbar rendering
-    const [loggedInOnce, setLoggedInOnce] = useState(false); // Track if user has logged in at least once
+    const [user, setUser] = useState(null);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+    const [showNavbar, setShowNavbar] = useState(false); 
+    const [loggedInOnce, setLoggedInOnce] = useState(false);
 
     // Check if the user is authenticated on system startup
     useEffect(() => {
         const checkAuth = async () => {
             try {
                 const response = await axios.get("http://localhost:3001/check-auth", {
-                    withCredentials: true, // Include cookies
+                    withCredentials: true,
                 });
                 if (response.data.isAuthenticated) {
-                    setUser(true); // User is logged in
-                    setShowNavbar(true); // Immediately show Navbar if already logged in
+                    setUser(true); 
+                    setShowNavbar(true); 
                 } else {
-                    setUser(false); // User is not logged in
+                    setUser(false);
                 }
             } catch (error) {
-                setUser(false); // In case of error, consider the user not logged in
+                setUser(false);
             } finally {
-                setIsCheckingAuth(false); // Mark the auth check as complete
+                setIsCheckingAuth(false);
             }
         };
 
@@ -50,14 +50,12 @@ function App() {
     // Delay rendering Navbar after login
     useEffect(() => {
         if (user && !loggedInOnce) {
-            // First-time login, add delay
             const timer = setTimeout(() => {
                 setShowNavbar(true);
-                setLoggedInOnce(true); // Mark as logged in
+                setLoggedInOnce(true); 
             }, 1000);
-            return () => clearTimeout(timer); // Cleanup the timer on unmount
+            return () => clearTimeout(timer); 
         } else if (user) {
-            // If user is already logged in, show Navbar immediately
             setShowNavbar(true);
         }else{
             setLoggedInOnce(false);

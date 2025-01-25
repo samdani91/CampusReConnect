@@ -23,7 +23,6 @@ function checkSignUp(name, email, department, role, password, res) {
 
         const is_student = role === 'Student';
 
-        // Query to get the current highest user_id
         const getMaxIdQuery = 'SELECT MAX(CAST(SUBSTRING(user_id, 2) AS UNSIGNED)) AS max_id FROM user';
 
         db.query(getMaxIdQuery, (err, results) => {
@@ -32,8 +31,8 @@ function checkSignUp(name, email, department, role, password, res) {
                 return res.status(500).json({ error: err.message });
             }
 
-            // Generate the next user_id
-            const maxId = results[0].max_id || 0; // If no user exists, max_id will be null
+
+            const maxId = results[0].max_id || 0;
             const user_id = `U${maxId + 1}`;
 
             const sql = 'INSERT INTO user (user_id, is_student, email, full_name, department, passwords) VALUES (?, ?, ?, ?, ?, ?)';

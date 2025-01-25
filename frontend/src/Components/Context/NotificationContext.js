@@ -8,14 +8,14 @@ export const NotificationProvider = ({ children }) => {
         { id: 2, message: "Your profile was viewed by John Doe.", seen: false },
     ]);
 
-    // Mark all notifications as seen
+    
     const markNotificationsAsSeen = () => {
         setNotifications((prevNotifications) =>
             prevNotifications.map((notification) => ({ ...notification, seen: true }))
         );
     };
 
-    // Determine if there are any unseen notifications
+    
     const hasUnseenNotifications = notifications.some((notification) => !notification.seen);
 
     return (

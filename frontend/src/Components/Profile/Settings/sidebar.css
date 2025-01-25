@@ -1,10 +1,9 @@
 .sidebar {
-  height: auto; /* Adjust to take full height */
-  /* min-height: 30vh;  */
+  height: auto;
   width: 100%;
-  background-color: #f8f9fa; /* Make sure to define a background color */
-  position: relative; /* Ensures proper positioning */
-  box-sizing: border-box; /* Includes padding and borders in the height/width calculations */
+  background-color: #f8f9fa;
+  position: relative;
+  box-sizing: border-box;
 }
 
 .sidebar .btn {
@@ -13,11 +12,11 @@
 }
 
 .sidebar .btn i {
-  font-size: 1.25rem; /* Adjust icon size if needed */
-  margin-right: 0.5rem; /* Add spacing between the icon and text */
+  font-size: 1.25rem;
+  margin-right: 0.5rem;
 }
 
 .sidebar li.active {
-  border-left: 4px solid blue; /* Blue bar on the left */
+  border-left: 4px solid blue;
 
 }

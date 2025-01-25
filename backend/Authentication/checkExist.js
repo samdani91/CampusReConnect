@@ -17,7 +17,6 @@ function isEmailExist(email, callback) {
             return callback(err, null);
         }
 
-        // If count > 0, the email exists
         const emailExists = results[0].count > 0;
         callback(null, emailExists);
     });

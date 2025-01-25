@@ -5,28 +5,28 @@ import axios from "axios";
 const ProtectedRoutes = () => {
     const [isAuthenticated, setIsAuthenticated] = React.useState(null);
 
-    // Check if the user is authenticated by validating the cookie
+
     React.useEffect(() => {
         const checkAuth = async () => {
             try {
                 const response = await axios.get("http://localhost:3001/check-auth", {
-                    withCredentials: true, // Include cookies in the request
+                    withCredentials: true, 
                 });
-                setIsAuthenticated(response.data.isAuthenticated); // True if authenticated
+                setIsAuthenticated(response.data.isAuthenticated); 
             } catch (error) {
-                setIsAuthenticated(false); // Not authenticated
+                setIsAuthenticated(false);
             }
         };
 
         checkAuth();
     }, []);
 
-    // While authentication is being checked, show a loading state
+
     if (isAuthenticated === null) {
         return <div>Loading...</div>;
     }
 
-    // If authenticated, render the requested route, otherwise redirect to login
+
     return isAuthenticated ? <Outlet /> : <Navigate to="/login" />;
 };
 

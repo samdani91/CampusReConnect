@@ -15,7 +15,7 @@ export default function Account() {
     const closeDeleteModal = () => setShowDeleteModal(false);
 
     const openPasswordModal = () => {
-        setShowDeleteModal(false); // Close the first modal
+        setShowDeleteModal(false); 
         setShowPasswordModal(true);
     };
     const closePasswordModal = () => setShowPasswordModal(false);
@@ -27,7 +27,6 @@ export default function Account() {
                     <h5 className="card-title mb-4 p-2">Account Settings</h5>
                     <hr />
 
-                    {/* Change Password Section */}
                     <div className="mb-4 p-2">
                         <h6 className="mt-2">Password</h6>
                         <p className="mb-1 text-wrap">
@@ -41,7 +40,6 @@ export default function Account() {
                     </div>
                     <hr />
 
-                    {/* Delete Account Section */}
                     <div className="mb-4 p-2">
                         <h6 className="mt-2 mb-3">Delete Your Account</h6>
                         <p>Are you sure you want to delete your account?</p>
@@ -60,7 +58,6 @@ export default function Account() {
                 </div>
             </div>
 
-            {/* Modals */}
             <ChangePassModal show={showChangePassModal} handleClose={closeChangePassModal} />
             <DeleteConfirmationModal
                 show={showDeleteModal}

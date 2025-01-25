@@ -11,7 +11,6 @@ export default function Login({ onLogin }) {
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const navigate = useNavigate();
 
-    // Login handler
     const handleLogin = (e) => {
         e.preventDefault();
 
@@ -19,15 +18,14 @@ export default function Login({ onLogin }) {
             'http://localhost:3001/login',
             { email, password },
             {
-                withCredentials: true, // Allow cookies to be sent and received
+                withCredentials: true, 
             }
         )
             .then((result) => {
                 if (result.data.message === 'Login Successful') {
                     setMessage('Login Successful');
-                    onLogin(true); // Notify App of successful login
+                    onLogin(true);
 
-                    // Navigate to feed after login
                     setTimeout(() => {
                         navigate('/feed');
                     }, 1000);

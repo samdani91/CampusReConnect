@@ -7,7 +7,6 @@ export default function ForgotPassword({ onBack }) {
     const [verificationMessage, setVerificationMessage] = useState('');
     const navigate = useNavigate();
 
-    // Handle Forgot Password submission
     const handleForgotPassword = (e) => {
         e.preventDefault();
 

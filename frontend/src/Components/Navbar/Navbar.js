@@ -27,14 +27,11 @@ export default function Navbar({ setUser,setShowNavbar }) {
 
     const handleLogout = async () => {
         try {
-            // Call API to clear the cookie on the server
             await axios.post("http://localhost:3001/logout", {}, { withCredentials: true });
 
-            // Update the user state to indicate the user is logged out
             setUser(false);
             setShowNavbar(false);
 
-            // Redirect to the landing page
             navigate("/");
         } catch (error) {
             console.error("Error during logout:", error);
@@ -50,7 +47,6 @@ export default function Navbar({ setUser,setShowNavbar }) {
                         CampusReConnect
                     </Link>
 
-                    {/* Toggler Button */}
                     <button
                         className="navbar-toggler"
                         type="button"
@@ -63,7 +59,7 @@ export default function Navbar({ setUser,setShowNavbar }) {
                         <span className="navbar-toggler-icon"></span>
                     </button>
 
-                    {/* Navbar Content */}
+
                     <div className="collapse navbar-collapse" id="navbarContent">
                         {/* Centered Search Bar */}
                         <form className="d-flex d-md-none w-100 my-3">
@@ -93,9 +89,8 @@ export default function Navbar({ setUser,setShowNavbar }) {
                             </button>
                         </form>
 
-                        {/* Right Side Elements */}
+
                         <div className="d-flex align-items-center">
-                            {/* Notification */}
                             <button
                                 className="btn position-relative me-2"
                                 onClick={handleNotificationClick}
@@ -104,12 +99,10 @@ export default function Navbar({ setUser,setShowNavbar }) {
                                 {hasUnseenNotifications && <span className="notification-badge">!</span>}
                             </button>
 
-                            {/* Other Icons */}
                             <button className="btn me-2" onClick={handleMessageClick}>
                                 <i className="bx bx-envelope"></i>
                             </button>
 
-                            {/* User Dropdown */}
                             <div className="dropdown me-2">
                                 <button className="btn" id="userDropdown" data-bs-toggle="dropdown">
                                     <i className="bx bx-user-circle"></i>
@@ -136,7 +129,6 @@ export default function Navbar({ setUser,setShowNavbar }) {
                                 </ul>
                             </div>
 
-                            {/* Add New */}
                             <button className="btn btn-primary">Add New</button>
                         </div>
                     </div>

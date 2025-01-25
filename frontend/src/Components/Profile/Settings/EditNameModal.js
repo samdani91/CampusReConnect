@@ -3,12 +3,12 @@ import "./EditNameModal.css";
 import axios from "axios";
 
 export default function EditNameModal({ show, handleClose, type, onSave }) {
-    const [newValue, setNewValue] = useState(""); // State to store the updated value
-    const [message, setMessage] = useState(""); // State to store success/error messages
+    const [newValue, setNewValue] = useState(""); 
+    const [message, setMessage] = useState("");
 
     useEffect(() => {
         if (show) {
-            setNewValue(""); // Clear the input field
+            setNewValue(""); 
         }
     }, [show, type]);
     if (!show) return null;
@@ -37,20 +37,18 @@ export default function EditNameModal({ show, handleClose, type, onSave }) {
         e.preventDefault();
 
         try {
-            // Send update request to backend
             const response = await axios.put(
                 "http://localhost:3001/update-user-details",
                 { field: type, value: newValue },
                 { withCredentials: true }
             );
-            setMessage(response.data.message); // Display success message
+            setMessage(response.data.message); 
 
-            // Call onSave to update the parent component
             onSave(type, newValue);
 
             setTimeout(() => {
                 setMessage("");
-                handleClose(); // Close the modal after success
+                handleClose();
             }, 1000);
         } catch (error) {
             setMessage(error.response?.data?.message || "An error occurred. Please try again.");
