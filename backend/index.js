@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const checkSignUp = require('./Authentication/checkSignUp');
 const checkLogin = require('./Authentication/checkLogin');
 const { getProfileTab, updateProfileTab} = require("./Profile/Dashboard")
-const { getProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./Profile/Settings");
+const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./Profile/Settings");
 const { sendCode, verificationCodes } = require('./Authentication/sendCode');
 const passwordReset = require('./Authentication/passwordReset');
 const db = require('./db');
@@ -150,26 +150,28 @@ app.post('/reset-password', async (req, res) => {
 
 
 app.put('/update-user-details', authenticateToken, (req, res) => {
-    const user_id = req.user_id; // Extracted from token
-    var { field, value } = req.body;
+    const user_id = req.user_id;
+    let { field, value } = req.body;
 
     const allowedFields = ['full_name', 'degree', 'department'];
-    if (!allowedFields.includes(field)) {
-        return res.status(400).json({ message: 'Invalid field for update' });
-    }
 
-    const sql = `UPDATE user SET ${field} = ? WHERE user_id = ?`;
-    db.query(sql, [value, user_id], (err, result) => {
+    updateProfileSettings(user_id, field, value, allowedFields, (err, result) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ message: 'Error updating user details' });
         }
 
-        if (result.affectedRows > 0) {
+        if (result.invalidField) {
+            return res.status(400).json({ message: 'Invalid field for update' });
+        }
+
+        if (result.userNotFound) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (result.success) {
             if (field === "full_name") field = "Name";
             return res.status(200).json({ message: `${field} updated successfully` });
-        } else {
-            return res.status(404).json({ message: 'User not found' });
         }
     });
 });
@@ -229,8 +231,7 @@ app.get('/user-list', authenticateToken, (req, res) => {
         SELECT 
             user_id AS id, 
             full_name AS name, 
-            department,
-            'https://example.com/default-avatar.jpg' AS avatar -- Replace with your actual avatar logic
+            department
         FROM SPL2.User
     `;
 
