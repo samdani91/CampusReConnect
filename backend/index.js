@@ -4,12 +4,12 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const checkSignUp = require('./Authentication/checkSignUp');
 const checkLogin = require('./Authentication/checkLogin');
+const { getProfileTab, updateProfileTab} = require("./Profile/Dashboard")
+const { getProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./Profile/Settings");
 const { sendCode, verificationCodes } = require('./Authentication/sendCode');
 const passwordReset = require('./Authentication/passwordReset');
-const db = require('./db'); // Assuming your database connection file is named db.js
+const db = require('./db');
 const { Server } = require('socket.io');
-const { v4: uuidv4 } = require('uuid');
-
 
 const SECRET_KEY = 'authTokenKey';
 const PORT = 3001;
@@ -21,17 +21,16 @@ app.use(cookieParser());
 
 const io = new Server(4000, { cors: { credentials: true, origin: 'http://localhost:3000' } });
 
-// Middleware to authenticate and extract user_id from the token
 function authenticateToken(req, res, next) {
-    const token = req.cookies.authToken; // Retrieve the token from cookies
+    const token = req.cookies.authToken; 
 
     if (!token) {
         return res.status(401).json({ message: 'Authentication token is missing' });
     }
 
     try {
-        const decoded = jwt.verify(token, SECRET_KEY); // Verify token
-        req.user_id = decoded.user_id; // Attach user_id to the request object
+        const decoded = jwt.verify(token, SECRET_KEY);
+        req.user_id = decoded.user_id;
         next();
     } catch (err) {
         return res.status(403).json({ message: 'Invalid or expired token' });
@@ -43,8 +42,6 @@ io.use((socket, next) => {
         ?.split(';')
         .find((c) => c.trim().startsWith('authToken='))
         ?.split('=')[1];
-
-    // console.log("Token",token)
 
     if (!token) {
         return next(new Error('Authentication token is missing'));
@@ -67,12 +64,11 @@ app.get('/get-userId', authenticateToken, (req, res) => {
     return res.status(200).json({ user_id: req.user_id });
 });
 
-// Registration Endpoint
+
 app.post('/register', async (req, res) => {
     const { name, email, department, role, password } = req.body;
 
     try {
-        // Call the checkSignUp function and handle the response
         await checkSignUp(name, email, department, role, password, res);
     } catch (err) {
         res.status(500).json({ message: 'Internal server error', error: err.message });
@@ -182,8 +178,7 @@ app.put('/change-password', authenticateToken, (req, res) => {
     const user_id = req.user_id;
     const { passwords } = req.body;
 
-    const sql = `UPDATE user SET passwords = ? WHERE user_id = ?`;
-    db.query(sql, [passwords, user_id], (err, result) => {
+    changePasswordSettings(user_id, passwords, (err, result) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ message: 'Error updating user details' });
@@ -205,45 +200,31 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
         return res.status(400).json({ message: 'Password is required' });
     }
 
-
-    const sqlGetPassword = 'SELECT passwords FROM user WHERE user_id = ?';
-    db.query(sqlGetPassword, [user_id], (err, results) => {
+    deleteAccountSettings(user_id, password, (err, result) => {
         if (err) {
             console.error('Database error:', err);
-            return res.status(500).json({ message: 'Error retrieving user data' });
+            return res.status(500).json({ message: 'Error deleting user account' });
         }
 
-        if (results.length === 0) {
+        if (result.userNotFound) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const storedPassword = results[0].passwords;
-
-
-        if (password !== storedPassword) {
+        if (result.incorrectPassword) {
             return res.status(401).json({ message: 'Incorrect password' });
         }
 
-
-        const sqlDeleteUser = 'DELETE FROM user WHERE user_id = ?';
-        db.query(sqlDeleteUser, [user_id], (err, result) => {
-            if (err) {
-                console.error('Database error:', err);
-                return res.status(500).json({ message: 'Error deleting user account' });
-            }
-            res.clearCookie('authToken', { httpOnly: true, secure: false });
-            return res.status(200).json({ message: 'Account deleted successfully' });
-        });
+        res.clearCookie('authToken', { httpOnly: true, secure: false });
+        return res.status(200).json({ message: 'Account deleted successfully' });
     });
 });
 
 app.post('/logout', (req, res) => {
-    res.clearCookie('authToken', { httpOnly: true, secure: false }); // Clear the authToken cookie
+    res.clearCookie('authToken', { httpOnly: true, secure: false });
     return res.status(200).json({ message: 'Logged out successfully' });
 });
 
 app.get('/user-list', authenticateToken, (req, res) => {
-    // SQL query to select only the required fields
     const sql = `
         SELECT 
             user_id AS id, 
@@ -266,20 +247,14 @@ app.get('/user-list', authenticateToken, (req, res) => {
 app.get('/get-profile', authenticateToken, (req, res) => {
     const user_id = req.user_id;
 
-    const sql = `
-        SELECT full_name, degree, department
-        FROM SPL2.User
-        WHERE user_id = ?
-    `;
-
-    db.query(sql, [user_id], (err, results) => {
+    getProfileSettings(user_id, (err, result) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ message: 'Error fetching profile data' });
         }
 
-        if (results.length > 0) {
-            return res.status(200).json(results[0]);
+        if (result) {
+            return res.status(200).json(result);
         } else {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -289,37 +264,25 @@ app.get('/get-profile', authenticateToken, (req, res) => {
 app.get('/get-profileTab', authenticateToken, (req, res) => {
     const user_id = req.user_id;
 
-    const sql = `
-        SELECT email, introduction, disciplines, skillsExpertise, languages, twitter
-        FROM SPL2.User
-        WHERE user_id = ?
-    `;
-
-    db.query(sql, [user_id], (err, results) => {
+    getProfileTab(user_id, (err, result) => {
         if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({ message: 'Error fetching profile data' });
+            console.error("Database error:", err);
+            return res.status(500).json({ message: "Error fetching profile data" });
         }
 
-        if (results.length > 0) {
-            return res.status(200).json(results[0]);
+        if (result) {
+            return res.status(200).json(result);
         } else {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: "User not found" });
         }
     });
 });
 
 app.put("/update-profileTab", authenticateToken, (req, res) => {
     const user_id = req.user_id;
-    const { introduction, disciplines, skillsExpertise, languages, twitter } = req.body;
+    const data = req.body;
 
-    const sql = `
-        UPDATE SPL2.User
-        SET introduction = ?, disciplines = ?, skillsExpertise = ?, languages = ?,  twitter = ?
-        WHERE user_id = ?
-    `;
-
-    db.query(sql, [introduction, disciplines, skillsExpertise, languages, twitter, user_id], (err, result) => {
+    updateProfileTab(user_id, data, (err, result) => {
         if (err) {
             console.error("Database error:", err);
             return res.status(500).json({ message: "Error updating profile data" });
@@ -421,12 +384,9 @@ io.on("connection", (socket) => {
     });
 });
 
-
-
 app.get('/', (req, res) => {
     res.send('Backend Server Running');
 });
-
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
