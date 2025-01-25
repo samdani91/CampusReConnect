@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import "./Navbar.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { NotificationContext } from "../Context/NotificationContext";
 
@@ -46,9 +46,9 @@ export default function Navbar({ setUser,setShowNavbar }) {
             <nav className="navbar navbar-expand-md navbar-light bg-light">
                 <div className="container-fluid">
                     {/* Brand */}
-                    <a className="navbar-brand fw-bold fs-3 me-5" href="#">
+                    <Link className="navbar-brand fw-bold fs-3 me-5" to="/feed">
                         CampusReConnect
-                    </a>
+                    </Link>
 
                     {/* Toggler Button */}
                     <button
