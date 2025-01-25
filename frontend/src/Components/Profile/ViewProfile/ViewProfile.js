@@ -43,7 +43,7 @@ const ViewProfile = () => {
         <>
             <div className="container profile-container">
                 <div className="profile-card card ">
-                    <div className="card-body">
+                    <div className="card-body mb-5">
                         <div className="d-flex align-items-center justify-content-between">
                             <div className="d-flex align-items-center">
                                 <div
@@ -73,11 +73,6 @@ const ViewProfile = () => {
                                 <div>
                                     <p className="mb-0 text-muted small">Citations ----- <span>0</span></p>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="d-flex justify-content-end mt-4">
-                            <div>
-                                <button className="btn btn-primary btn-sm">+ Add research</button>
                             </div>
                         </div>
                     </div>

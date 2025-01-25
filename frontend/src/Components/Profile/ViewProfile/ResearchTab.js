@@ -76,7 +76,7 @@ const ResearchTab = () => {
         </ul>
       </div>
 
-      <div className="p-4 flex-grow-1 d-flex justify-content-center align-items-center">
+      <div className="p-4 flex-grow-1">
         <div className="border rounded p-4 text-center">
           <div>
             {renderContent()}
