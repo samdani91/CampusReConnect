@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import AddPublication from "./AddPublication"; // Import the AddPublication component
+import AddPublication from "./AddPublication"; 
 
 const ResearchTab = () => {
   const [selectedItem, setSelectedItem] = useState("Article");
@@ -31,7 +31,6 @@ const ResearchTab = () => {
 
   return (
     <div className="d-flex">
-      {/* Sidebar */}
       <div className="border-end p-3" style={{ width: "250px" }}>
         <h6>Research Items</h6>
         <ul className="list-unstyled mb-4">
@@ -42,7 +41,7 @@ const ResearchTab = () => {
               style={{ cursor: "pointer", borderRadius: "5px" }}
               onClick={() => {
                 setSelectedItem(item);
-                setShowAddPublication(false); // Ensure Add Publication page is not shown
+                setShowAddPublication(false); 
               }}
             >
               {item}
@@ -56,7 +55,7 @@ const ResearchTab = () => {
             style={{ cursor: "pointer", borderRadius: "5px" }}
             onClick={() => {
               setSelectedItem("Questions");
-              setShowAddPublication(false); // Ensure Add Publication page is not shown
+              setShowAddPublication(false); 
             }}
           >
             Questions
@@ -69,7 +68,7 @@ const ResearchTab = () => {
             style={{ cursor: "pointer", borderRadius: "5px" }}
             onClick={() => {
               setSelectedItem("Answers");
-              setShowAddPublication(false); // Ensure Add Publication page is not shown
+              setShowAddPublication(false); 
             }}
           >
             Answers
@@ -77,24 +76,15 @@ const ResearchTab = () => {
         </ul>
       </div>
 
-      {/* Content Area */}
-      <div className="p-4 flex-grow-1">
+      <div className="p-4 flex-grow-1 d-flex justify-content-center align-items-center">
         <div className="border rounded p-4 text-center">
           <div>
-            {!showAddPublication && (
-              <img
-                src="https://via.placeholder.com/100"
-                alt="Placeholder"
-                className="mb-3"
-                style={{ opacity: 0.7 }}
-              />
-            )}
             {renderContent()}
           </div>
           {!showAddPublication && selectedItem !== "Questions" && selectedItem !== "Answers" && (
             <button
               className="btn btn-primary mt-3"
-              onClick={() => setShowAddPublication(true)} // Show AddPublication component
+              onClick={() => setShowAddPublication(true)} 
             >
               Add a publication
             </button>
