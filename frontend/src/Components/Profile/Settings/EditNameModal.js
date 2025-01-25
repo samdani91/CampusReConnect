@@ -91,10 +91,10 @@ export default function EditNameModal({ show, handleClose, type, onSave }) {
                         <div className="d-flex justify-content-end mt-5">
                             <button
                                 type="button"
-                                className="btn btn-secondary me-2"
+                                className="btn btn-danger me-2"
                                 onClick={handleClose}
                             >
-                                Close
+                                Cancel
                             </button>
                             <button type="submit" className="btn btn-primary">
                                 Save Changes

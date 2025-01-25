@@ -88,10 +88,10 @@ export default function ChangePassModal({ show, handleClose }) {
                         <div className="d-flex justify-content-end mt-4">
                                 <button
                                     type="button"
-                                    className="btn btn-secondary me-2"
+                                    className="btn btn-danger me-2"
                                     onClick={handleClose}
                                 >
-                                    Close
+                                    Cancel
                                 </button>
                                 <button type="submit" className="btn btn-primary">
                                     Save Changes
