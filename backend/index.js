@@ -3,7 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { checkLogin, checkSignUp, passwordReset} = require("./Authentication")
-const { sendCode, verificationCodes } = require('./Authentication/sendCode');
+const { sendCode, verificationCodes, sendOtp } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab} = require("./Profile/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./Profile/Settings");
 const db = require('./db');
@@ -73,6 +73,14 @@ app.post('/register', async (req, res) => {
     }
 });
 
+app.post('/send-otp', async (req, res) => {
+    const { email } = req.body;
+    try {
+        await sendOtp(email, res);
+    } catch (err) {
+        res.status(500).json({ message: 'Internal server error', error: err.message });
+    }
+});
 
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -113,7 +121,7 @@ app.post('/verify-code', async (req, res) => {
     const { email, code } = req.body;
 
     if (!email || !code) {
-        return res.status(400).json({ message: 'Email and code are required' });
+        return res.status(400).json({ message: 'Code is required' });
     }
 
     try {

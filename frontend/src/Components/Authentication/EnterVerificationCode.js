@@ -37,7 +37,7 @@ export default function EnterVerificationCode({ onCodeVerified }) {
         <>
             <div className="d-flex justify-content-center align-items-center vh-100">
                 <div className="bg-white p-3 rounded-2 mx-3">
-                    <h2>Enter Verification Code</h2>
+                    <h2>Password Verification Code</h2>
                     <form onSubmit={handleCodeSubmit}>
                         <div className="mb-3">
                             <label htmlFor="code">
@@ -52,9 +52,13 @@ export default function EnterVerificationCode({ onCodeVerified }) {
                                 onChange={(e) => setCode(e.target.value)}
                             />
                         </div>
-                        <button type="submit" className="btn btn-primary w-100 rounded-0">
+                        <button type="submit" className="btn btn-success w-100 rounded-0">
                             Verify Code
                         </button>
+                        {/* <p className="mt-3">Resend verification code</p>
+                        <button type="submit" className="btn btn-danger w-100 rounded-0">
+                            Resend Code
+                        </button> */}
                         <p className={`mt-3 ${message === 'Code Matched!' ? 'text-success' : 'text-danger'}`}>
                             {message}
                         </p>
