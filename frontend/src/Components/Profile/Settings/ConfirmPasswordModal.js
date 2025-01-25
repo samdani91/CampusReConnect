@@ -3,14 +3,14 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const ConfirmPasswordModal = ({ show, handleClose }) => {
-    const [password, setPassword] = useState(""); // Store the password input
-    const [message, setMessage] = useState(""); // Store success/error messages
+    const [password, setPassword] = useState(""); 
+    const [message, setMessage] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
         if (show) {
             setPassword("");
-            setMessage(""); // Clear the input field
+            setMessage(""); 
         }
     }, [show]);
     if (!show) return null;
@@ -23,20 +23,20 @@ const ConfirmPasswordModal = ({ show, handleClose }) => {
 
         axios
             .delete("http://localhost:3001/delete-account", {
-                data: { password }, // Pass the password in the request body
-                withCredentials: true, // Include cookies in the request
+                data: { password }, 
+                withCredentials: true,
             })
             .then((response) => {
-                setMessage(response.data.message); // Display success message
+                setMessage(response.data.message); 
                 setTimeout(() => {
-                    handleClose(); // Close the modal
-                    navigate("/"); // Redirect to the root page
+                    handleClose();
+                    navigate("/"); 
                 }, 2000);
             })
             .catch((error) => {
                 setMessage(
                     error.response?.data?.message || "An error occurred. Please try again."
-                ); // Display error message
+                ); 
             });
     };
 
