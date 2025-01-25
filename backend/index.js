@@ -2,12 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const checkSignUp = require('./Authentication/checkSignUp');
-const checkLogin = require('./Authentication/checkLogin');
+const { checkLogin, checkSignUp, passwordReset} = require("./Authentication")
+const { sendCode, verificationCodes } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab} = require("./Profile/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./Profile/Settings");
-const { sendCode, verificationCodes } = require('./Authentication/sendCode');
-const passwordReset = require('./Authentication/passwordReset');
 const db = require('./db');
 const { Server } = require('socket.io');
 
