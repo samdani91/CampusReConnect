@@ -1,0 +1,9 @@
+h6{
+    font-weight: bold !important;
+    font-size: 1.05rem;
+}
+
+.card {
+    width: 600px;
+    margin: auto;    
+}
