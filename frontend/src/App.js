@@ -13,9 +13,9 @@ import ProtectedRoutes from './Components/ProtectedRoutes';
 import Notification from './Components/Notification';
 import { NotificationProvider } from './Components/Context/NotificationContext';
 import Chat from './Components/Message/Chat';
-import Setting from './Components/Profile/Settings/Setting';
-import ViewProfile from './Components/Profile/ViewProfile/ViewProfile';
-import Navbar from './Components/Navbar/Navbar'; // Import Navbar
+import Setting from './Components/User/Settings/Setting';
+import ViewProfile from './Components/User/ViewProfile/ViewProfile';
+import Navbar from './Components/Navbar/Navbar';
 import axios from 'axios';
 
 function App() {
