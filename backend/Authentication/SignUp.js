@@ -3,7 +3,7 @@ const { isEmailExist, isStudentEmail, isFacultyEmail } = require('./checkExist')
 
 
 function SignUp(name, email, department, role, password, res) {
-    isEmailExist(email, (err, exists) => {
+    isEmailExist(email, async(err, exists) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: err.message });
