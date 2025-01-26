@@ -309,8 +309,6 @@ app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => 
     const { userId, receiverId } = req.params;
     const user_id = req.user_id;
 
-    // console.log(user_id);
-
     try {
         const query = `
              SELECT * FROM message 
