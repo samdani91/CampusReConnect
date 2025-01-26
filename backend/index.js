@@ -6,6 +6,7 @@ const { Login, SignUp, LogOut, ChangePassword} = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab} = require("./Profile/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./Profile/Settings");
+const { viewMessages, sendMessages, viewUserList} = require("./Message")
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -237,23 +238,13 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
 
 
 
-app.get('/user-list', authenticateToken, (req, res) => {
-    const sql = `
-        SELECT 
-            user_id AS id, 
-            full_name AS name, 
-            department
-        FROM SPL2.User
-    `;
-
-    db.query(sql, (err, results) => {
-        if (err) {
-            console.error('Error fetching user list:', err);
-            return res.status(500).json({ message: 'Internal server error' });
-        }
-
+app.get('/user-list', authenticateToken, async (req, res) => {
+    try {
+        const results = await viewUserList();
         return res.status(200).json(results);
-    });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 });
 
 app.get('/get-profile', authenticateToken, (req, res) => {
@@ -309,84 +300,26 @@ app.get("/messages/:userId/:receiverId", authenticateToken, async (req, res) => 
     const { userId, receiverId } = req.params;
     const user_id = req.user_id;
 
-    try {
-        const query = `
-             SELECT * FROM message 
-            WHERE (sender_id = ? AND receiver_id = ?)
-            OR (sender_id = ? AND receiver_id = ?)
-            ORDER BY message_id ASC
-
-        `;
-        db.query(query, [user_id, receiverId, receiverId, user_id], (err, results) => {
-            if (err) {
-                console.error("Error fetching messages:", err);
-                return res.status(500).json({ message: "Error fetching messages" });
-            }
-            res.status(200).json(results);
-            // console.log(results)
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error fetching messages" });
-    }
+    viewMessages(user_id, receiverId, (err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Error fetching messages" });
+        }
+        res.status(200).json(results);
+    });
 });
 
 
 io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
-    // socket.emit("Hello");
+
     const user_id = socket.user_id;
     userSockets.set(user_id, socket.id);
 
     socket.on("sendMessage", (data) => {
         // console.log(data);
-        const { message_id, message_content, receiver_id } = data;
-        const sender_id = user_id;
-        
-        //   const message_id = uuidv4(); 
-
-
-        const query = `
-        INSERT INTO message (message_id, message_content, sender_id, receiver_id) 
-        VALUES (?, ?, ?, ?)
-      `;
-        db.query(
-            query,
-            [message_id, message_content, sender_id, receiver_id],
-            (err, result) => {
-                if (err) {
-                    console.error("Error saving message:", err);
-                } else {
-                    console.log("Message saved:", message_id);
-
-
-                    const fetchQuery = `
-              SELECT * FROM message 
-              WHERE (sender_id = ? AND receiver_id = ?)
-              OR (sender_id = ? AND receiver_id = ?)
-              ORDER BY message_id ASC
-            `;
-                    db.query(
-                        fetchQuery,
-                        [sender_id, receiver_id, receiver_id, sender_id],
-                        (err, updatedMessages) => {
-                            if (err) {
-                                console.error("Error fetching updated messages:", err);
-                            } else {
-                                socket.emit("receiveMessage", updatedMessages); // Emit to the sender
-                                
-                                const receiverSocketId = userSockets.get(receiver_id);
-                                console.log(receiverSocketId);
-                                if (receiverSocketId) {
-                                    console.log("in")
-                                    io.emit("receiveMessage", updatedMessages);
-                                }
-                            }
-                        }
-                    );
-                }
-            }
-        );
+        // const { message_id, message_content, receiver_id } = data;
+        // const sender_id = user_id;
+        sendMessages(data, user_id, socket, io, userSockets);
     });
 
     socket.on("disconnect", () => {
