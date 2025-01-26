@@ -142,13 +142,15 @@ export default function Signup() {
                     ) : (
                         <form onSubmit={handleVerifyOtp}>
                             <div className="mb-3">
-                                <label htmlFor="code">
+                                <label htmlFor="otpCode">
                                     <strong>Verification Code</strong>
                                 </label>
                                 <input
                                     type="text"
+                                    id="otpCode"
                                     placeholder="Enter the code"
-                                    name="code"
+                                    name="otpCode"
+                                    autoComplete="off"
                                     className="form-control-sm rounded-2 w-100 custom-input"
                                     onChange={(e) => setOtp(e.target.value)}
                                 />
@@ -156,7 +158,7 @@ export default function Signup() {
                             <button type="submit" className="btn btn-success w-100 rounded-0">
                                 Verify Code
                             </button>
-                            <p className="mt-3">Resend verification code</p>
+                            <p className="mt-3">Didn't receive a code?</p>
                             <button type="submit" onClick={handleRegister} className="btn btn-danger w-100 rounded-0">
                                 Resend Code
                             </button>

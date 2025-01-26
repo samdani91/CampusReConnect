@@ -13,7 +13,7 @@ const SECRET_KEY = 'authTokenKey';
 const PORT = 3001;
 
 const app = express();
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' })); // Allow credentials for cookies
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -98,7 +98,7 @@ app.post('/login', async (req, res) => {
             );
 
 
-            res.cookie('authToken', token, { httpOnly: true, secure: false }); // Use `secure: true` for HTTPS
+            res.cookie('authToken', token, { httpOnly: true, secure: false });
             return res.status(200).json({ message: 'Login Successful' });
         } else {
             return res.status(401).json({ message: 'Credentials Mismatch' });
