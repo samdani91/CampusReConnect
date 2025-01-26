@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const { checkLogin, checkSignUp, passwordReset} = require("./Authentication")
-const { sendCode, verificationCodes, sendOtp } = require('./Authentication/sendCode');
+const { Login, SignUp, LogOut, ChangePassword} = require("./Authentication")
+const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab} = require("./Profile/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./Profile/Settings");
 const db = require('./db');
@@ -67,7 +67,7 @@ app.post('/register', async (req, res) => {
     const { name, email, department, role, password } = req.body;
 
     try {
-        await checkSignUp(name, email, department, role, password, res);
+        await SignUp(name, email, department, role, password, res);
     } catch (err) {
         res.status(500).json({ message: 'Internal server error', error: err.message });
     }
@@ -85,7 +85,7 @@ app.post('/send-otp', async (req, res) => {
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    checkLogin(email, password, (err, isValid, user) => {
+    Login(email, password, (err, isValid, user) => {
         if (err) {
             return res.status(500).json({ error: 'Internal server error' });
         }
@@ -106,11 +106,19 @@ app.post('/login', async (req, res) => {
     });
 });
 
+app.post('/logout', async (req, res) => {
+    try {
+        await LogOut(req, res);
+    } catch (err) {
+        res.status(500).json({ message: 'Internal server error', error: err.message });
+    }
+});
+
 
 app.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
-        await sendCode(email, res);
+        await ForgotPassword(email, res);
     } catch (err) {
         res.status(500).json({ message: 'Internal server error', error: err.message });
     }
@@ -148,7 +156,7 @@ app.post('/reset-password', async (req, res) => {
     const { email, newPassword } = req.body;
 
     try {
-        await passwordReset(email, newPassword, res);
+        await ChangePassword(email, newPassword, res);
     } catch (err) {
         res.status(500).json({ message: 'Internal server error', error: err.message });
     }
@@ -227,10 +235,7 @@ app.delete('/delete-account', authenticateToken, (req, res) => {
     });
 });
 
-app.post('/logout', (req, res) => {
-    res.clearCookie('authToken', { httpOnly: true, secure: false });
-    return res.status(200).json({ message: 'Logged out successfully' });
-});
+
 
 app.get('/user-list', authenticateToken, (req, res) => {
     const sql = `

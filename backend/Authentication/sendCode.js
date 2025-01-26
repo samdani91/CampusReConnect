@@ -10,7 +10,7 @@ function generateVerificationCode() {
     return crypto.randomBytes(3).toString('hex').toUpperCase();
 }
 
-function sendCode(email, res) {
+function ForgotPassword(email, res) {
     isEmailExist(email, (err, exists) => {
         if (err) {
             console.error('Database error:', err);
@@ -78,4 +78,4 @@ function sendOtp(email,res){
 }
 
 
-module.exports = { sendCode, sendOtp, verificationCodes };
+module.exports = { ForgotPassword, sendOtp, verificationCodes };

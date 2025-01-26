@@ -1,9 +1,11 @@
-const checkLogin = require("./checkLogin");
-const checkSignUp = require("./checkSignUp");
-const passwordReset = require("./passwordReset");
+const Login = require("./Login");
+const SignUp = require("./SignUp");
+const LogOut = require("./LogOut");
+const ChangePassword = require("./ChangePassword");
 
 module.exports = {
-    checkLogin,
-    checkSignUp,
-    passwordReset
+    Login,
+    SignUp,
+    LogOut,
+    ChangePassword
 }
