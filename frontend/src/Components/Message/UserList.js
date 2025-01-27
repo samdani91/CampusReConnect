@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function UserList({ setSelectedUser }) {
+  const [selfUserId, setUserId] = useState(null);
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
@@ -13,6 +14,17 @@ function UserList({ setSelectedUser }) {
       .catch((err) => console.error(err));
   }, []);
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/get-userId", { withCredentials: true })
+      .then((response) => {
+        setUserId(response.data.user_id);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user ID:", err);
+      });
+  }, []);
+
   return (
     <div className="card h-100" style={{
       width:"100%"
@@ -21,7 +33,9 @@ function UserList({ setSelectedUser }) {
         <strong>Chat List</strong>
       </div>
       <ul className="list-group list-group-flush overflow-auto h-100">
-        {users.map((user) => (
+        {users
+        .filter((user) => user.id !== selfUserId)
+        .map((user) => (
           <li
             key={user.id}
             className="list-group-item d-flex align-items-center"
