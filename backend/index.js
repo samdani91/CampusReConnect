@@ -6,7 +6,7 @@ const { Login, SignUp, LogOut, ChangePassword} = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab} = require("./User/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./User/Settings");
-const { viewMessages, sendMessages, viewUserList} = require("./Message")
+const { viewMessages, sendMessages, viewUserList, getUserStatus} = require("./Message")
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -61,6 +61,17 @@ app.get('/check-auth', authenticateToken, (req, res) => {
 
 app.get('/get-userId', authenticateToken, (req, res) => {
     return res.status(200).json({ user_id: req.user_id });
+});
+
+app.get("/user-status/:userId", authenticateToken, async (req, res) => {
+    const { userId } = req.params;
+
+    getUserStatus(userId,(err, results) => {
+        if (err) {
+            return res.status(500).json({ message: "Error fetching user status" });
+        }
+        res.status(200).json(results);
+    });
 });
 
 
