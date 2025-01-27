@@ -1,0 +1,12 @@
+.userList li.active {
+    border-left: 4px solid blue;
+    background-color: transparent !important;
+    color: black;
+    border-bottom: 1px solid #ddd;
+    border-top: none;
+}
+
+.userList li:focus,
+.userList li:hover {
+    background-color: rgb(107, 168, 238)!important;
+}

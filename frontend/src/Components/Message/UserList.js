@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import './userList.css'
 
 function UserList({ setSelectedUser }) {
+  const [selfUserId, setUserId] = useState(null);
   const [users, setUsers] = useState([]);
+  const [activeUserId, setActiveUserId] = useState(null);
 
   useEffect(() => {
     axios
@@ -11,7 +14,23 @@ function UserList({ setSelectedUser }) {
       })
       .then((res) => setUsers(res.data))
       .catch((err) => console.error(err));
-  }, []);
+  }, [users]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3001/get-userId", { withCredentials: true })
+      .then((response) => {
+        setUserId(response.data.user_id);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user ID:", err);
+      });
+  }, [selfUserId]);
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user); // Pass the selected user to the parent component
+    setActiveUserId(user.id); // Update the local state to track the active user
+  };
 
   return (
     <div className="card h-100" style={{
@@ -20,12 +39,16 @@ function UserList({ setSelectedUser }) {
       <div className="card-header bg-primary text-white d-flex align-items-center justify-content-center" style={{height:"72px"}}>
         <strong>Chat List</strong>
       </div>
-      <ul className="list-group list-group-flush overflow-auto h-100">
-        {users.map((user) => (
+      <ul className="list-group list-group-flush overflow-auto h-100 userList">
+        {users
+        .filter((user) => user.id !== selfUserId)
+        .map((user) => (
           <li
             key={user.id}
-            className="list-group-item d-flex align-items-center"
-            onClick={() => setSelectedUser(user)}
+            className={`list-group-item d-flex align-items-center ${
+              activeUserId === user.id ? "active" : ""
+            }`}
+            onClick={() => handleUserClick(user)}
             style={{ cursor: "pointer" }}
           >
             <div

@@ -5,7 +5,7 @@ function viewMessages(user_id, receiverId, callback){
         SELECT * FROM message 
         WHERE (sender_id = ? AND receiver_id = ?)
         OR (sender_id = ? AND receiver_id = ?)
-        ORDER BY message_id ASC
+        ORDER BY message_time ASC
     `;
 
     db.query(query, [user_id, receiverId, receiverId, user_id], (err, results) => {

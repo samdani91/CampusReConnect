@@ -1,14 +1,17 @@
 const db = require('../db');
+const { v4: uuidv4 } = require('uuid');
 
 function sendMessages(data, senderId, socket, io, userSockets) {
-    const { message_id, message_content, receiver_id } = data;
+    const { msg_id, message_content, receiver_id, message_time } = data;
+
+    const message_id = uuidv4();
 
     const query = `
-        INSERT INTO message (message_id, message_content, sender_id, receiver_id) 
-        VALUES (?, ?, ?, ?)
+        INSERT INTO message (message_id, message_content, sender_id, receiver_id,message_time) 
+        VALUES (?, ?, ?, ?, ?)
     `;
 
-    db.query(query, [message_id, message_content, senderId, receiver_id], (err) => {
+    db.query(query, [message_id, message_content, senderId, receiver_id,message_time], (err) => {
         if (err) {
             console.error("Error saving message:", err);
             return;
@@ -20,7 +23,7 @@ function sendMessages(data, senderId, socket, io, userSockets) {
             SELECT * FROM message 
             WHERE (sender_id = ? AND receiver_id = ?)
             OR (sender_id = ? AND receiver_id = ?)
-            ORDER BY message_id ASC
+            ORDER BY message_time ASC
         `;
         db.query(fetchQuery, [senderId, receiver_id, receiver_id, senderId], (err, updatedMessages) => {
             if (err) {
