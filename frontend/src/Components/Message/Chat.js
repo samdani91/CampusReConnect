@@ -114,7 +114,7 @@ function Chat() {
                     </div>
                   </div>
                   <MessageList messages={messages} userId={null} />
-                  <MessageInput onSend={sendMessage} />
+                  <MessageInput onSend={sendMessage} userId={selectedUser.id}/>
                 </div>
               </>
             ) : (
