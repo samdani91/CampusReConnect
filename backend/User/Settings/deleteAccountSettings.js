@@ -18,13 +18,35 @@ const deleteAccountSettings = (user_id, password, callback) => {
             return callback(null, { incorrectPassword: true });
         }
 
-        const sqlDeleteUser = `DELETE FROM user WHERE user_id = ?`;
-        db.query(sqlDeleteUser, [user_id], (err, result) => {
+        const sqlDeactivateUser = `
+            UPDATE SPL2.User 
+            SET 
+                status = 'inactive',
+                email = NULL,
+                department = NULL,
+                passwords = NULL,
+                research_interest = NULL,
+                achievements = NULL,
+                citation_count = NULL,
+                h_index = NULL,
+                points = NULL,
+                badges = NULL,
+                degree = NULL,
+                introduction = NULL,
+                disciplines = NULL,
+                skillsExpertise = NULL,
+                languages = NULL,
+                twitter = NULL
+            WHERE user_id = ?;
+        `;
+
+        db.query(sqlDeactivateUser, [user_id], (err, result) => {
             if (err) {
                 return callback(err, null);
             }
             return callback(null, { success: true });
         });
+
     });
 };
 
