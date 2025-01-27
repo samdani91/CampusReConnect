@@ -58,7 +58,7 @@ function MessageInput({ onSend, userId }) {
 				</>
 			) : (
 				<div
-					className="text-center w-100 bg-danger rounded-pill"
+					className="text-center w-100 bg-danger rounded"
 					style={{
 						padding: "10px 0",
 						color: "white",
