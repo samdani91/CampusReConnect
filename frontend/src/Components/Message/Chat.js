@@ -51,10 +51,11 @@ function Chat() {
   const sendMessage = (messageContent) => {
     if (!selectedUser) return alert("Select a user to chat with!");
     const newMessage = {
-      message_id: Date.now(),
+      message_id: null,
       message_content: messageContent,
       sender_id: null,
       receiver_id: selectedUser.id,
+      message_time: Date.now()
     };
     // console.log("Message being sent to backend:", newMessage);
 
