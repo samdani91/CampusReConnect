@@ -12,7 +12,7 @@ function UserList({ setSelectedUser }) {
       })
       .then((res) => setUsers(res.data))
       .catch((err) => console.error(err));
-  }, []);
+  }, [users]);
 
   useEffect(() => {
     axios
