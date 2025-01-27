@@ -62,6 +62,7 @@ export default function Login({ onLogin }) {
                                         autoComplete="off"
                                         name="email"
                                         className="form-control-sm rounded-2 w-100 custom-input"
+                                        required
                                         onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
@@ -77,6 +78,7 @@ export default function Login({ onLogin }) {
                                         name="password"
                                         className="form-control-sm rounded-2 w-100 custom-input"
                                         onChange={(e) => setPassword(e.target.value)}
+                                        required
                                     />
                                 </div>
 
