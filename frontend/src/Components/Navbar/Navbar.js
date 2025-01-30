@@ -1,12 +1,19 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./Navbar.css";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, NavLink, useLocation } from "react-router-dom";
 import axios from "axios";
 import { NotificationContext } from "../Context/NotificationContext";
 
-export default function Navbar({ setUser,setShowNavbar }) {
+export default function Navbar({ setUser, setShowNavbar }) {
     const { hasUnseenNotifications, markNotificationsAsSeen } = useContext(NotificationContext);
     const navigate = useNavigate();
+    const location = useLocation();
+    const [activeLink, setActiveLink] = useState(null);
+
+    useEffect(() => {
+        setActiveLink(location.pathname);
+    }, [location]);
+
 
     const handleNotificationClick = () => {
         markNotificationsAsSeen();
@@ -43,7 +50,7 @@ export default function Navbar({ setUser,setShowNavbar }) {
             <nav className="navbar navbar-expand-md navbar-light bg-light">
                 <div className="container-fluid">
                     {/* Brand */}
-                    <Link className="navbar-brand fw-bold fs-3 me-5" to="/feed">
+                    <Link className="navbar-brand fw-bold fs-4 me-5" to="/feed">
                         CampusReConnect
                     </Link>
 
@@ -61,6 +68,26 @@ export default function Navbar({ setUser,setShowNavbar }) {
 
 
                     <div className="collapse navbar-collapse" id="navbarContent">
+                        <div className="nav-links">
+                            <NavLink
+                                className={`nav-item nav-link ${activeLink === "/feed" ? "active" : ""}`}
+                                to="/feed"
+                            >
+                                Home
+                            </NavLink>
+                            <NavLink
+                                className={`nav-item nav-link ${activeLink === "/questions" ? "active" : ""}`}
+                                to="/questions"
+                            >
+                                Questions
+                            </NavLink>
+                            <NavLink
+                                className={`nav-item nav-link ${activeLink === "/community" ? "active" : ""}`}
+                                to="/community"
+                            >
+                                Community
+                            </NavLink>
+                        </div>
                         {/* Centered Search Bar */}
                         <form className="d-flex d-md-none w-100 my-3">
                             <input
@@ -75,8 +102,7 @@ export default function Navbar({ setUser,setShowNavbar }) {
                             </button>
                         </form>
 
-                        {/* Search Bar for Larger Screens */}
-                        <form className="d-none d-md-flex flex-grow-1 me-2 align-items-center justify-content-center">
+                        <form className="d-none d-md-flex flex-grow-1 align-items-center  justify-content-center">
                             <input
                                 className="form-control w-50"
                                 type="search"
