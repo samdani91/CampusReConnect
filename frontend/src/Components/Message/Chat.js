@@ -4,130 +4,131 @@ import axios from "axios";
 import UserList from "./UserList";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
-// import Footer from "../Home/Footer";
-
 
 function Chat() {
-  const [messages, setMessages] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [socket, setSocket] = useState(null);
-  const [usId,setUsId] = useState(null);
+	const [messages, setMessages] = useState([]);
+	const [selectedUser, setSelectedUser] = useState(null);
+	const [socket, setSocket] = useState(null);
+	const [selfUserId, setUserId] = useState(null);
+
+	useEffect(() => {
+		axios
+		  .get("http://localhost:3001/get-userId", { withCredentials: true })
+		  .then((response) => {
+			setUserId(response.data.user_id);
+		  })
+		  .catch((err) => {
+			console.error("Failed to fetch user ID:", err);
+		  });
+	  }, [selfUserId]);
 
 
-  // Fetch messages
-  useEffect(() => {
-    if (selectedUser) {
-      axios
-        .get(`http://localhost:3001/messages/${null}/${selectedUser.id}`, { withCredentials: true })
-        .then((res) => setMessages(res.data))
-        .catch((err) => console.error(err));
-    }
-  }, [selectedUser]);
+	// Fetch messages
+	useEffect(() => {
+		if (selectedUser) {
+			axios
+				.get(`http://localhost:3001/messages/${null}/${selectedUser.id}`, { withCredentials: true })
+				.then((res) => setMessages(res.data))
+				.catch((err) => console.error(err));
+		}
+	}, [selectedUser]);
 
-  // Real-time listener for receiving updated messages
-  useEffect(() => {
-    if (!socket) {
-      const socket = io('ws://localhost:4000', { withCredentials: true });
-      setSocket(socket);
-    }
-    socket?.on("receiveMessage", (updatedMessages) => {
-      console.log(updatedMessages);
-      // console.log(selectedUser?.id);
-      // setUsId(updatedMessages.receiver_id);
-      // if(updatedMessages.sender_id === selectedUser?.id || updatedMessages.receiver_id === selectedUser?.id){
+	// Real-time listener for receiving updated messages
+	useEffect(() => {
+		if (!socket) {
+			const socket = io("ws://localhost:4000", { withCredentials: true });
+			setSocket(socket);
+		}
+	
+		socket?.on("receiveMessage", (newMessage) => { 
+			if (selectedUser && (newMessage.sender_id === selectedUser.id )) {
+				setMessages((prevMessages) => [...prevMessages, newMessage]);
+			}
+		});
 
-        setMessages(updatedMessages); // Update messages dynamically from the server
-      // }
-    });
-
-    // socket?.on("Hello", () => {
-    //   console.log("Socket says hello");
-    // })
-
-  }, [socket]);
+		return () => {
+			socket?.off("receiveMessage");
+		};
+	}, [socket, selectedUser]);
+	
 
 
 
-  const sendMessage = (messageContent) => {
-    if (!selectedUser) return alert("Select a user to chat with!");
-    const newMessage = {
-      message_id: null,
-      message_content: messageContent,
-      sender_id: null,
-      receiver_id: selectedUser.id,
-      message_time: Date.now()
-    };
-    // console.log("Message being sent to backend:", newMessage);
+	const sendMessage = (messageContent) => {
+		if (!selectedUser) return alert("Select a user to chat with!");
+		const newMessage = {
+			message_id: null,
+			message_content: messageContent,
+			sender_id: selfUserId,
+			receiver_id: selectedUser.id,
+			message_time: Date.now()
+		};
 
-    // Emit the message to the server
-    socket?.emit("sendMessage", newMessage);
+		setMessages((prevMessages) => [
+			...prevMessages,
+			newMessage,
+		]);
+		socket?.emit("sendMessage", newMessage);
 
-    // Optimistically update the messages state
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      newMessage, // No need to modify the message structure
-    ]);
-  };
+	};
 
 
-  return (
-    <>
-      <div className="container-md mt-3">
-        <div className="row" style={{ height: "calc(100vh - 100px)" }}>
-          {/* User List */}
-          <div className="col-md-4" style={{ height: "99%" }}>
-            <UserList setSelectedUser={setSelectedUser} />
-          </div>
-          {/* Chat Box */}
-          <div
-            className="col-md-8 bg-white d-flex flex-column"
-            style={{
-              height: "99%",
-              padding: "0",
-              borderRadius: "5px",
-            }}
-          >
-            {selectedUser ? (
-              <>
-                <div className="card h-100 w-100">
-                  <div
-                    className="card-header d-flex align-items-center p-2 bg-primary text-white"
-                    style={{ borderBottom: "1px solid #dee2e6", height: "70px" }}
-                  >
-                    <div
-                      className="rounded-circle bg-light text-black d-flex justify-content-center align-items-center"
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        fontSize: "18px",
-                        marginRight: "10px",
-                      }}
-                    >
-                      {selectedUser.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h5 className="mb-0">{selectedUser.name}</h5> {/* Full username */}
-                      <small className="text-white">
-                        {selectedUser.department}
-                      </small>
-                      {/* Department name as subheader */}
-                    </div>
-                  </div>
-                  <MessageList messages={messages} userId={null} />
-                  <MessageInput onSend={sendMessage} userId={selectedUser.id}/>
-                </div>
-              </>
-            ) : (
-              <div className="d-flex justify-content-center align-items-center flex-grow-1">
-                <h5>Select a user to start chatting!</h5>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      {/* <Footer /> */}
-    </>
-  );
+	return (
+		<>
+			<div className="container-md mt-3">
+				<div className="row" style={{ height: "calc(100vh - 100px)" }}>
+					{/* User List */}
+					<div className="col-md-4" style={{ height: "99%" }}>
+						<UserList setSelectedUser={setSelectedUser} />
+					</div>
+					{/* Chat Box */}
+					<div
+						className="col-md-8 bg-white d-flex flex-column"
+						style={{
+							height: "99%",
+							padding: "0",
+							borderRadius: "5px",
+						}}
+					>
+						{selectedUser ? (
+							<>
+								<div className="card h-100 w-100">
+									<div
+										className="card-header d-flex align-items-center p-2 bg-primary text-white"
+										style={{ borderBottom: "1px solid #dee2e6", height: "70px" }}
+									>
+										<div
+											className="rounded-circle bg-light text-black d-flex justify-content-center align-items-center"
+											style={{
+												width: "40px",
+												height: "40px",
+												fontSize: "18px",
+												marginRight: "10px",
+											}}
+										>
+											{selectedUser.name.charAt(0).toUpperCase()}
+										</div>
+										<div>
+											<h5 className="mb-0">{selectedUser.name}</h5> {/* Full username */}
+											<small className="text-white">
+												{selectedUser.department}
+											</small>
+										</div>
+									</div>
+									<MessageList messages={messages} />
+									<MessageInput onSend={sendMessage} userId={selectedUser.id} />
+								</div>
+							</>
+						) : (
+							<div className="d-flex justify-content-center align-items-center flex-grow-1">
+								<h5>Select a user to start chatting!</h5>
+							</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</>
+	);
 }
 
 export default Chat;
