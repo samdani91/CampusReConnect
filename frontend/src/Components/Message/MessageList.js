@@ -33,19 +33,6 @@ function MessageList({ messages }) {
             msg.sender_id === userId ? "justify-content-end" : "justify-content-start"
           }`}
         >
-          {/* Name Avatar */}
-          {/* {msg.sender_id !== userId && (
-            <div
-              className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center me-2"
-              style={{
-                width: "30px",
-                height: "30px",
-                fontSize: "1em",
-              }}
-            >
-              {msg.sender_name?.charAt(0).toUpperCase()}
-            </div>
-          )} */}
           <div
             className={`p-2 rounded shadow-sm`}
             style={{

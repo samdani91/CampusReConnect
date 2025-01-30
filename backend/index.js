@@ -327,9 +327,6 @@ io.on("connection", (socket) => {
     userSockets.set(user_id, socket.id);
 
     socket.on("sendMessage", (data) => {
-        // console.log(data);
-        // const { message_id, message_content, receiver_id } = data;
-        // const sender_id = user_id;
         sendMessages(data, user_id, socket, io, userSockets);
     });
 
