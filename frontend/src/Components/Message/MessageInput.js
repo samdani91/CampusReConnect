@@ -27,22 +27,29 @@ function MessageInput({ onSend, userId }) {
 		}
 	};
 
+
 	return (
 		<div className="input-group p-2 bg-light">
 			{isActive ? (
 				<>
-					<input
-						type="text"
+					<textarea
 						className="form-control border-2 rounded-pill me-2"
 						placeholder="Type a message"
 						value={message}
 						onChange={(e) => setMessage(e.target.value)}
-						style={{ padding: "10px 20px" }}
+						style={{
+							padding: "10px 20px",
+							width: "50%",
+							height: "50px",
+							wordWrap: "break-word",
+							overflowWrap: "break-word",
+							resize: "none",
+						}}
 					/>
 					<button
 						className="btn bx bxs-send"
 						onClick={handleSend}
-						style={{
+						style={{			
 							backgroundColor: "#007bff",
 							borderRadius: "50px",
 							padding: "10px 15px",

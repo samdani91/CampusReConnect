@@ -49,7 +49,7 @@ function UserList({ setSelectedUser }) {
               activeUserId === user.id ? "active" : ""
             }`}
             onClick={() => handleUserClick(user)}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer",transition: "background-color 0.1s linear" }}
           >
             <div
               className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center"
