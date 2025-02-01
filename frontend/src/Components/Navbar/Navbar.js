@@ -71,12 +71,6 @@ export default function Navbar({ setUser, setShowNavbar }) {
                                 Home
                             </NavLink>
                             <NavLink
-                                className={`nav-item ${activeLink === "/questions" ? "active" : ""}`}
-                                to="/questions"
-                            >
-                                Questions
-                            </NavLink>
-                            <NavLink
                                 className={`nav-item  ${activeLink === "/community" ? "active" : ""}`}
                                 to="/community"
                             >
