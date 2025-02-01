@@ -17,11 +17,6 @@ export default function Navbar({ setUser, setShowNavbar }) {
 
     const handleNotificationClick = () => {
         markNotificationsAsSeen();
-        navigate("/notifications");
-    };
-
-    const handleMessageClick = () => {
-        navigate("/message");
     };
 
     const handleSettings = () => {
@@ -70,19 +65,19 @@ export default function Navbar({ setUser, setShowNavbar }) {
                     <div className="collapse navbar-collapse" id="navbarContent">
                         <div className="nav-links">
                             <NavLink
-                                className={`nav-item nav-link ${activeLink === "/feed" ? "active" : ""}`}
+                                className={`nav-item  ${activeLink === "/feed" ? "active" : ""}`}
                                 to="/feed"
                             >
                                 Home
                             </NavLink>
                             <NavLink
-                                className={`nav-item nav-link ${activeLink === "/questions" ? "active" : ""}`}
+                                className={`nav-item ${activeLink === "/questions" ? "active" : ""}`}
                                 to="/questions"
                             >
                                 Questions
                             </NavLink>
                             <NavLink
-                                className={`nav-item nav-link ${activeLink === "/community" ? "active" : ""}`}
+                                className={`nav-item  ${activeLink === "/community" ? "active" : ""}`}
                                 to="/community"
                             >
                                 Community
@@ -117,20 +112,27 @@ export default function Navbar({ setUser, setShowNavbar }) {
 
 
                         <div className="d-flex align-items-center">
-                            <button
-                                className="btn position-relative me-2"
+                            <NavLink
+                                className={`nav-item me-4 ${activeLink === "/notifications" ? "active" : ""}`}
+                                to="/notifications"
                                 onClick={handleNotificationClick}
                             >
                                 <i className="bx bx-bell"></i>
                                 {hasUnseenNotifications && <span className="notification-badge">!</span>}
-                            </button>
+                            </NavLink>
 
-                            <button className="btn me-2" onClick={handleMessageClick}>
+                            <NavLink
+                                className={`nav-item me-4 ${activeLink === "/message" ? "active" : ""}`}
+                                to="/message"
+                            >
                                 <i className="bx bx-envelope"></i>
-                            </button>
+                            </NavLink>
 
                             <div className="dropdown me-2">
-                                <button className="btn" id="userDropdown" data-bs-toggle="dropdown">
+                                <button className={`btn me-3 nav-item ${activeLink === "/settings" || activeLink === "/view-profile" ? "active" : ""}`}
+                                    id="userDropdown"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false">
                                     <i className="bx bx-user-circle"></i>
                                 </button>
                                 <ul className="dropdown-menu dropdown-menu-end">
@@ -154,6 +156,7 @@ export default function Navbar({ setUser, setShowNavbar }) {
                                     </li>
                                 </ul>
                             </div>
+
 
                             <button className="btn btn-primary">Add New</button>
                         </div>
