@@ -8,7 +8,7 @@ import Landing from './Components/Home/Landing';
 import ForgotPassword from './Components/Authentication/ForgotPassword';
 import EnterVerificationCode from './Components/Authentication/EnterVerificationCode';
 import ResetPassword from './Components/Authentication/ResetPassword';
-import Feed from './Components/ContentFeed/Feed';
+import Feed from './Components/Post/Feed';
 import ProtectedRoutes from './Components/ProtectedRoutes';
 import Notification from './Components/Notification';
 import { NotificationProvider } from './Components/Context/NotificationContext';
