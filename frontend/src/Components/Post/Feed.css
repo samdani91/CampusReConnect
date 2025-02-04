@@ -1,0 +1,26 @@
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+.left-side {
+    height: 100vh;
+    overflow-y: scroll;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+
+.left-side::-webkit-scrollbar {
+    display: none;
+}
+
+
+.right-side {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+footer {
+    margin-top: 20px;
+}
