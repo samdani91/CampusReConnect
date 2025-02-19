@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddPublication from "./AddPublication"; 
 
-const ResearchTab = () => {
+const ResearchTab = ({ isOwnProfile }) => {
   const [selectedItem, setSelectedItem] = useState("Article");
   const [showAddPublication, setShowAddPublication] = useState(false);
 
@@ -81,7 +81,7 @@ const ResearchTab = () => {
           <div>
             {renderContent()}
           </div>
-          {!showAddPublication && selectedItem !== "Questions" && selectedItem !== "Answers" && (
+          {!showAddPublication && selectedItem !== "Questions" && selectedItem !== "Answers" && isOwnProfile && (
             <button
               className="btn btn-primary mt-3"
               onClick={() => setShowAddPublication(true)} 

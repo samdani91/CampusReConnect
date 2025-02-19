@@ -9,6 +9,27 @@ import "./style.css";
 const ViewProfile = () => {
     const [activeTab, setActiveTab] = useState("Profile");
     const [userData, setUserData] = useState({ full_name: "Loading...", degree: "Loading..." });
+    const [followers, setFollowers] = useState([]);
+    const [following, setFollowing] = useState([]);
+    const [followersCount, setFollowersCount] = useState(0);
+    const [followingCount, setFollowingCount] = useState(0);
+    const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null); // Current logged-in user
+
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001/get-userId", {
+                    withCredentials: true,
+                });
+                setCurrentUser(response.data);
+            } catch (error) {
+                console.error("Error fetching current user data:", error);
+            }
+        };
+
+        fetchCurrentUser();
+    }, []);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -26,26 +47,69 @@ const ViewProfile = () => {
         fetchUserData();
     }, []);
 
+    useEffect(() => {
+        const fetchFollowersData = async () => {
+            try {
+                const followersResponse = await axios.get("http://localhost:3001/get-followers", {
+                    withCredentials: true,
+                });
+                const followingResponse = await axios.get("http://localhost:3001/get-following", {
+                    withCredentials: true,
+                });
+
+                setFollowers(followersResponse.data);
+                setFollowing(followingResponse.data);
+                setFollowersCount(followersResponse.data.length);
+                setFollowingCount(followingResponse.data.length);
+            } catch (error) {
+                console.error("Error fetching followers data:", error);
+            }
+        };
+
+        fetchFollowersData();
+    }, []);
+
+    const handleFollowersClick = () => {
+        setIsFollowersModalOpen(true);
+    };
+
+    const handleRemoveFollower = () => {
+
+    }
+
+    const handleFollowClick = () => {
+        // Implement follow logic here
+        console.log("Follow button clicked");
+    };
+
+    const handleCloseModal = () => {
+        setIsFollowersModalOpen(false);
+    };
+
+    const isOwnProfile = currentUser && currentUser.id === userData.id;
+
     const renderTabContent = () => {
         switch (activeTab) {
             case "Profile":
-                return <ProfileTab />;
+                return <ProfileTab isOwnProfile={isOwnProfile}/>;
             case "Research":
-                return <ResearchTab />;
+                return <ResearchTab isOwnProfile={isOwnProfile}/>;
             case "Stats":
                 return <StatsTab />;
             default:
-                return <ProfileTab />;
+                return <ProfileTab isOwnProfile={isOwnProfile}/>;
         }
     };
+
+    
 
     return (
         <>
             <div className="container profile-container">
                 <div className="profile-card card ">
-                    <div className="card-body mb-5">
-                        <div className="d-flex align-items-center justify-content-between">
-                            <div className="d-flex align-items-center">
+                    <div className=" card-body">
+                        <div className="d-flex justify-content-between">
+                            <div className="d-flex align-items-center h-100 mt-2">
                                 <div
                                     className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center"
                                     style={{
@@ -66,13 +130,29 @@ const ViewProfile = () => {
                                     </p>
                                 </div>
                             </div>
-                            <div className="text-end">
+                            <div className="text-end mt-2">
                                 <div>
                                     <p className="mb-0 text-muted small">Research Interest Score ----- <span>0</span></p>
                                 </div>
                                 <div>
                                     <p className="mb-0 text-muted small">Citations ----- <span>0</span></p>
                                 </div>
+
+                                <div className="d-flex mt-3 mb-5">
+                                    <div className="me-4" style={{ cursor: 'pointer' }} onClick={handleFollowersClick}>
+                                        <span><span className="fw-bold p-1">{followersCount}</span> Followers</span>
+                                    </div>
+                                    <div style={{ cursor: 'pointer' }}>
+                                        <span><span className="fw-bold p-1">{followingCount}</span> Following</span>
+                                    </div>
+                                </div>
+
+                                {!isOwnProfile && (
+                                    <button className="btn btn-primary" onClick={handleFollowClick}>
+                                        Follow
+                                    </button>
+                                )}
+
                             </div>
                         </div>
                     </div>
@@ -104,7 +184,25 @@ const ViewProfile = () => {
                     </ul>
                     <div className="p-3">{renderTabContent()}</div>
                 </div>
-            </div >
+            </div>
+
+            {/* Followers Modal */}
+            {isFollowersModalOpen && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h5>Followers</h5>
+                        <ul>
+                            {followers.map((follower) => (
+                                <li key={follower.id}>
+                                    {follower.name} <button onClick={() => handleRemoveFollower(follower.id)}>Remove</button>
+                                </li>
+                            ))}
+                        </ul>
+                        <button onClick={handleCloseModal}>Close</button>
+                    </div>
+                </div>
+            )}
+
             <Footer />
         </>
     );
