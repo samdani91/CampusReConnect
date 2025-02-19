@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const ProfileTab = () => {
+const ProfileTab = ({ isOwnProfile }) => {
   const [formData, setFormData] = useState({
     introduction: "",
     disciplines: "",
@@ -11,7 +11,7 @@ const ProfileTab = () => {
     twitter: "",
   });
 
-  const [originalData, setOriginalData] = useState({}); 
+  const [originalData, setOriginalData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
@@ -20,7 +20,7 @@ const ProfileTab = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3001/get-profileTab", {
-          withCredentials: true, 
+          withCredentials: true,
         });
         if (response.data) {
           setFormData(response.data);
@@ -51,7 +51,7 @@ const ProfileTab = () => {
 
       if (response.status === 200) {
         setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 3000); 
+        setTimeout(() => setShowPopup(false), 3000);
         setOriginalData(formData);
         setIsEditing(false);
       }
@@ -62,7 +62,7 @@ const ProfileTab = () => {
 
   const handleCancel = () => {
     setFormData(originalData);
-    setIsEditing(false); 
+    setIsEditing(false);
   };
 
   return (
@@ -170,9 +170,11 @@ const ProfileTab = () => {
             <h6>Twitter</h6>
             <p>{formData.twitter || "No Twitter handle provided"}</p>
           </div>
-          <button className="btn btn-success" onClick={() => setIsEditing(true)}>
-            Edit
-          </button>
+          {isOwnProfile && (
+            <button className="btn btn-success" onClick={() => setIsEditing(true)}>
+              Edit
+            </button>
+          )}
         </>
       )}
       {showPopup && (
