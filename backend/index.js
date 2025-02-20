@@ -4,9 +4,10 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { Login, SignUp, LogOut, ChangePassword} = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
-const { getProfileTab, updateProfileTab} = require("./User/Dashboard")
+const { getProfileTab, updateProfileTab, getHeaderSectionData} = require("./User/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./User/Settings");
 const { viewMessages, sendMessages, viewUserList, getUserStatus} = require("./Message")
+const searchUser = require("./Search/searchUser")
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -258,6 +259,23 @@ app.get('/user-list', authenticateToken, async (req, res) => {
     }
 });
 
+app.get('/get-headerData/:userId', authenticateToken, (req, res) => {
+    const user_id = req.params;
+
+    getHeaderSectionData(user_id, (err, result) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ message: 'Error fetching profile data' });
+        }
+
+        if (result) {
+            return res.status(200).json(result);
+        } else {
+            return res.status(404).json({ message: 'User not found' });
+        }
+    });
+});
+
 app.get('/get-profile', authenticateToken, (req, res) => {
     const user_id = req.user_id;
 
@@ -275,8 +293,8 @@ app.get('/get-profile', authenticateToken, (req, res) => {
     });
 });
 
-app.get('/get-profileTab', authenticateToken, (req, res) => {
-    const user_id = req.user_id;
+app.get('/get-profileTab/:userId', authenticateToken, (req, res) => {
+    const user_id = req.params
 
     getProfileTab(user_id, (err, result) => {
         if (err) {
@@ -333,6 +351,35 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
     });
+});
+
+
+
+//search
+
+app.get('/search-users', authenticateToken, async (req, res) => {
+    const { name } = req.query;  // Get the name parameter from the query string
+
+    // Ensure a search term is provided
+    if (!name) {
+        return res.status(400).json({ message: 'Search query is required' });
+    }
+
+    try {
+        // Call the search function from the userService
+        const users = await searchUser(name);
+
+        // If no results are found, send a 404 response
+        if (users.length === 0) {
+            return res.status(404).json({ message: 'No users found' });
+        }
+
+        // Return the found users
+        return res.status(200).json(users);
+    } catch (error) {
+        console.error('Error searching users:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
 app.get('/', (req, res) => {

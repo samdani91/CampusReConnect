@@ -86,7 +86,7 @@ function App() {
                         <Route path="/notifications" element={<Notification />} />
                         <Route path="/message" element={<Chat />} />
                         <Route path="/settings" element={<Setting />} />
-                        <Route path="/view-profile" element={<ViewProfile />} />
+                        <Route path="/view-profile/:userId" element={<ViewProfile />} />
                     </Route>
                 </Routes>
             </BrowserRouter>

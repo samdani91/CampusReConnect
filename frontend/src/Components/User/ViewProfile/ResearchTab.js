@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddPublication from "./AddPublication"; 
 
-const ResearchTab = ({ isOwnProfile }) => {
+const ResearchTab = ({ isOwnProfile,userId }) => {
   const [selectedItem, setSelectedItem] = useState("Article");
   const [showAddPublication, setShowAddPublication] = useState(false);
 

@@ -9,10 +9,60 @@ export default function Navbar({ setUser, setShowNavbar }) {
     const navigate = useNavigate();
     const location = useLocation();
     const [activeLink, setActiveLink] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [currentUser, setCurrentUser] = useState(null);
+
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001/get-userId", {
+                    withCredentials: true,
+                });
+                setCurrentUser(response.data);
+            } catch (error) {
+                console.error("Error fetching current user data:", error);
+            }
+        };
+
+        fetchCurrentUser();
+    }, []);
+
 
     useEffect(() => {
         setActiveLink(location.pathname);
     }, [location]);
+
+    const handleSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+
+        if (query.length > 2) { // To make sure we search after 3 characters
+            searchUsers(query);
+        } else {
+            setSearchResults([]); // Clear results when the query is less than 3 characters
+        }
+    };
+
+    // Function to fetch users by name
+    const searchUsers = async (query) => {
+        try {
+            const response = await axios.get(`http://localhost:3001/search-users`, {
+                params: { name: query },
+                withCredentials: true,
+            });
+            setSearchResults(response.data);  // Set search results to state
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            setSearchResults([]);  // Clear search results on error
+        }
+    };
+
+    const handleUserClick = (userId) => {
+        // Navigate to the ViewProfile page for the selected user
+        navigate(`/view-profile/${userId}`);
+    };
+
 
 
     const handleNotificationClick = () => {
@@ -24,7 +74,8 @@ export default function Navbar({ setUser, setShowNavbar }) {
     };
 
     const handleViewProfile = () => {
-        navigate("/view-profile");
+        const userId = currentUser.user_id;
+        navigate(`/view-profile/${userId}`);
     };
 
     const handleLogout = async () => {
@@ -79,27 +130,53 @@ export default function Navbar({ setUser, setShowNavbar }) {
                         </div>
                         {/* Centered Search Bar */}
                         <form className="d-flex d-md-none w-100 my-3">
-                            <input
-                                className="form-control"
-                                type="search"
-                                placeholder="Search for research, journals, people, etc."
-                                aria-label="Search"
-                                style={{ outline: "none", boxShadow: "none" }}
-                            />
-                            <button type="submit" className="btn btn-light ms-2">
+                            <div className="position-relative w-100"> {/* Wrap input and dropdown in a relative container */}
+                                <input
+                                    className="form-control w-100" // Use w-100 to fill the container
+                                    type="search"
+                                    placeholder="Search for research, journals, people, etc."
+                                    aria-label="Search"
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    style={{ outline: "none", boxShadow: "none" }}
+                                />
+                                {searchResults.length > 0 && (
+                                    <ul className="dropdown-menu position-absolute w-100 mt-1" style={{ display: 'block', zIndex: 1000 }}>
+                                        {searchResults.map((user) => (
+                                            <button key={user.user_id} className="dropdown-item" onClick={() => handleUserClick(user.user_id)}>
+                                                <span>{user.full_name}</span>
+                                            </button>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                            <button type="submit" className="btn btn-light ms-2" onClick={handleSearchChange}>
                                 <i className="bx bx-search"></i>
                             </button>
                         </form>
 
-                        <form className="d-none d-md-flex flex-grow-1 align-items-center  justify-content-center">
-                            <input
-                                className="form-control w-50"
-                                type="search"
-                                placeholder="Search for research, journals, people, etc."
-                                aria-label="Search"
-                                style={{ outline: "none", boxShadow: "none" }}
-                            />
-                            <button type="submit" className="btn btn-light ms-2">
+                        <form className="d-none d-md-flex flex-grow-1 align-items-center justify-content-center">
+                            <div className="position-relative w-50"> {/* Wrap input and dropdown in a relative container */}
+                                <input
+                                    className="form-control w-100" // Use w-100 to fill the container
+                                    type="search"
+                                    placeholder="Search for research, journals, people, etc."
+                                    aria-label="Search"
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    style={{ outline: "none", boxShadow: "none" }}
+                                />
+                                {searchResults.length > 0 && (
+                                    <ul className="dropdown-menu position-absolute w-100 mt-1" style={{ display: 'block', zIndex: 1000 }}>
+                                        {searchResults.map((user) => (
+                                            <button key={user.user_id} className="dropdown-item" onClick={() => handleUserClick(user.user_id)}>
+                                                <span>{user.full_name}</span>
+                                            </button>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                            <button type="submit" className="btn btn-light ms-2" onClick={handleSearchChange}>
                                 <i className="bx bx-search"></i>
                             </button>
                         </form>

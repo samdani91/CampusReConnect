@@ -1,6 +1,6 @@
 import React from "react";
 
-const StatsTab = () => {
+const StatsTab = ({userId}) => {
   return (
     <div>
       <h5>Statistics</h5>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import ProfileTab from "./ProfileTab";
 import ResearchTab from "./ResearchTab";
@@ -7,6 +8,7 @@ import Footer from '../../Home/Footer';
 import "./style.css";
 
 const ViewProfile = () => {
+    const { userId } = useParams();
     const [activeTab, setActiveTab] = useState("Profile");
     const [userData, setUserData] = useState({ full_name: "Loading...", degree: "Loading..." });
     const [followers, setFollowers] = useState([]);
@@ -14,7 +16,7 @@ const ViewProfile = () => {
     const [followersCount, setFollowersCount] = useState(0);
     const [followingCount, setFollowingCount] = useState(0);
     const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null); // Current logged-in user
+    const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
@@ -34,10 +36,11 @@ const ViewProfile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const response = await axios.get("http://localhost:3001/get-profile", {
+                const response = await axios.get(`http://localhost:3001/get-headerData/${userId}`, {
                     withCredentials: true,
                 });
                 setUserData(response.data);
+                console.log(userData)
             } catch (error) {
                 console.error("Error fetching user data:", error);
                 setUserData({ full_name: "Error", degree: "Error" });
@@ -45,7 +48,7 @@ const ViewProfile = () => {
         };
 
         fetchUserData();
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         const fetchFollowersData = async () => {
@@ -86,18 +89,18 @@ const ViewProfile = () => {
         setIsFollowersModalOpen(false);
     };
 
-    const isOwnProfile = currentUser && currentUser.id === userData.id;
+    const isOwnProfile = currentUser && currentUser.user_id === userId;
 
     const renderTabContent = () => {
         switch (activeTab) {
             case "Profile":
-                return <ProfileTab isOwnProfile={isOwnProfile}/>;
+                return <ProfileTab isOwnProfile={isOwnProfile} userId={userId}/>;
             case "Research":
-                return <ResearchTab isOwnProfile={isOwnProfile}/>;
+                return <ResearchTab isOwnProfile={isOwnProfile} userId={userId}/>;
             case "Stats":
-                return <StatsTab />;
+                return <StatsTab userId={userId}/>;
             default:
-                return <ProfileTab isOwnProfile={isOwnProfile}/>;
+                return <ProfileTab isOwnProfile={isOwnProfile} userId={userId}/>;
         }
     };
 
@@ -107,7 +110,7 @@ const ViewProfile = () => {
         <>
             <div className="container profile-container">
                 <div className="profile-card card ">
-                    <div className=" card-body">
+                    <div className="card-body">
                         <div className="d-flex justify-content-between">
                             <div className="d-flex align-items-center h-100 mt-2">
                                 <div
@@ -187,7 +190,7 @@ const ViewProfile = () => {
             </div>
 
             {/* Followers Modal */}
-            {isFollowersModalOpen && (
+            {/* {isFollowersModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
                         <h5>Followers</h5>
@@ -201,7 +204,7 @@ const ViewProfile = () => {
                         <button onClick={handleCloseModal}>Close</button>
                     </div>
                 </div>
-            )}
+            )} */}
 
             <Footer />
         </>
