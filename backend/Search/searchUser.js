@@ -11,7 +11,6 @@ const searchUser = async (name) => {
         const [rows] = await db.promise().query(query, [`%${name}%`]);
 
         if (rows.length === 0) {
-            console.error('No users found');
             throw new Error('No users found');
         }
 
