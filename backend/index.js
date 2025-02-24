@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const { Login, SignUp, LogOut, ChangePassword} = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
-const { getProfileTab, updateProfileTab, getHeaderSectionData} = require("./User/Dashboard")
+const { getProfileTab, updateProfileTab, getProfileHeader} = require("./User/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./User/Settings");
 const { viewMessages, sendMessages, viewUserList, getUserStatus} = require("./Message")
 const searchUser = require("./Search/searchUser")
@@ -262,7 +262,7 @@ app.get('/user-list', authenticateToken, async (req, res) => {
 app.get('/get-headerData/:userId', authenticateToken, (req, res) => {
     const user_id = req.params;
 
-    getHeaderSectionData(user_id, (err, result) => {
+    getProfileHeader(user_id, (err, result) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ message: 'Error fetching profile data' });
