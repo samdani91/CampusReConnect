@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProfileTab from "./ProfileTab";
 import ResearchTab from "./ResearchTab";
@@ -9,6 +9,7 @@ import "./style.css";
 
 const ViewProfile = () => {
     const { userId } = useParams();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("Profile");
     const [userData, setUserData] = useState({ full_name: "Loading...", degree: "Loading..." });
     const [followers, setFollowers] = useState([]);
@@ -16,7 +17,40 @@ const ViewProfile = () => {
     const [followersCount, setFollowersCount] = useState(0);
     const [followingCount, setFollowingCount] = useState(0);
     const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
+    const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
+    const [isFollowing, setIsFollowing] = useState(false);
+
+    useEffect(() => {
+        if (currentUser && userId) {
+            axios.get(`http://localhost:3001/is-following/${userId}`, { withCredentials: true })
+                .then(response => setIsFollowing(response.data.isFollowing))
+                .catch(error => console.error("Error checking follow status:", error));
+        }
+    }, [currentUser, userId]);
+
+    useEffect(() => {
+        const fetchFollowersData = async () => {
+            try {
+                const followersResponse = await axios.get(`http://localhost:3001/get-followers/${userId}`, {
+                    withCredentials: true,
+                });
+                const followingResponse = await axios.get(`http://localhost:3001/get-following/${userId}`, {
+                    withCredentials: true,
+                });
+                const followersCountResponse = await axios.get(`http://localhost:3001/followers/count/${userId}`);
+                const followingCountResponse = await axios.get(`http://localhost:3001/following/count/${userId}`);
+
+                setFollowers(followersResponse.data);
+                setFollowing(followingResponse.data);
+                setFollowersCount(followersCountResponse.data.count);
+                setFollowingCount(followingCountResponse.data.count);
+            } catch (error) {
+                console.error("Error fetching followers data:", error);
+            }
+        };
+        fetchFollowersData();
+    }, [userId, isFollowing, followers, following, followersCount, followingCount]);
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
@@ -40,9 +74,9 @@ const ViewProfile = () => {
                     withCredentials: true,
                 });
                 setUserData(response.data);
-                console.log(userData)
+                // console.log(userData)
             } catch (error) {
-                console.error("Error fetching user data:", error);
+                // console.error("Error fetching user data:", error);
                 setUserData({ full_name: "Error", degree: "Error" });
             }
         };
@@ -50,43 +84,51 @@ const ViewProfile = () => {
         fetchUserData();
     }, [userId]);
 
-    useEffect(() => {
-        const fetchFollowersData = async () => {
-            try {
-                const followersResponse = await axios.get("http://localhost:3001/get-followers", {
-                    withCredentials: true,
-                });
-                const followingResponse = await axios.get("http://localhost:3001/get-following", {
-                    withCredentials: true,
-                });
-
-                setFollowers(followersResponse.data);
-                setFollowing(followingResponse.data);
-                setFollowersCount(followersResponse.data.length);
-                setFollowingCount(followingResponse.data.length);
-            } catch (error) {
-                console.error("Error fetching followers data:", error);
-            }
-        };
-
-        fetchFollowersData();
-    }, []);
-
     const handleFollowersClick = () => {
         setIsFollowersModalOpen(true);
+        console.log("Followers clicked, modal should open");
     };
 
-    const handleRemoveFollower = () => {
-
+    const handleFollwingClick = () => {
+        setIsFollowingModalOpen(true);
     }
 
-    const handleFollowClick = () => {
-        // Implement follow logic here
-        console.log("Follow button clicked");
+    const handleRemoveFollowing = async (followeeId) => {
+        try {
+            await axios.delete(`http://localhost:3001/unfollow/${followeeId}`, {
+                withCredentials: true,
+            });
+        } catch (error) {
+            console.error("Error unfollowing:", error);
+        }
+    };
+
+    const seeProfile = async (profileId) => {
+        navigate(`/view-profile/${profileId}`);
+        handleCloseModal();
+    }
+
+    const handleFollowClick = async () => {
+        try {
+            if (isFollowing) {
+                await axios.delete(`http://localhost:3001/unfollow/${userId}`, {
+                    withCredentials: true,
+                });
+                setIsFollowing(false);
+            } else {
+                await axios.post(`http://localhost:3001/follow/${userId}`, {}, {
+                    withCredentials: true,
+                });
+                setIsFollowing(true);
+            }
+        } catch (error) {
+            console.error(isFollowing ? "Error unfollowing:" : "Error following:", error);
+        }
     };
 
     const handleCloseModal = () => {
         setIsFollowersModalOpen(false);
+        setIsFollowingModalOpen(false)
     };
 
     const isOwnProfile = currentUser && currentUser.user_id === userId;
@@ -94,17 +136,17 @@ const ViewProfile = () => {
     const renderTabContent = () => {
         switch (activeTab) {
             case "Profile":
-                return <ProfileTab isOwnProfile={isOwnProfile} userId={userId}/>;
+                return <ProfileTab isOwnProfile={isOwnProfile} userId={userId} />;
             case "Research":
-                return <ResearchTab isOwnProfile={isOwnProfile} userId={userId}/>;
+                return <ResearchTab isOwnProfile={isOwnProfile} userId={userId} />;
             case "Stats":
-                return <StatsTab userId={userId}/>;
+                return <StatsTab userId={userId} />;
             default:
-                return <ProfileTab isOwnProfile={isOwnProfile} userId={userId}/>;
+                return <ProfileTab isOwnProfile={isOwnProfile} userId={userId} />;
         }
     };
 
-    
+
 
     return (
         <>
@@ -145,14 +187,14 @@ const ViewProfile = () => {
                                     <div className="me-4" style={{ cursor: 'pointer' }} onClick={handleFollowersClick}>
                                         <span><span className="fw-bold p-1">{followersCount}</span> Followers</span>
                                     </div>
-                                    <div style={{ cursor: 'pointer' }}>
+                                    <div style={{ cursor: 'pointer' }} onClick={handleFollwingClick}>
                                         <span><span className="fw-bold p-1">{followingCount}</span> Following</span>
                                     </div>
                                 </div>
 
                                 {!isOwnProfile && (
                                     <button className="btn btn-primary" onClick={handleFollowClick}>
-                                        Follow
+                                        {isFollowing ? "Following" : "Follow"}
                                     </button>
                                 )}
 
@@ -190,21 +232,62 @@ const ViewProfile = () => {
             </div>
 
             {/* Followers Modal */}
-            {/* {isFollowersModalOpen && (
+            {isFollowersModalOpen && (
                 <div className="modal">
                     <div className="modal-content">
-                        <h5>Followers</h5>
-                        <ul>
+                        <h4>Followers</h4>
+                        <ul className="list-unstyled">
                             {followers.map((follower) => (
-                                <li key={follower.id}>
-                                    {follower.name} <button onClick={() => handleRemoveFollower(follower.id)}>Remove</button>
+                                <li key={follower.user_id} className="d-flex justify-content-between align-items-center border-bottom">
+                                    <span
+                                        onClick={() => { seeProfile(follower.user_id) }}
+                                        className="text-decoration-none p-2 rounded fs-5" // Add padding and rounded corners
+                                        style={{
+                                            transition: 'background-color 0.3s',
+                                            cursor: 'pointer'
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'} // Change background on hover
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'} // Reset background on mouse leave
+                                    >
+                                        {follower.full_name}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
-                        <button onClick={handleCloseModal}>Close</button>
+                        <button className="btn btn-primary" onClick={handleCloseModal}>Close</button>
                     </div>
                 </div>
-            )} */}
+            )}
+
+            {isFollowingModalOpen && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <h4>Following</h4>
+                        <ul className="list-unstyled ">
+                            {following.map((followings) => (
+                                <li key={followings.user_id} className="d-flex justify-content-between align-items-center border-bottom">
+                                    <span
+                                        onClick={() => { seeProfile(followings.user_id)}}
+                                        className="text-decoration-none p-2 rounded fs-5 " // Add padding and rounded corners
+                                        style={{
+                                            transition: 'background-color 0.3s',
+                                            cursor: 'pointer'
+                                        }}
+                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f0f0f0'} // Change background on hover
+                                        onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'} // Reset background on mouse leave
+                                    >
+                                        {followings.full_name}
+                                    </span>
+                                    <button className="btn btn-danger " onClick={() => handleRemoveFollowing(followings.user_id)}>Remove</button>
+                                </li>
+                                
+                            ))}
+                        </ul>
+                        <button className="btn btn-primary" onClick={handleCloseModal}>Close</button>
+                    </div>
+                </div>
+            )}
+
 
             <Footer />
         </>
