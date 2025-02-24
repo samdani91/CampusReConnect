@@ -1,5 +1,5 @@
 const getProfileTab = require("./getProfileTab");
 const updateProfileTab = require("./updateProfileTab");
-const getHeaderSectionData = require("./getHeaderSectionData")
+const getProfileHeader = require("./getProfileHeader")
 
-module.exports = { getProfileTab, updateProfileTab , getHeaderSectionData};
+module.exports = { getProfileTab, updateProfileTab , getProfileHeader};
