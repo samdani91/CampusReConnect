@@ -1,7 +1,7 @@
 CREATE TABLE spl2.user (
     user_id VARCHAR(30) PRIMARY KEY,
     is_student BIT NOT NULL,
-    email VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(50) UNIQUE,
     full_name VARCHAR(30) NOT NULL,
     department VARCHAR(30),
     passwords VARCHAR(30),
