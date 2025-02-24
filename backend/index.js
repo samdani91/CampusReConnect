@@ -2,11 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const { Login, SignUp, LogOut, ChangePassword} = require("./Authentication")
+const { Login, SignUp, LogOut, ChangePassword } = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
-const { getProfileTab, updateProfileTab, getProfileHeader} = require("./User/Dashboard")
-const { getProfileSettings, updateProfileSettings, changePasswordSettings,deleteAccountSettings} = require("./User/Settings");
-const { viewMessages, sendMessages, viewUserList, getUserStatus} = require("./Message")
+const { getProfileTab, updateProfileTab, getProfileHeader } = require("./User/Dashboard")
+const { getProfileSettings, updateProfileSettings, changePasswordSettings, deleteAccountSettings } = require("./User/Settings");
+const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
+const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
 const searchUser = require("./Search/searchUser")
 const db = require('./db');
 const { Server } = require('socket.io');
@@ -22,7 +23,7 @@ app.use(cookieParser());
 const io = new Server(4000, { cors: { credentials: true, origin: 'http://localhost:3000' } });
 
 function authenticateToken(req, res, next) {
-    const token = req.cookies.authToken; 
+    const token = req.cookies.authToken;
 
     if (!token) {
         return res.status(401).json({ message: 'Authentication token is missing' });
@@ -67,7 +68,7 @@ app.get('/get-userId', authenticateToken, (req, res) => {
 app.get("/user-status/:userId", authenticateToken, async (req, res) => {
     const { userId } = req.params;
 
-    getUserStatus(userId,(err, results) => {
+    getUserStatus(userId, (err, results) => {
         if (err) {
             return res.status(500).json({ message: "Error fetching user status" });
         }
@@ -379,6 +380,98 @@ app.get('/search-users', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Error searching users:', error);
         return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+// Follow Endpoint
+app.post('/follow/:followeeId', authenticateToken, async (req, res) => {
+    const { followeeId } = req.params;
+    const followerId = req.user_id;
+
+
+    if (followeeId === followerId) {
+        return res.status(400).json({ message: 'You cannot follow yourself' });
+    }
+
+    const result = await followUser(followeeId, followerId);
+
+
+    if (result.success) {
+        res.status(200).json({ message: result.message });
+    } else {
+        res.status(500).json({ message: result.message });
+    }
+});
+
+// Unfollow Endpoint
+app.delete('/unfollow/:followeeId', authenticateToken, async (req, res) => {
+    const { followeeId } = req.params;
+    const followerId = req.user_id;
+
+    const result = await unfollowUser(followeeId, followerId);
+    if (result.success) {
+        res.status(200).json({ message: result.message });
+    } else if (result.message === 'Follow relationship not found') {
+        res.status(404).json({ message: result.message });
+    } else {
+        res.status(500).json({ message: result.message });
+    }
+});
+
+// Check if Following
+app.get('/is-following/:followeeId', authenticateToken, async (req, res) => {
+    const { followeeId } = req.params;
+    const followerId = req.user_id;
+
+    const result = await isFollowingUser(followeeId, followerId);
+    if (result.success === false) {
+        return res.status(500).json({ message: result.message });
+    }
+    res.status(200).json({ isFollowing: result.isFollowing });
+});
+
+// Get Followers/Following Count
+app.get('/followers/count/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    const result = await getFollowersCount(userId);
+    
+    if (result.success === false) {
+        return res.status(500).json({ message: result.message });
+    }
+    res.status(200).json({ count: result.count });
+});
+
+app.get('/following/count/:userId', async (req, res) => {
+    const { userId } = req.params;
+
+    const result = await getFollowingCount(userId);
+    if (result.success === false) {
+        return res.status(500).json({ message: result.message });
+    }
+    res.status(200).json({ count: result.count });
+});
+
+app.get('/get-followers/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const result = await getFollowers(userId);
+
+    if (result.success) {
+        res.status(200).json(result.data);
+    } else {
+        res.status(500).json({ message: result.message });
+    }
+});
+
+app.get('/get-following/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const result = await getFollowing(userId);
+
+    if (result.success) {
+        res.status(200).json(result.data);
+    } else {
+        res.status(500).json({ message: result.message });
     }
 });
 
