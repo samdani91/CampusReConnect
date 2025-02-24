@@ -8,6 +8,7 @@ const { getProfileTab, updateProfileTab, getProfileHeader } = require("./User/Da
 const { getProfileSettings, updateProfileSettings, changePasswordSettings, deleteAccountSettings } = require("./User/Settings");
 const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
 const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
+const { storeNotifications, getNotifications} = require("./Notification")
 const searchUser = require("./Search/searchUser")
 const db = require('./db');
 const { Server } = require('socket.io');
@@ -472,6 +473,29 @@ app.get('/get-following/:userId', async (req, res) => {
         res.status(200).json(result.data);
     } else {
         res.status(500).json({ message: result.message });
+    }
+});
+
+//notification
+app.post('/store-notification', authenticateToken, async (req, res) => {
+    const { id, senderId, receiverId, content } = req.body;
+
+    const result = await storeNotifications(id, senderId, receiverId, content);
+    if (result.success) {
+        res.send(result.message);
+    } else {
+        res.status(500).send(result.message);
+    }
+    
+});
+
+app.get('/notifications/:userId', authenticateToken, async (req, res) => {
+    const { userId } = req.params;
+    const result = await getNotifications(userId);
+    if (result.success) {
+        res.json(result.data);
+    } else {
+        res.status(500).send(result.message);
     }
 });
 

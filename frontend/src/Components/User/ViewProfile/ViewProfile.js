@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams,useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProfileTab from "./ProfileTab";
@@ -19,6 +19,7 @@ const ViewProfile = () => {
     const [isFollowersModalOpen, setIsFollowersModalOpen] = useState(false);
     const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
+    const [currentUserName, setCurrentUserName] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
 
     useEffect(() => {
@@ -59,6 +60,11 @@ const ViewProfile = () => {
                     withCredentials: true,
                 });
                 setCurrentUser(response.data);
+                const response2 = await axios.get("http://localhost:3001/get-profile", {
+                    withCredentials: true,
+                });
+                setCurrentUserName(response2.data);
+                console.log(response2.data)
             } catch (error) {
                 console.error("Error fetching current user data:", error);
             }
@@ -86,7 +92,6 @@ const ViewProfile = () => {
 
     const handleFollowersClick = () => {
         setIsFollowersModalOpen(true);
-        console.log("Followers clicked, modal should open");
     };
 
     const handleFollwingClick = () => {
@@ -120,6 +125,18 @@ const ViewProfile = () => {
                     withCredentials: true,
                 });
                 setIsFollowing(true);
+
+                const name = currentUserName.full_name;
+                
+
+                await axios.post('http://localhost:3001/store-notification', {
+                    id: Date.now(),
+                    senderId: currentUser.user_id,
+                    receiverId: userId,
+                    content: `${name} started following you.`
+                },{
+                    withCredentials:true
+                });
             }
         } catch (error) {
             console.error(isFollowing ? "Error unfollowing:" : "Error following:", error);

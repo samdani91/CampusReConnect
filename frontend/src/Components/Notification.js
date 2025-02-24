@@ -1,19 +1,50 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { NotificationContext } from "./Context/NotificationContext";
+import axios from "axios";
 
 const Notification = () => {
-    const { notifications } = useContext(NotificationContext);
+    const [currentUser, setCurrentUser] = useState(null);
+    const [userNotifications, setUserNotifications] = useState([]); // State for notifications
+
+    useEffect(() => {
+        const fetchCurrentUser = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001/get-userId", {
+                    withCredentials: true,
+                });
+                setCurrentUser(response.data);
+            } catch (error) {
+                console.error("Error fetching current user data:", error);
+            }
+        };
+
+        fetchCurrentUser();
+    }, []);
+
+    useEffect(() => {
+        if (currentUser) {
+            const fetchNotifications = async () => {
+                try {
+                    const response = await axios.get(`http://localhost:3001/notifications/${currentUser.user_id}`,{withCredentials:true});
+                    setUserNotifications(response.data);
+                } catch (error) {
+                    console.error("Error fetching notifications:", error);
+                }
+            };
+            fetchNotifications();
+        }
+    }, [currentUser,userNotifications]);
 
     return (
         <>
             <div className="container mt-4">
                 <h1 className="mb-4">Notifications</h1>
 
-                {notifications.length > 0 ? (
+                {userNotifications.length > 0 ? (
                     <ul className="list-group">
-                        {notifications.map((notification) => (
-                            <li key={notification.id} className="list-group-item">
-                                {notification.message}
+                        {userNotifications.map((notification) => (
+                            <li key={notification.notification_id} className="list-group-item">
+                                {notification.notification_content}
                             </li>
                         ))}
                     </ul>
