@@ -3,11 +3,10 @@ import VoteButton from './VoteButton';
 import Comment from './Comment';
 import AddComment from './AddComment';
 
-const Post = ({ title, description, authors, pdfUrl, postType }) => {
+const Post = ({ title, description, authors, pdfUrl, postType, date }) => {
     const [votes, setVotes] = useState(0);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
-    const [createdAt, setCreatedAt] = useState(new Date());
     const [showComments, setShowComments] = useState(false);
 
     const handleVote = (type) => {
@@ -51,10 +50,6 @@ const Post = ({ title, description, authors, pdfUrl, postType }) => {
         );
     };
 
-    const formatDate = (date) => {
-        const options = { month: 'long', year: 'numeric' }; // Format as "October 2024"
-        return date.toLocaleDateString(undefined, options);
-    };
 
     const toggleComments = () => {
         setShowComments(!showComments);
@@ -62,16 +57,16 @@ const Post = ({ title, description, authors, pdfUrl, postType }) => {
 
     return (
         <div className="card mb-4">
-            <div className="card-body">
+            <div className="card-body text-start">
                 <h2 className="card-title">{title}</h2>
-                <p className="card-text">{description}</p>
-                <p className="card-text">
+                <p className="card-text" style={{ whiteSpace: 'pre-line' }}>{description}</p>
+                <p className="card-text my-3">
                     <strong>Authors:</strong> {authors.join(', ')}
                 </p>
-                <div className="d-flex align-items-center mb-3"> {/* Meta info below authors */}
+                <div className="d-flex align-items-center my-3"> {/* Meta info below authors */}
                     <span className="badge bg-secondary me-2 text-uppercase">{postType}</span>
                     <span className="text-muted small">
-                        {formatDate(createdAt)}
+                        {date}
                     </span>
                 </div>
 
