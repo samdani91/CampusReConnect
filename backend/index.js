@@ -2,13 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
 const { Login, SignUp, LogOut, ChangePassword } = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab, getProfileHeader } = require("./User/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings, deleteAccountSettings } = require("./User/Settings");
 const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
 const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
-const { storeNotifications, getNotifications} = require("./Notification")
+const { storeNotifications, getNotifications } = require("./Notification")
+const { createPost } = require("./Post");
 const searchUser = require("./Search/searchUser")
 const db = require('./db');
 const { Server } = require('socket.io');
@@ -38,6 +40,17 @@ function authenticateToken(req, res, next) {
         return res.status(403).json({ message: 'Invalid or expired token' });
     }
 }
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './uploads'); // Folder to save uploaded files
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Use current timestamp for unique filenames
+    },
+});
+
+const upload = multer({ storage: storage });
 
 io.use((socket, next) => {
     const token = socket.handshake.headers['cookie']
@@ -437,7 +450,7 @@ app.get('/followers/count/:userId', async (req, res) => {
     const { userId } = req.params;
 
     const result = await getFollowersCount(userId);
-    
+
     if (result.success === false) {
         return res.status(500).json({ message: result.message });
     }
@@ -486,7 +499,7 @@ app.post('/store-notification', authenticateToken, async (req, res) => {
     } else {
         res.status(500).send(result.message);
     }
-    
+
 });
 
 app.get('/notifications/:userId', authenticateToken, async (req, res) => {
@@ -497,6 +510,54 @@ app.get('/notifications/:userId', authenticateToken, async (req, res) => {
     } else {
         res.status(500).send(result.message);
     }
+});
+
+
+//post
+
+app.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
+    const { publicationType, topic, title, authors, description } = req.body;
+    const user_id = req.user_id;  // Get user_id from the authentication middleware
+    const file = req.file ? req.file.filename : null;  // Get file path (file name)
+
+    // Call the createPost function to insert the post into the database
+    createPost(publicationType, user_id, topic, title, authors, description, file, (err, newPost) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error uploading post' });
+        }
+
+        // Send response with new post data
+        return res.status(201).json(newPost);
+    });
+});
+
+app.get('/posts', authenticateToken, (req, res) => {
+    // Query to fetch posts from the Post table
+    const query = 'SELECT * FROM post ORDER BY post_id DESC'; // Customize the query as needed
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching posts:', err);
+            return res.status(500).json({ message: 'Error fetching posts' });
+        }
+
+        // Send the posts back to the client
+        res.status(200).json(results);
+    });
+});
+
+app.get('/get-posts/:userId', authenticateToken, (req, res) => {
+    const { userId } = req.params;
+
+    const query = 'SELECT * FROM post WHERE user_id = ? ORDER BY created_time DESC';
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching posts:', err);
+            return res.status(500).json({ message: 'Error fetching posts' });
+        }
+        res.status(200).json(results);
+    });
 });
 
 app.get('/', (req, res) => {
