@@ -1,3 +1,4 @@
-const createPost = require("./createPost")
+const createPost = require("./createPost");
+const editPost = require("./editPost");
 
-module.exports = {createPost};
+module.exports = {createPost,editPost};

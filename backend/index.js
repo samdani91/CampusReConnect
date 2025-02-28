@@ -3,6 +3,7 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
+const path = require('path');
 const { Login, SignUp, LogOut, ChangePassword } = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab, getProfileHeader } = require("./User/Dashboard")
@@ -10,7 +11,7 @@ const { getProfileSettings, updateProfileSettings, changePasswordSettings, delet
 const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
 const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
 const { storeNotifications, getNotifications } = require("./Notification")
-const { createPost } = require("./Post");
+const { createPost, editPost } = require("./Post");
 const searchUser = require("./Search/searchUser")
 const db = require('./db');
 const { Server } = require('socket.io');
@@ -557,6 +558,36 @@ app.get('/get-posts/:userId', authenticateToken, (req, res) => {
             return res.status(500).json({ message: 'Error fetching posts' });
         }
         res.status(200).json(results);
+    });
+});
+
+// server.js (backend)
+
+app.put('/update-votes/:postId', authenticateToken, (req, res) => {
+    const { postId } = req.params;
+    const { upvotes, downvotes } = req.body;
+
+    const query = 'UPDATE post SET upvotes = ?, downvotes = ? WHERE post_id = ?';
+    db.query(query, [upvotes, downvotes, postId], (err, result) => {
+        if (err) {
+            console.error('Error updating votes:', err);
+            return res.status(500).json({ message: 'Error updating votes' });
+        }
+        res.status(200).json({ message: 'Votes updated successfully' });
+    });
+});
+
+app.put('/update-post/:postId', authenticateToken, upload.single('file'), (req, res) => {
+    const { postId } = req.params;
+    const { publicationType, topic, title, authors, description } = req.body;
+    const file = req.file ? req.file.filename : null;
+
+    editPost(postId, publicationType, topic, title, authors, description, file, (err, updatedPost) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error updating post' });
+        }
+
+        return res.status(200).json(updatedPost);
     });
 });
 

@@ -20,7 +20,7 @@ export default function Feed() {
         };
 
         fetchPosts();
-    }, []); // Empty dependency array means this effect runs once when the component mounts
+    }, [posts]); // Empty dependency array means this effect runs once when the component mounts
 
     return (
         <div className="container-md mt-4 d-flex">
@@ -29,13 +29,17 @@ export default function Feed() {
                 {posts.length > 0 ? (
                     posts.map((post) => (
                         <Post
-                            key={post.id}
+                            key={post.post_id}
+                            postId={post.post_id}
                             title={post.title}
+                            topic={post.topic}
                             description={post.description}
                             authors={JSON.parse(post.authors)} // Assuming authors are stored as a JSON string
                             pdfUrl={`http://localhost:3001/uploads/${post.attachment}`} // Assuming attachment field stores the file path
                             postType={post.post_type}
                             date={post.created_date}
+                            initialUpvotes={post.upvotes} 
+                            initialDownvotes={post.downvotes}
                         />
                     ))
                 ) : (
