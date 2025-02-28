@@ -12,6 +12,7 @@ CREATE TABLE spl2.post (
     upvotes INT(5),
     downvotes INT(5),
     created_date VARCHAR(50),
+    created_time DATETIME,
     community_id VARCHAR(30)
     -- FOREIGN KEY (user_id) REFERENCES spl2.user(user_id)  -- Assuming a Users table exists
 );
