@@ -64,7 +64,7 @@ const ViewProfile = () => {
                     withCredentials: true,
                 });
                 setCurrentUserName(response2.data);
-                console.log(response2.data)
+                // console.log(response2.data)
             } catch (error) {
                 console.error("Error fetching current user data:", error);
             }
