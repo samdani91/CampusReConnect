@@ -11,7 +11,7 @@ const { getProfileSettings, updateProfileSettings, changePasswordSettings, delet
 const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
 const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
 const { storeNotifications, getNotifications } = require("./Notification")
-const { createPost, editPost, makeComment, getComment} = require("./Post");
+const { createPost, editPost,deletePost, makeComment, getComment} = require("./Post");
 const searchUser = require("./Search/searchUser")
 const db = require('./db');
 const { Server } = require('socket.io');
@@ -588,6 +588,20 @@ app.put('/update-post/:postId', authenticateToken, upload.single('file'), (req, 
         }
 
         return res.status(200).json(updatedPost);
+    });
+});
+
+app.delete('/delete-post/:postId', authenticateToken, (req, res) => {
+    const { postId } = req.params;
+
+    deletePost(postId, (err, result) => {
+        if (err) {
+            if (err.message === 'Post not found') {
+                return res.status(404).json({ message: 'Post not found' });
+            }
+            return res.status(500).json({ message: 'Error deleting post' });
+        }
+        res.status(200).json(result); // Send the result from the deletePost function
     });
 });
 
