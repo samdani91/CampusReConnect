@@ -12,6 +12,19 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
     const [newComment, setNewComment] = useState('');
     const [showComments, setShowComments] = useState(false);
     const [showFullDescription, setShowFullDescription] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/get-userId', { withCredentials: true });
+                setCurrentUserId(response.data.user_id);
+            } catch (error) {
+                console.error('Error fetching user ID:', error);
+            }
+        };
+        fetchUserId();
+    },[]);
 
     useEffect(() => {
         setUpVotes(initialUpvotes || 0);
@@ -21,7 +34,20 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
         if (storedVoteStatus) {
             setVoteStatus(storedVoteStatus);
         }
-    }, [initialUpvotes, initialDownvotes, postId]);
+        fetchComments();
+
+    }, [initialUpvotes, initialDownvotes, postId, comments]);
+
+    const fetchComments = async () => {
+        try {
+            const response = await axios.get(`http://localhost:3001/get-comments/${postId}`, {
+                withCredentials: true,
+            });
+            setComments(response.data);
+        } catch (error) {
+            console.error('Error fetching comments:', error);
+        }
+    };
 
     const handleVote = (type) => {
         let newUpVotes = upVotes;
@@ -73,42 +99,84 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
             console.error('Error updating vote count:', error);
         }
     };
-    const handleAddComment = () => {
+    const handleAddComment = async () => {
         if (newComment.trim() !== '') {
-            setComments([
-                ...comments,
-                {
-                    id: Date.now(),
-                    text: newComment,
-                    author: 'Current User',
-                    votes: 0,
-                    replies: [],
-                },
-            ]);
-            setNewComment('');
+            try {
+                const response = await axios.post(
+                    'http://localhost:3001/add-comment',
+                    { postId: postId, text: newComment },
+                    {
+                        withCredentials: true,
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                setComments([...comments, response.data]); // Add new comment to state
+                setNewComment(''); // Clear input field
+            } catch (error) {
+                console.error('Error adding comment:', error);
+            }
         }
     };
 
-    const handleReply = (commentId, replyText) => {
-        setComments(
-            comments.map((comment) =>
-                comment.id === commentId
-                    ? {
-                          ...comment,
-                          replies: [
-                              ...comment.replies,
-                              {
-                                  id: Date.now(),
-                                  text: replyText,
-                                  author: 'Current User',
-                                  votes: 0,
-                              },
-                          ],
-                      }
-                    : comment
-            )
-        );
+    const handleReply = async (commentId, replyText) => {
+        if (replyText.trim() !== '') {
+            try {
+                const response = await axios.post(
+                    'http://localhost:3001/add-comment',
+                    { postId: postId, text: replyText, parentCommentId: commentId },
+                    { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+                );
+
+                const newReply = response.data;
+
+                // Update comments state to include the new reply in the correct parent
+                setComments(prevComments => {
+                    const addReplyToComment = (commentsList) => {
+                        return commentsList.map(comment => {
+                            if (comment.comment_id === commentId) {
+                                return {
+                                    ...comment,
+                                    replies: [...comment.replies, newReply]
+                                };
+                            } else if (comment.replies.length > 0) {
+                                return {
+                                    ...comment,
+                                    replies: addReplyToComment(comment.replies)
+                                };
+                            }
+                            return comment;
+                        });
+                    };
+
+                    return addReplyToComment(prevComments);
+                });
+
+            } catch (error) {
+                console.error('Error adding reply:', error);
+            }
+        }
     };
+
+    const handleDeleteComment = (commentId) => {
+        setComments(prevComments => {
+            const deleteCommentRecursive = (commentsList) => {
+                return commentsList.map(comment => {
+                    if (comment.comment_id === commentId) {
+                        return null;
+                    } else if (comment.replies && comment.replies.length > 0) {
+                        const updatedReplies = deleteCommentRecursive(comment.replies);
+                        return { ...comment, replies: updatedReplies };
+                    }
+                    return comment;
+                }).filter(comment => comment !== null);
+            };
+    
+            return deleteCommentRecursive(prevComments);
+        });
+    };
+
 
     const toggleComments = () => {
         setShowComments(!showComments);
@@ -171,7 +239,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                     {showComments && (
                         <div>
                             {comments.map((comment) => (
-                                <Comment key={comment.id} comment={comment} onReply={handleReply} />
+                                <Comment key={comment.comment_id} comment={comment} onReply={handleReply} onDelete={handleDeleteComment} currentUserId={currentUserId}/>
                             ))}
                             <AddComment
                                 onAdd={handleAddComment}
