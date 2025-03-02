@@ -11,7 +11,7 @@ const { getProfileSettings, updateProfileSettings, changePasswordSettings, delet
 const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
 const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
 const { storeNotifications, getNotifications } = require("./Notification")
-const { createPost, editPost } = require("./Post");
+const { createPost, editPost, makeComment, getComment} = require("./Post");
 const searchUser = require("./Search/searchUser")
 const db = require('./db');
 const { Server } = require('socket.io');
@@ -588,6 +588,60 @@ app.put('/update-post/:postId', authenticateToken, upload.single('file'), (req, 
         }
 
         return res.status(200).json(updatedPost);
+    });
+});
+
+app.post('/add-comment', authenticateToken, (req, res) => {
+    const { postId, text, parentCommentId = null } = req.body;
+    const userId = req.user_id;
+
+    makeComment(userId, postId, text, parentCommentId, (err, newComment) => {
+        if (err) {
+            return res.status(500).json({ message: "Error adding comment" });
+        }
+
+        res.status(201).json(newComment);
+    });
+});
+
+app.get('/get-comments/:postId', authenticateToken, (req, res) => {
+    const { postId } = req.params;
+
+    getComment(postId, (err, comments) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error fetching comments' });
+        }
+        res.status(200).json(comments);
+    });
+});
+
+app.delete('/delete-comment/:commentId', authenticateToken, (req, res) => {
+    const { commentId } = req.params;
+
+    const query = 'DELETE FROM comment WHERE comment_id = ?';
+    db.query(query, [commentId], (err, result) => {
+        if (err) {
+            console.error('Error deleting comment:', err);
+            return res.status(500).json({ message: 'Error deleting comment' });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Comment not found' });
+        }
+        res.status(200).json({ message: 'Comment deleted successfully' });
+    });
+});
+
+app.put('/update-comment-votes/:commentId', authenticateToken, (req, res) => {
+    const { commentId } = req.params;
+    const { upvotes, downvotes } = req.body;
+
+    const query = 'UPDATE comment SET upvotes = ?, downvotes = ? WHERE comment_id = ?';
+    db.query(query, [upvotes, downvotes, commentId], (err, result) => {
+        if (err) {
+            console.error('Error updating comment votes:', err);
+            return res.status(500).json({ message: 'Error updating comment votes' });
+        }
+        res.status(200).json({ message: 'Comment votes updated successfully' });
     });
 });
 
