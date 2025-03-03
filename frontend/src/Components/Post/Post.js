@@ -5,7 +5,7 @@ import AddComment from './AddComment';
 import axios from 'axios';
 import "./Post.css"
 
-const Post = ({ postId,postOwnerId, title, topic, description, authors, pdfUrl, pdfPath,  postType, date, initialUpvotes, initialDownvotes, postUserId, onDeletePost }) => {
+const Post = ({ postId, postOwnerId, title, topic, description, authors, pdfUrl, pdfPath, postType, date, initialUpvotes, initialDownvotes, postUserId, onDeletePost }) => {
     const [voteStatus, setVoteStatus] = useState(null);
     const [upVotes, setUpVotes] = useState(initialUpvotes || 0);
     const [downVotes, setDownVotes] = useState(initialDownvotes || 0);
@@ -61,7 +61,7 @@ const Post = ({ postId,postOwnerId, title, topic, description, authors, pdfUrl, 
         }
     };
 
-    const handleVote = (type) => {
+    const handleVote = async (type) => {
         let newUpVotes = upVotes;
         let newDownVotes = downVotes;
         let newVoteStatus = null;
@@ -93,6 +93,24 @@ const Post = ({ postId,postOwnerId, title, topic, description, authors, pdfUrl, 
         localStorage.setItem(`voteStatus-${postId}`, newVoteStatus);
 
         updateVoteCount(postId, newUpVotes, newDownVotes);
+
+        const name = currentUserName.full_name;
+        const voteAction = type === 'up' ? 'upvoted' : 'downvoted';  // Evaluate the vote action
+
+        if (currentUserId !== postOwnerId) {
+            try {
+                await axios.post('http://localhost:3001/store-notification', {
+                    id: Date.now(),
+                    senderId: currentUserId,
+                    receiverId: postOwnerId,
+                    content: `${name} ${voteAction} your post <b>${title}</b>.`,  // Insert the evaluated action
+                }, {
+                    withCredentials: true
+                });
+            } catch (error) {
+                console.error('Error sending vote notification:', error);
+            }
+        }
     };
 
     const updateVoteCount = async (postId, upvotes, downvotes) => {
@@ -127,14 +145,14 @@ const Post = ({ postId,postOwnerId, title, topic, description, authors, pdfUrl, 
 
                 const name = currentUserName.full_name;
 
-                if(currentUserId !== postOwnerId){
+                if (currentUserId !== postOwnerId) {
                     await axios.post('http://localhost:3001/store-notification', {
                         id: Date.now(),
                         senderId: currentUserId,
                         receiverId: postOwnerId,
                         content: `${name} Commented on your post <b>${title}</b>.`, // Wrap title in ** **
-                    },{
-                        withCredentials:true
+                    }, {
+                        withCredentials: true
                     });
                 }
 
@@ -338,7 +356,7 @@ const Post = ({ postId,postOwnerId, title, topic, description, authors, pdfUrl, 
                             <i className="bi bi-three-dots-vertical"></i>
                         </button>
 
-                        <ul className="dropdown-menu" aria-labelledby={`postDropdownMenuButton-${postId}`} style={{backgroundColor:"#deeaee"}}>
+                        <ul className="dropdown-menu" aria-labelledby={`postDropdownMenuButton-${postId}`} style={{ backgroundColor: "#deeaee" }}>
                             <li>
                                 <button className="dropdown-item" onClick={handlePostSummary}>
                                     📄 Post Summary
