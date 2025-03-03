@@ -16,6 +16,7 @@ const { storeNotifications, getNotifications } = require("./Notification")
 const { createPost, editPost, deletePost, makeComment, getComment } = require("./Post");
 const searchUser = require("./Search/searchUser")
 const { generateSummary} = require("./geminiApi");
+const { calculatePoints } = require("./Gamification/calculatePoints");
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -692,6 +693,41 @@ app.post('/generate-paper-summary', async (req, res) => {
     }
 });
 
+app.post('/get-points', authenticateToken, async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+    }
+
+    try {
+        calculatePoints(userId, (err) => {
+            if (err) {
+                console.error("Error calculating points:", err);
+                return res.status(500).json({ error: "Error calculating points" });
+            }
+
+            const query = "SELECT points FROM spl2.user WHERE user_id = ?";
+            db.query(query, [userId], (err, result) => {
+                if (err) {
+                    console.error("Database error:", err);
+                    return res.status(500).json({ error: "Internal server error" });
+                }
+
+                if (result.length === 0) {
+                    return res.status(404).json({ error: "User not found" });
+                }
+
+                const points = result[0].points || 0;
+                return res.json({ points });
+            });
+        });
+    } catch (error) {
+        console.error("Server error:", error);
+        return res.status(500).json({ error: "Server error" });
+    }
+});
+
 app.get('/', (req, res) => {
     res.send('Backend Server Running');
 });
@@ -699,3 +735,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
