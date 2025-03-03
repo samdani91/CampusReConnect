@@ -2,7 +2,7 @@ const db = require('../db');
 
 function viewMessages(user_id, receiverId, callback){
     const query = `
-        SELECT * FROM message 
+        SELECT * FROM Message 
         WHERE (sender_id = ? AND receiver_id = ?)
         OR (sender_id = ? AND receiver_id = ?)
         ORDER BY message_time ASC

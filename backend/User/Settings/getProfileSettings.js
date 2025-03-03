@@ -3,7 +3,7 @@ const db = require("../../db");
 const getProfileSettings = (user_id, callback) => {
     const sql = `
         SELECT full_name, degree, department
-        FROM SPL2.User
+        FROM user
         WHERE user_id = ?
     `;
 

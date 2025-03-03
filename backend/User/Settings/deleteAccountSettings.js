@@ -19,10 +19,11 @@ const deleteAccountSettings = (user_id, password, callback) => {
         }
 
         const sqlDeactivateUser = `
-            UPDATE SPL2.User 
+            UPDATE user 
             SET 
                 status = 'inactive',
                 email = NULL,
+                full_name= 'CampusReConnect User',
                 department = NULL,
                 passwords = NULL,
                 research_interest = NULL,

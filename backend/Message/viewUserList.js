@@ -6,7 +6,7 @@ async function viewUserList() {
             user_id AS id, 
             full_name AS name, 
             department
-        FROM SPL2.User
+        FROM user
     `;
 
     return new Promise((resolve, reject) => {

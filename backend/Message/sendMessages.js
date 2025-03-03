@@ -6,7 +6,7 @@ function sendMessages(data, senderId, socket, io, userSockets) {
     const message_id = uuidv4();
 
     const query = `
-        INSERT INTO message (message_id, message_content, sender_id, receiver_id, message_time) 
+        INSERT INTO Message (message_id, message_content, sender_id, receiver_id, message_time) 
         VALUES (?, ?, ?, ?, ?)
     `;
 
@@ -19,7 +19,7 @@ function sendMessages(data, senderId, socket, io, userSockets) {
         console.log("Message saved:", message_id);
 
         const fetchQuery = `
-            SELECT * FROM message WHERE message_id = ?
+            SELECT * FROM Message WHERE message_id = ?
         `;
 
         db.query(fetchQuery, [message_id], (err, newMessage) => {  

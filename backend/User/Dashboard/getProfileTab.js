@@ -3,11 +3,11 @@ const db = require("../../db");
 const getProfileTab = (user_id, callback) => {
     const sql = `
         SELECT email, introduction, disciplines, skillsExpertise, languages, twitter
-        FROM SPL2.User
+        FROM user
         WHERE user_id = ?
     `;
 
-    db.query(sql, [user_id], (err, results) => {
+    db.query(sql, [user_id.userId], (err, results) => {
         if (err) {
             return callback(err, null);
         }

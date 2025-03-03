@@ -1,7 +1,7 @@
 const db = require("../db");
 
 function getUserStatus(userId, callback) {
-  const query = "SELECT status FROM SPL2.User WHERE user_id = ?";
+  const query = "SELECT status FROM user WHERE user_id = ?";
 
   db.query(query, [userId], (err, results) => {
     if (err) {

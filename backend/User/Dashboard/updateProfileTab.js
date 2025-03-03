@@ -4,7 +4,7 @@ const updateProfileTab = (user_id, data, callback) => {
     const { introduction, disciplines, skillsExpertise, languages, twitter } = data;
 
     const sql = `
-        UPDATE SPL2.User
+        UPDATE user
         SET introduction = ?, disciplines = ?, skillsExpertise = ?, languages = ?, twitter = ?
         WHERE user_id = ?
     `;

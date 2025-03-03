@@ -2,9 +2,9 @@ import React from 'react';
 
 const FollowList = () => {
     const followers = [ // Replace with dynamic data fetching later
-        { name: 'Md. Abdullah-Al-Shafi', relationship: 'Department colleague' },
-        { name: 'Emon Kumar Dey', relationship: 'Department colleague' },
-        { name: 'Nadia Nahar', relationship: 'Department colleague' },
+        { name: 'xyz', relationship: 'Department colleague' },
+        { name: 'abc', relationship: 'Department colleague' },
+        { name: 'pqr', relationship: 'Department colleague' },
         // ... more followers
     ];
 
