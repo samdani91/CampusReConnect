@@ -432,7 +432,7 @@ const Post = ({ postId, postOwnerId, title, topic, description, authors, pdfUrl,
                     {showComments && (
                         <div>
                             {comments.map((comment) => (
-                                <Comment key={comment.comment_id} comment={comment} onReply={handleReply} onDelete={handleDeleteComment} currentUserId={currentUserId} />
+                                <Comment key={comment.comment_id} comment={comment} onReply={handleReply} onDelete={handleDeleteComment} currentUserId={currentUserId} currentUserName={currentUserName} postTitle={title} />
                             ))}
                             <AddComment
                                 onAdd={handleAddComment}
