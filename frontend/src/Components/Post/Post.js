@@ -16,6 +16,9 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
     const [currentUserId, setCurrentUserId] = useState(null);
     const [showDeleteButton, setShowDeleteButton] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [showPostSummaryModal, setShowPostSummaryModal] = useState(false);
+    const [postSummary, setPostSummary] = useState('');
+    const [generatingSummary, setGeneratingSummary] = useState(false);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -27,7 +30,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
             }
         };
         fetchUserId();
-    },[]);
+    }, []);
 
     useEffect(() => {
         setUpVotes(initialUpvotes || 0);
@@ -115,8 +118,8 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                         },
                     }
                 );
-                setComments([...comments, response.data]); // Add new comment to state
-                setNewComment(''); // Clear input field
+                setComments([...comments, response.data]);
+                setNewComment('');
             } catch (error) {
                 console.error('Error adding comment:', error);
             }
@@ -175,7 +178,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                     return comment;
                 }).filter(comment => comment !== null);
             };
-    
+
             return deleteCommentRecursive(prevComments);
         });
     };
@@ -185,7 +188,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
             await axios.delete(`http://localhost:3001/delete-post/${postId}`, {
                 withCredentials: true,
             });
-            onDeletePost(postId); // Call onDeletePost to update parent component
+            onDeletePost(postId);
         } catch (error) {
             console.error('Error deleting post:', error);
         }
@@ -207,45 +210,92 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
     const handleConfirmDelete = () => {
         handleDeletePost();
         setShowDeleteConfirmation(false);
-        setShowDeleteButton(false); // Hide the delete button after deleting
+        setShowDeleteButton(false);
     };
 
     const handleCancelDelete = () => {
         setShowDeleteConfirmation(false);
     };
 
+    const handlePaperSummary = () => {
+        alert("Paper Summary will be generated!"); // Placeholder function
+    };
+
     const descriptionSentences = description.split('.').filter(sentence => sentence.trim() !== ''); //split by fullstop, and remove empty sentences
     const isLongDescription = descriptionSentences.length > 5;
+
+    const handlePostSummary = async () => {
+        setGeneratingSummary(true);
+        setShowPostSummaryModal(true); 
+
+        try {
+            const response = await axios.post(
+                'http://localhost:3001/generate-post-summary',
+                { text: description },
+                { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+            );
+
+            setPostSummary(response.data.summary);
+        } catch (error) {
+            console.error('Error generating summary:', error);
+            alert('Failed to generate post summary.');
+            closePostSummaryModal();
+        } finally {
+            setGeneratingSummary(false); 
+        }
+    };
+
+    const closePostSummaryModal = () => {
+        setShowPostSummaryModal(false);
+        setPostSummary('');
+    };
 
     return (
         <div className="card mb-2">
             <div className="card-body text-start">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h2 className="card-title mb-0">{title}</h2>
-                    {currentUserId === postUserId && (
-                        <div className="dropdown">
+                    <div className="dropdown">
                         <button
                             className="btn btn-sm btn-link p-0"
                             type="button"
-                            id={`postDropdownMenuButton-${postId}`} // Unique ID for each dropdown
+                            id={`postDropdownMenuButton-${postId}`}
                             data-bs-toggle="dropdown"
                             aria-expanded="false"
-                            onClick={() => setShowDeleteButton(!showDeleteButton)}
                         >
                             <i className="bi bi-three-dots-vertical"></i>
                         </button>
-                        <ul
-                            className="dropdown-menu bg-danger "
-                            aria-labelledby={`postDropdownMenuButton-${postId}`} // Match the ID here
-                        >
+
+                        <ul className="dropdown-menu" aria-labelledby={`postDropdownMenuButton-${postId}`}>
                             <li>
-                                <button className="dropdown-item deleteButton text-white" onClick={handleDeleteClick}>
-                                    Delete Post
+                                <button className="dropdown-item" onClick={handlePostSummary}>
+                                    📄 Post Summary
                                 </button>
                             </li>
+                            <li>
+                                <hr className="dropdown-divider" />
+                            </li>
+                            <li>
+                                <button className="dropdown-item" onClick={handlePaperSummary}>
+                                    📑 Paper Summary
+                                </button>
+                            </li>
+
+                            {currentUserId === postUserId && (
+                                <>
+                                    <li>
+                                        <hr className="dropdown-divider" />
+                                    </li>
+                                    <li>
+                                        <button className="btn btn-danger ms-3" onClick={handleDeleteClick}>
+                                            Delete Post
+                                        </button>
+                                    </li>
+                                </>
+                            )}
+
                         </ul>
                     </div>
-                    )}
                 </div>
 
                 <p className="card-text" style={{ whiteSpace: 'pre-line' }}>
@@ -311,7 +361,6 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                             <div className="modal-content">
                                 <div className="modal-header">
                                     <h5 className="modal-title">Confirm Delete</h5>
-                                    <button type="button" className="btn-close" aria-label="Close" onClick={handleCancelDelete}></button>
                                 </div>
                                 <div className="modal-body">
                                     <p>Are you sure you want to delete this post?</p>
@@ -320,6 +369,34 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                                     <button type="button" className="btn btn-secondary" onClick={handleCancelDelete}>No</button>
                                     <button type="button" className="btn btn-danger" onClick={handleConfirmDelete}>Yes</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {showPostSummaryModal && (
+                    <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1"> 
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Post Summary</h5>
+                                </div>
+                                <div className="modal-body">
+                                    {generatingSummary ? ( 
+                                        <div className="d-flex justify-content-center">
+                                            <div className="spinner-border text-primary" role="status">
+                                                <span className="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p>{postSummary}</p>
+                                    )}
+                                </div>
+                                {!generatingSummary && ( 
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-danger" onClick={closePostSummaryModal}>Close</button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

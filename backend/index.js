@@ -13,6 +13,7 @@ const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./M
 const { storeNotifications, getNotifications } = require("./Notification")
 const { createPost, editPost,deletePost, makeComment, getComment} = require("./Post");
 const searchUser = require("./Search/searchUser")
+const {generatePostSummary}= require("./geminiApi");
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -519,7 +520,7 @@ app.get('/notifications/:userId', authenticateToken, async (req, res) => {
 app.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
     const { publicationType, topic, title, authors, description } = req.body;
     const user_id = req.user_id;  // Get user_id from the authentication middleware
-    const file = req.file ? req.file.filename : null;  // Get file path (file name)
+    const file = req.file ? `backend/uploads/${req.file.filename}` : null;  // Get file path (file name)
 
     // Call the createPost function to insert the post into the database
     createPost(publicationType, user_id, topic, title, authors, description, file, (err, newPost) => {
@@ -580,7 +581,7 @@ app.put('/update-votes/:postId', authenticateToken, (req, res) => {
 app.put('/update-post/:postId', authenticateToken, upload.single('file'), (req, res) => {
     const { postId } = req.params;
     const { publicationType, topic, title, authors, description } = req.body;
-    const file = req.file ? req.file.filename : null;
+    const file = req.file ? `backend/uploads/${req.file.filename}` : null;
 
     editPost(postId, publicationType, topic, title, authors, description, file, (err, updatedPost) => {
         if (err) {
@@ -657,6 +658,18 @@ app.put('/update-comment-votes/:commentId', authenticateToken, (req, res) => {
         }
         res.status(200).json({ message: 'Comment votes updated successfully' });
     });
+});
+
+app.post('/generate-post-summary', async (req, res) => {
+    const { text } = req.body;
+
+    try {
+        const summary = await generatePostSummary(text);
+        res.json({ summary });
+    } catch (error) {
+        console.error('Error generating summary:', error);
+        res.status(500).json({ message: 'Failed to generate summary' });
+    }
 });
 
 app.get('/', (req, res) => {
