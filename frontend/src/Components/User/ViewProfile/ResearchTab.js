@@ -104,6 +104,7 @@ const ResearchTab = ({ isOwnProfile, userId }) => {
                     <div key={post.post_id}>
                         <Post
                             postId={post.post_id}
+                            postOwnerId={post.user_id}
                             title={post.title}
 							topic={post.topic}
                             description={post.description}

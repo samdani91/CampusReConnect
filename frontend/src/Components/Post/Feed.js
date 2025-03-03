@@ -33,6 +33,7 @@ export default function Feed() {
                         <Post
                             key={post.post_id}
                             postId={post.post_id}
+                            postOwnerId={post.user_id}
                             title={post.title}
                             topic={post.topic}
                             description={post.description}

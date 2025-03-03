@@ -69,7 +69,7 @@ const Comment = ({ comment, onReply, onDelete, currentUserId }) => {
     };
 
     const handleActualReply = () => {
-        onReply(comment.comment_id, replyText);
+        onReply(comment.comment_id, replyText, comment.comment_content);
         setReplyText('');
         setShowReplyInput(false);
     };
