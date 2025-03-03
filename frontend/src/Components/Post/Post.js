@@ -5,7 +5,7 @@ import AddComment from './AddComment';
 import axios from 'axios';
 import "./Post.css"
 
-const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, date, initialUpvotes, initialDownvotes, postUserId, onDeletePost }) => {
+const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  postType, date, initialUpvotes, initialDownvotes, postUserId, onDeletePost }) => {
     const [voteStatus, setVoteStatus] = useState(null);
     const [upVotes, setUpVotes] = useState(initialUpvotes || 0);
     const [downVotes, setDownVotes] = useState(initialDownvotes || 0);
@@ -15,9 +15,10 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-    const [showPostSummaryModal, setShowPostSummaryModal] = useState(false);
-    const [postSummary, setPostSummary] = useState('');
+    const [showSummaryModal, setShowSummaryModal] = useState(false);
+    const [summaryContent, setSummaryContent] = useState('');
     const [generatingSummary, setGeneratingSummary] = useState(false);
+    const [summaryType, setSummaryType] = useState('post'); // 'post' or 'paper'
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -215,16 +216,15 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
         setShowDeleteConfirmation(false);
     };
 
-    const handlePaperSummary = () => {
-        alert("Paper Summary will be generated!"); // Placeholder function
-    };
+
 
     const descriptionSentences = description.split('.').filter(sentence => sentence.trim() !== ''); //split by fullstop, and remove empty sentences
     const isLongDescription = descriptionSentences.length > 5;
 
     const handlePostSummary = async () => {
         setGeneratingSummary(true);
-        setShowPostSummaryModal(true); 
+        setShowSummaryModal(true);
+        setSummaryType('post');
 
         try {
             const response = await axios.post(
@@ -233,19 +233,41 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                 { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
             );
 
-            setPostSummary(response.data.summary);
+            setSummaryContent(response.data.summary);
         } catch (error) {
-            console.error('Error generating summary:', error);
+            console.error('Error generating post summary:', error);
             alert('Failed to generate post summary.');
-            closePostSummaryModal();
+            closeSummaryModal();
         } finally {
-            setGeneratingSummary(false); 
+            setGeneratingSummary(false);
         }
     };
 
-    const closePostSummaryModal = () => {
-        setShowPostSummaryModal(false);
-        setPostSummary('');
+    const handlePaperSummary = async () => {
+        setGeneratingSummary(true);
+        setShowSummaryModal(true);
+        setSummaryType('paper');
+
+        try {
+            const response = await axios.post(
+                'http://localhost:3001/generate-paper-summary',
+                { pdfPath: pdfPath },
+                { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+            );
+
+            setSummaryContent(response.data.summary);
+        } catch (error) {
+            console.error('Error generating paper summary:', error);
+            alert('Failed to generate paper summary.');
+            closeSummaryModal();
+        } finally {
+            setGeneratingSummary(false);
+        }
+    };
+
+    const closeSummaryModal = () => {
+        setShowSummaryModal(false);
+        setSummaryContent('');
     };
 
     return (
@@ -264,7 +286,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                             <i className="bi bi-three-dots-vertical"></i>
                         </button>
 
-                        <ul className="dropdown-menu" aria-labelledby={`postDropdownMenuButton-${postId}`}>
+                        <ul className="dropdown-menu" aria-labelledby={`postDropdownMenuButton-${postId}`} style={{backgroundColor:"#deeaee"}}>
                             <li>
                                 <button className="dropdown-item" onClick={handlePostSummary}>
                                     📄 Post Summary
@@ -372,33 +394,35 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                     </div>
                 )}
 
-                {showPostSummaryModal && (
-                    <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1"> 
+
+                {showSummaryModal && (
+                    <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1">
                         <div className="modal-dialog">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Post Summary</h5>
+                                    <h5 className="modal-title">{summaryType === 'post' ? 'Post Summary' : 'Paper Summary'}</h5>
                                 </div>
                                 <div className="modal-body">
-                                    {generatingSummary ? ( 
+                                    {generatingSummary ? (
                                         <div className="d-flex justify-content-center">
                                             <div className="spinner-border text-primary" role="status">
                                                 <span className="visually-hidden">Loading...</span>
                                             </div>
                                         </div>
                                     ) : (
-                                        <p>{postSummary}</p>
+                                        <p>{summaryContent}</p>
                                     )}
                                 </div>
-                                {!generatingSummary && ( 
+                                {!generatingSummary && (
                                     <div className="modal-footer">
-                                        <button type="button" className="btn btn-danger" onClick={closePostSummaryModal}>Close</button>
+                                        <button type="button" className="btn btn-danger" onClick={closeSummaryModal}>Close</button>
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
                 )}
+
             </div>
         </div>
     );

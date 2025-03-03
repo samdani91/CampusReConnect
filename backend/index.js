@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+const pdfParse = require('pdf-parse');
 const { Login, SignUp, LogOut, ChangePassword } = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
 const { getProfileTab, updateProfileTab, getProfileHeader } = require("./User/Dashboard")
@@ -11,9 +13,9 @@ const { getProfileSettings, updateProfileSettings, changePasswordSettings, delet
 const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
 const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
 const { storeNotifications, getNotifications } = require("./Notification")
-const { createPost, editPost,deletePost, makeComment, getComment} = require("./Post");
+const { createPost, editPost, deletePost, makeComment, getComment } = require("./Post");
 const searchUser = require("./Search/searchUser")
-const {generatePostSummary}= require("./geminiApi");
+const { generateSummary} = require("./geminiApi");
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -665,11 +667,28 @@ app.post('/generate-post-summary', async (req, res) => {
     const { text } = req.body;
 
     try {
-        const summary = await generatePostSummary(text);
+        const summary = await generateSummary(text);
         res.json({ summary });
     } catch (error) {
         console.error('Error generating summary:', error);
         res.status(500).json({ message: 'Failed to generate summary' });
+    }
+});
+
+app.post('/generate-paper-summary', async (req, res) => {
+    const { pdfPath } = req.body;
+
+    try {
+        const pdfBuffer = fs.readFileSync(pdfPath);
+        const pdfData = await pdfParse(pdfBuffer);
+        const pdfText = pdfData.text;
+
+        const summary = await generateSummary(pdfText); // Use Gemini API to summarize PDF text
+
+        res.json({ summary });
+    } catch (error) {
+        console.error('Error generating paper summary:', error);
+        res.status(500).json({ message: 'Failed to generate paper summary' });
     }
 });
 

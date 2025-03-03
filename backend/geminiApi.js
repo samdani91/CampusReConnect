@@ -4,7 +4,7 @@ const axios = require('axios');
 const apiKey = process.env.GEMINI_API_KEY;
 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-const generatePostSummary = async (text) => {
+const generateSummary = async (text) => {
     try {
         const response = await axios.post(apiUrl, {
             contents: [{ parts: [{ text: `Summarize the following text: ${text}` }] }],
@@ -18,4 +18,4 @@ const generatePostSummary = async (text) => {
     }
 };
 
-module.exports = { generatePostSummary };
+module.exports = { generateSummary};

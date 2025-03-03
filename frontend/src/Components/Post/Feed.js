@@ -38,6 +38,7 @@ export default function Feed() {
                             description={post.description}
                             authors={JSON.parse(post.authors)} // Assuming authors are stored as a JSON string
                             pdfUrl={`http://localhost:3001/${post.attachment}`} // Assuming attachment field stores the file path
+                            pdfPath={post.attachment}
                             postType={post.post_type}
                             date={post.created_date}
                             initialUpvotes={post.upvotes}
