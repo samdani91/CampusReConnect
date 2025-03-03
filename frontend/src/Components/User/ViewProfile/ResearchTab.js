@@ -108,7 +108,7 @@ const ResearchTab = ({ isOwnProfile, userId }) => {
 							topic={post.topic}
                             description={post.description}
                             authors={JSON.parse(post.authors)}
-                            pdfUrl={`http://localhost:3001/uploads/${post.attachment}`}
+                            pdfUrl={`http://localhost:3001/${post.attachment}`}
                             postType={post.post_type}
                             date={post.created_date}
                             initialUpvotes={post.upvotes}

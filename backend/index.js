@@ -21,6 +21,7 @@ const SECRET_KEY = 'authTokenKey';
 const PORT = 3001;
 
 const app = express();
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(express.json());
 app.use(cookieParser());
@@ -520,7 +521,7 @@ app.get('/notifications/:userId', authenticateToken, async (req, res) => {
 app.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
     const { publicationType, topic, title, authors, description } = req.body;
     const user_id = req.user_id;  // Get user_id from the authentication middleware
-    const file = req.file ? `backend/uploads/${req.file.filename}` : null;  // Get file path (file name)
+    const file = req.file ? `uploads/${req.file.filename}` : null;  // Get file path (file name)
 
     // Call the createPost function to insert the post into the database
     createPost(publicationType, user_id, topic, title, authors, description, file, (err, newPost) => {
@@ -581,7 +582,7 @@ app.put('/update-votes/:postId', authenticateToken, (req, res) => {
 app.put('/update-post/:postId', authenticateToken, upload.single('file'), (req, res) => {
     const { postId } = req.params;
     const { publicationType, topic, title, authors, description } = req.body;
-    const file = req.file ? `backend/uploads/${req.file.filename}` : null;
+    const file = req.file ? `uploads/${req.file.filename}` : null;
 
     editPost(postId, publicationType, topic, title, authors, description, file, (err, updatedPost) => {
         if (err) {

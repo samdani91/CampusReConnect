@@ -14,7 +14,6 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
     const [showComments, setShowComments] = useState(false);
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
-    const [showDeleteButton, setShowDeleteButton] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [showPostSummaryModal, setShowPostSummaryModal] = useState(false);
     const [postSummary, setPostSummary] = useState('');
@@ -210,7 +209,6 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
     const handleConfirmDelete = () => {
         handleDeletePost();
         setShowDeleteConfirmation(false);
-        setShowDeleteButton(false);
     };
 
     const handleCancelDelete = () => {

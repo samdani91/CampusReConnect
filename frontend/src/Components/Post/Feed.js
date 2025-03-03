@@ -37,7 +37,7 @@ export default function Feed() {
                             topic={post.topic}
                             description={post.description}
                             authors={JSON.parse(post.authors)} // Assuming authors are stored as a JSON string
-                            pdfUrl={`http://localhost:3001/uploads/${post.attachment}`} // Assuming attachment field stores the file path
+                            pdfUrl={`http://localhost:3001/${post.attachment}`} // Assuming attachment field stores the file path
                             postType={post.post_type}
                             date={post.created_date}
                             initialUpvotes={post.upvotes}
@@ -54,7 +54,7 @@ export default function Feed() {
             <div className="d-flex flex-column w-50 right-side">
                 <div className="flex-grow-1">
                     <FollowList />
-                    <Footer />
+                    {/* <Footer /> */}
                 </div>
             </div>
         </div>
