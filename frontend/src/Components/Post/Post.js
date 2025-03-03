@@ -18,7 +18,8 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
     const [showSummaryModal, setShowSummaryModal] = useState(false);
     const [summaryContent, setSummaryContent] = useState('');
     const [generatingSummary, setGeneratingSummary] = useState(false);
-    const [summaryType, setSummaryType] = useState('post'); // 'post' or 'paper'
+    const [summaryType, setSummaryType] = useState('post');
+    const [showNoPdfModal, setShowNoPdfModal] = useState(false);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -221,6 +222,14 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
     const descriptionSentences = description.split('.').filter(sentence => sentence.trim() !== ''); //split by fullstop, and remove empty sentences
     const isLongDescription = descriptionSentences.length > 5;
 
+    const handleDownloadPdf = () => {
+        if (pdfUrl && pdfPath) {
+            window.location.href = pdfUrl; // Trigger download
+        } else {
+            setShowNoPdfModal(true);
+        }
+    };
+
     const handlePostSummary = async () => {
         setGeneratingSummary(true);
         setShowSummaryModal(true);
@@ -244,6 +253,11 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
     };
 
     const handlePaperSummary = async () => {
+        if (!pdfPath) {
+            setShowNoPdfModal(true);
+            return;
+        }
+
         setGeneratingSummary(true);
         setShowSummaryModal(true);
         setSummaryType('paper');
@@ -268,6 +282,10 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
     const closeSummaryModal = () => {
         setShowSummaryModal(false);
         setSummaryContent('');
+    };
+
+    const closeNoPdfModal = () => {
+        setShowNoPdfModal(false);
     };
 
     return (
@@ -346,11 +364,9 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
 
                 <div className="d-flex justify-content-between align-items-center">
                     <VoteButton onVote={handleVote} upvotes={upVotes} downvotes={downVotes} voteStatus={voteStatus} />
-                    {pdfUrl && (
-                        <a href={pdfUrl} className="btn btn-primary" download>
-                            Download PDF
-                        </a>
-                    )}
+                    <button className="btn btn-primary" onClick={handleDownloadPdf}> {/* Use a button */}
+                        Download PDF
+                    </button>
                 </div>
 
                 <div className="mt-4">
@@ -374,6 +390,24 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
                         </div>
                     )}
                 </div>
+
+                {showNoPdfModal && (
+                    <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1">
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">No PDF Provided</h5>
+                                </div>
+                                <div className="modal-body">
+                                    <p>This post does not have an associated PDF.</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-danger" onClick={closeNoPdfModal}>Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {showDeleteConfirmation && (
                     <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1">
