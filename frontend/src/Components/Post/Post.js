@@ -3,8 +3,9 @@ import VoteButton from './VoteButton';
 import Comment from './Comment';
 import AddComment from './AddComment';
 import axios from 'axios';
+import "./Post.css"
 
-const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, date, initialUpvotes, initialDownvotes }) => {
+const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, date, initialUpvotes, initialDownvotes, postUserId, onDeletePost }) => {
     const [voteStatus, setVoteStatus] = useState(null);
     const [upVotes, setUpVotes] = useState(initialUpvotes || 0);
     const [downVotes, setDownVotes] = useState(initialDownvotes || 0);
@@ -13,6 +14,8 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
     const [showComments, setShowComments] = useState(false);
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [currentUserId, setCurrentUserId] = useState(null);
+    const [showDeleteButton, setShowDeleteButton] = useState(false);
+    const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -177,6 +180,17 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
         });
     };
 
+    const handleDeletePost = async () => {
+        try {
+            await axios.delete(`http://localhost:3001/delete-post/${postId}`, {
+                withCredentials: true,
+            });
+            onDeletePost(postId); // Call onDeletePost to update parent component
+        } catch (error) {
+            console.error('Error deleting post:', error);
+        }
+    };
+
 
     const toggleComments = () => {
         setShowComments(!showComments);
@@ -186,13 +200,54 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
         setShowFullDescription(!showFullDescription);
     };
 
+    const handleDeleteClick = () => {
+        setShowDeleteConfirmation(true);
+    };
+
+    const handleConfirmDelete = () => {
+        handleDeletePost();
+        setShowDeleteConfirmation(false);
+        setShowDeleteButton(false); // Hide the delete button after deleting
+    };
+
+    const handleCancelDelete = () => {
+        setShowDeleteConfirmation(false);
+    };
+
     const descriptionSentences = description.split('.').filter(sentence => sentence.trim() !== ''); //split by fullstop, and remove empty sentences
     const isLongDescription = descriptionSentences.length > 5;
 
     return (
         <div className="card mb-2">
             <div className="card-body text-start">
-                <h2 className="card-title">{title}</h2>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h2 className="card-title mb-0">{title}</h2>
+                    {currentUserId === postUserId && (
+                        <div className="dropdown">
+                        <button
+                            className="btn btn-sm btn-link p-0"
+                            type="button"
+                            id={`postDropdownMenuButton-${postId}`} // Unique ID for each dropdown
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            onClick={() => setShowDeleteButton(!showDeleteButton)}
+                        >
+                            <i className="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul
+                            className="dropdown-menu bg-danger "
+                            aria-labelledby={`postDropdownMenuButton-${postId}`} // Match the ID here
+                        >
+                            <li>
+                                <button className="dropdown-item deleteButton text-white" onClick={handleDeleteClick}>
+                                    Delete Post
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    )}
+                </div>
+
                 <p className="card-text" style={{ whiteSpace: 'pre-line' }}>
                     {showFullDescription || !isLongDescription
                         ? description
@@ -239,7 +294,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                     {showComments && (
                         <div>
                             {comments.map((comment) => (
-                                <Comment key={comment.comment_id} comment={comment} onReply={handleReply} onDelete={handleDeleteComment} currentUserId={currentUserId}/>
+                                <Comment key={comment.comment_id} comment={comment} onReply={handleReply} onDelete={handleDeleteComment} currentUserId={currentUserId} />
                             ))}
                             <AddComment
                                 onAdd={handleAddComment}
@@ -249,6 +304,26 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, postType, da
                         </div>
                     )}
                 </div>
+
+                {showDeleteConfirmation && (
+                    <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1">
+                        <div className="modal-dialog">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Confirm Delete</h5>
+                                    <button type="button" className="btn-close" aria-label="Close" onClick={handleCancelDelete}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <p>Are you sure you want to delete this post?</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={handleCancelDelete}>No</button>
+                                    <button type="button" className="btn btn-danger" onClick={handleConfirmDelete}>Yes</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

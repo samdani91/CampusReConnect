@@ -1,0 +1,8 @@
+/* #postDropdownMenuButton:hover {
+    background-color: transparent; 
+    border-color: transparent;   
+} */
+
+.deleteButton:hover{
+    background-color: #dc3545;
+}

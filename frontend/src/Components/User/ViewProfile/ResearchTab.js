@@ -113,6 +113,7 @@ const ResearchTab = ({ isOwnProfile, userId }) => {
                             date={post.created_date}
                             initialUpvotes={post.upvotes}
                             initialDownvotes={post.downvotes}
+                            postUserId={post.user_id} // Pass the post's user ID
                         />
                         {isOwnProfile && (
                             <button

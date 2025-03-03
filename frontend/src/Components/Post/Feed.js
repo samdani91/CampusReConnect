@@ -6,26 +6,28 @@ import Footer from './Footer';
 import './Feed.css';
 
 export default function Feed() {
-    const [posts, setPosts] = useState([]); // State to store the fetched posts
+    const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        // Fetch posts when the component mounts
         const fetchPosts = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/posts',{withCredentials:true}); // Replace with your backend API URL
-                setPosts(response.data); // Update the state with the fetched posts
+                const response = await axios.get('http://localhost:3001/posts', { withCredentials: true }); 
+                setPosts(response.data);
             } catch (error) {
                 console.error('Error fetching posts:', error);
             }
         };
 
         fetchPosts();
-    }, [posts]); // Empty dependency array means this effect runs once when the component mounts
+    }, [posts]);
+
+    const handleDeletePost = (postId) => {
+        setPosts(posts.filter(post => post.post_id !== postId));
+    };
 
     return (
         <div className="container-md mt-4 d-flex">
             <div className="w-50 left-side">
-                {/* Map through the posts and render a Post component for each */}
                 {posts.length > 0 ? (
                     posts.map((post) => (
                         <Post
@@ -38,12 +40,14 @@ export default function Feed() {
                             pdfUrl={`http://localhost:3001/uploads/${post.attachment}`} // Assuming attachment field stores the file path
                             postType={post.post_type}
                             date={post.created_date}
-                            initialUpvotes={post.upvotes} 
+                            initialUpvotes={post.upvotes}
                             initialDownvotes={post.downvotes}
+                            postUserId={post.user_id} 
+                            onDeletePost={handleDeletePost}
                         />
                     ))
                 ) : (
-                    <p>No posts available</p> // Show this message if there are no posts
+                    <p>No posts available</p>
                 )}
             </div>
 
