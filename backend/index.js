@@ -17,6 +17,7 @@ const { createPost, editPost, deletePost, makeComment, getComment } = require(".
 const searchUser = require("./Search/searchUser")
 const { generateSummary} = require("./geminiApi");
 const { calculatePoints } = require("./Gamification/calculatePoints");
+const {createCommunity, joinCommunity, leaveCommunity} = require("./Community");
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -93,6 +94,25 @@ app.get("/user-status/:userId", authenticateToken, async (req, res) => {
             return res.status(500).json({ message: "Error fetching user status" });
         }
         res.status(200).json(results);
+    });
+});
+
+app.get('/get-user-role', authenticateToken, (req, res) => {
+    const user_id = req.user_id;
+
+    const query = 'SELECT is_student FROM user WHERE user_id = ?';
+    db.query(query, [user_id], (err, results) => {
+        if (err) {
+            console.error('Error fetching user role:', err);
+            return res.status(500).json({ message: 'Error fetching user role' });
+        }
+
+        if (results.length > 0) {
+            const isStudent = results[0].is_student;
+            return res.status(200).json({ isStudent: isStudent });
+        } else {
+            return res.status(404).json({ message: 'User not found' });
+        }
     });
 });
 
@@ -726,6 +746,81 @@ app.post('/get-points', authenticateToken, async (req, res) => {
         console.error("Server error:", error);
         return res.status(500).json({ error: "Server error" });
     }
+});
+
+
+
+
+//community
+app.post('/create-community', authenticateToken, async (req, res) => {
+    const { community_name, community_description } = req.body;
+    const moderator_id = req.user_id;
+
+    createCommunity(moderator_id, community_name, community_description, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+        if (!result.success) {
+            return res.status(409).json({ message: result.message });
+        }
+        return res.status(201).json({ message: result.message });
+    });
+});
+
+app.get('/get-communities', authenticateToken, (req, res) => {
+    const query = 'SELECT * FROM community';
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching communities:', err);
+            return res.status(500).json({ message: 'Error fetching communities' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+app.get('/get-user-communities', authenticateToken, (req, res) => {
+    const userId = req.user_id;
+    const query = 'SELECT community_id FROM user_community WHERE user_id = ?';
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching user communities:', err);
+            return res.status(500).json({ message: 'Error fetching user communities' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+
+app.post("/join-community", authenticateToken, (req, res) => {
+    const userId = req.user_id;
+    const { communityId } = req.body;
+
+    joinCommunity(userId, communityId, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+        if (!result.success) {
+            return res.status(409).json({ message: result.message });
+        }
+        return res.status(200).json({ message: result.message });
+    });
+});
+
+app.post("/leave-community", authenticateToken, (req, res) => {
+    const userId = req.user_id;
+    const { communityId } = req.body;
+
+    leaveCommunity(userId, communityId, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+        if (!result.success) {
+            return res.status(409).json({ message: result.message });
+        }
+        return res.status(200).json({ message: result.message });
+    });
 });
 
 app.get('/', (req, res) => {
