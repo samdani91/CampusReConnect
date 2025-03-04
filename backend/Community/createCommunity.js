@@ -1,4 +1,5 @@
 const db = require("../db");
+const joinCommunity = require("./joinCommunity")
 
 const createCommunity = (moderator_id, community_name, community_description, callback) => {
     try {
@@ -27,7 +28,15 @@ const createCommunity = (moderator_id, community_name, community_description, ca
                         }
 
                         if (result.affectedRows === 1) {
-                            return callback(null, { success: true, message: 'Community created successfully' });
+                            const communityId = result.insertId; 
+
+                            joinCommunity(moderator_id, communityId, (err, joinResult) => {
+                                if (err) {
+                                    console.error('Error joining community:', err);
+                                    return callback(err, null);
+                                }
+                                return callback(null, { success: true, message: 'Community created successfully' });
+                            });
                         } else {
                             return callback(null, { success: false, message: 'Failed to create community' });
                         }

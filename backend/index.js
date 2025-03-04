@@ -17,7 +17,7 @@ const { createPost, editPost, deletePost, makeComment, getComment } = require(".
 const searchUser = require("./Search/searchUser")
 const { generateSummary} = require("./geminiApi");
 const { calculatePoints } = require("./Gamification/calculatePoints");
-const {createCommunity, joinCommunity, leaveCommunity} = require("./Community");
+const {createCommunity, leaveCommunity} = require("./Community");
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -793,21 +793,6 @@ app.get('/get-user-communities', authenticateToken, (req, res) => {
 });
 
 
-app.post("/join-community", authenticateToken, (req, res) => {
-    const userId = req.user_id;
-    const { communityId } = req.body;
-
-    joinCommunity(userId, communityId, (err, result) => {
-        if (err) {
-            return res.status(500).json({ message: "Internal server error" });
-        }
-        if (!result.success) {
-            return res.status(409).json({ message: result.message });
-        }
-        return res.status(200).json({ message: result.message });
-    });
-});
-
 app.post("/leave-community", authenticateToken, (req, res) => {
     const userId = req.user_id;
     const { communityId } = req.body;
@@ -821,6 +806,163 @@ app.post("/leave-community", authenticateToken, (req, res) => {
         }
         return res.status(200).json({ message: result.message });
     });
+});
+
+app.get('/moderator/communities', authenticateToken, (req, res) => {
+    const userId = req.user_id;
+
+    const query = `
+        SELECT community_id, community_name, community_description 
+        FROM community
+        WHERE moderator_id = ?
+    `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching communities:', err);
+            return res.status(500).json({ message: 'Error fetching communities' });
+        }
+
+        res.status(200).json(results);
+    });
+});
+
+// Route to get members for a specific community
+app.get('/community/:communityId/members', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+
+    try {
+        const results = await db.promise().query(`
+            SELECT u.user_id, u.full_name, u.email
+            FROM user_community uc
+            JOIN user u ON uc.user_id = u.user_id
+            WHERE uc.community_id = ?
+        `, [communityId]);
+
+        const members = results[0]; // Access the array of members
+
+        // Fetch join requests for the community
+        const requestsResults = await db.promise().query(
+            'SELECT u.* FROM spl2.user u JOIN spl2.community_join_requests cjr ON u.user_id = cjr.user_id WHERE cjr.community_id = ?',
+            [communityId]
+        );
+
+        const requests = requestsResults[0];
+
+        res.json({ members, requests });
+    } catch (error) {
+        console.error('Error fetching community members:', error);
+        res.status(500).json({ message: 'Failed to fetch community members' });
+    }
+});
+
+app.post('/request-join', authenticateToken, async (req, res) => {
+    const { communityId } = req.body;
+    const userId = req.user_id;
+    try {
+        await db.execute(
+            'INSERT INTO community_join_requests (user_id, community_id) VALUES (?, ?)',
+            [userId, communityId]
+        );
+        res.json({ message: 'Join request sent' });
+    } catch (error) {
+        console.error('Error requesting join:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.delete('/cancel-request', authenticateToken, async (req, res) => {
+    const { communityId } = req.body;
+    const userId = req.user_id;
+    try {
+        await db.execute(
+            'DELETE FROM community_join_requests WHERE user_id = ? AND community_id = ?',
+            [userId, communityId]
+        );
+        res.json({ message: 'Join request cancelled' });
+    } catch (error) {
+        console.error('Error cancelling request:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.post('/approve-request', authenticateToken, async (req, res) => {
+    const { userId, communityId } = req.body;
+    try {
+        await db.execute(
+            'INSERT INTO spl2.user_community (user_id, community_id) VALUES (?, ?)',
+            [userId, communityId]
+        );
+        await db.execute(
+            'DELETE FROM spl2.community_join_requests WHERE user_id = ? AND community_id = ?',
+            [userId, communityId]
+        );
+        res.json({ message: 'Request approved' });
+    } catch (error) {
+        console.error('Error approving request:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+app.delete('/reject-request', authenticateToken, async (req, res) => {
+    const { userId, communityId } = req.body;
+    try {
+        await db.execute(
+            'DELETE FROM spl2.community_join_requests WHERE user_id = ? AND community_id = ?',
+            [userId, communityId]
+        );
+        res.json({ message: 'Request rejected' });
+    } catch (error) {
+        console.error('Error rejecting request:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.get('/get-pending-requests', authenticateToken, async (req, res) => {
+    const userId = req.user_id;
+
+    try {
+        const results = await db.promise().query(
+            'SELECT community_id FROM community_join_requests WHERE user_id = ?',
+            [userId]
+        );
+
+        const pendingRequests = results[0].map(row => row.community_id);
+
+        res.json(pendingRequests);
+    } catch (error) {
+        console.error('Error fetching pending requests:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.delete('/delete-community/:communityId', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+    const moderatorId = req.user_id; // Assuming you have middleware to set req.user_id
+
+    try {
+        // Check if the logged-in user is the moderator of the community
+        const [community] = await db.promise().execute(
+            'SELECT * FROM spl2.community WHERE community_id = ? AND moderator_id = ?',
+            [communityId, moderatorId]
+        );
+
+        if (community.length === 0) {
+            return res.status(403).json({ message: 'You are not authorized to delete this community' });
+        }
+
+        // Delete the community
+        await db.promise().execute(
+            'DELETE FROM spl2.community WHERE community_id = ?',
+            [communityId]
+        );
+
+        res.json({ message: 'Community deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting community:', error);
+        res.status(500).json({ message: 'Failed to delete community' });
+    }
 });
 
 app.get('/', (req, res) => {
