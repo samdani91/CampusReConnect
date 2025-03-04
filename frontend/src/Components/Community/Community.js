@@ -5,6 +5,7 @@ import CommunityForm from './CommunityForm';
 import { Container, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
 import Footer from '../Home/Footer';
+import ModeratorDashboard from './ModeratorDashboard';
 
 function Community() {
     const [activeTab, setActiveTab] = useState('list');
@@ -14,7 +15,12 @@ function Community() {
         const fetchUserRole = async () => {
             try {
                 const response = await axios.get('http://localhost:3001/get-user-role', { withCredentials: true });
-                setIsStudent(response.data.is_Student);
+                const buffer = response.data.isStudent;
+                if (buffer && buffer.data && buffer.data.length > 0) {
+                    setIsStudent(buffer.data[0] === 1); // Convert Buffer to boolean
+                }else{
+                    setIsStudent(false); //default to false if the buffer is empty or null.
+                }
             } catch (error) {
                 console.error('Error fetching user role:', error);
             }
@@ -35,6 +41,12 @@ function Community() {
                                 <Tab eventKey="create" title="Create Community">
                                     <CommunityForm />
                                 </Tab>
+                                
+                            )}
+                            {!isStudent && (
+                                <Tab eventKey="moderator" title="Moderator Dashboard">
+                                    <ModeratorDashboard />
+                            </Tab>
                             )}
                         </Tabs>
                     </Col>
