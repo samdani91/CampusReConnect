@@ -17,7 +17,7 @@ const { createPost, editPost, deletePost, makeComment, getComment } = require(".
 const searchUser = require("./Search/searchUser")
 const { generateSummary} = require("./geminiApi");
 const { calculatePoints } = require("./Gamification/calculatePoints");
-const {createCommunity, joinCommunity, leaveCommunity} = require("./Community");
+const {createCommunity, leaveCommunity} = require("./Community");
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -934,6 +934,34 @@ app.get('/get-pending-requests', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Error fetching pending requests:', error);
         res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.delete('/delete-community/:communityId', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+    const moderatorId = req.user_id; // Assuming you have middleware to set req.user_id
+
+    try {
+        // Check if the logged-in user is the moderator of the community
+        const [community] = await db.promise().execute(
+            'SELECT * FROM spl2.community WHERE community_id = ? AND moderator_id = ?',
+            [communityId, moderatorId]
+        );
+
+        if (community.length === 0) {
+            return res.status(403).json({ message: 'You are not authorized to delete this community' });
+        }
+
+        // Delete the community
+        await db.promise().execute(
+            'DELETE FROM spl2.community WHERE community_id = ?',
+            [communityId]
+        );
+
+        res.json({ message: 'Community deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting community:', error);
+        res.status(500).json({ message: 'Failed to delete community' });
     }
 });
 

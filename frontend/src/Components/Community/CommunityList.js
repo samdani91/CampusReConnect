@@ -11,7 +11,7 @@ function CommunityList() {
         fetchCommunities();
         fetchUserCommunities();
         fetchPendingRequests(); // Fetch pending request IDs
-    }, []);
+    }, [communities]);
 
     const fetchCommunities = async () => {
         try {
