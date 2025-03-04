@@ -17,6 +17,8 @@ import Chat from './Components/Message/Chat';
 import Setting from './Components/User/Settings/Setting';
 import ViewProfile from './Components/User/ViewProfile/ViewProfile';
 import Navbar from './Components/Navbar/Navbar';
+import ModeratorDashboard from './Components/Community/ModeratorDashboard';
+import Community from './Components/Community/Community';
 import axios from 'axios';
 
 function App() {
@@ -88,6 +90,8 @@ function App() {
                         <Route path="/message" element={<Chat />} />
                         <Route path="/settings" element={<Setting />} />
                         <Route path="/view-profile/:userId" element={<ViewProfile />} />
+                        <Route path="/community" element={<Community />} />
+                        <Route path="/moderator" element={<ModeratorDashboard />}  />
                     </Route>
                 </Routes>
             </BrowserRouter>
