@@ -6,6 +6,10 @@ import ResearchTab from "./ResearchTab";
 import StatsTab from "./StatsTab";
 import Footer from '../../Home/Footer';
 import "./style.css";
+import GoldBadge from "../../../Badges/Gold.png"; // Adjust path based on your structure
+import SilverBadge from "../../../Badges/Silver.png"; // Adjust path based on your structure
+import BronzeBadge from "../../../Badges/Bronze.png"; // Adjust path based on your structure
+
 
 const ViewProfile = () => {
     const { userId } = useParams();
@@ -25,12 +29,44 @@ const ViewProfile = () => {
     const [points, setPoints] = useState(0);
     const [citations, setCitations] = useState(0);
     const [hIndex, setHIndex] = useState(0);
+    const [badge, setBadge] = useState("");
+    const [userBadge, setUserBadge] = useState(null);
+
+    useEffect(() => {
+        const fetchBadge = async () => {
+            try {
+                const response = await axios.post(`http://localhost:3001/get-user-badge`, { userId }, {
+                    withCredentials: true,
+
+                });
+
+                setBadge(response.data.badge);
+                if (badge === "GoldBadge") {
+                    // console.log(badge);
+                    setUserBadge(GoldBadge);
+                }
+                else if (badge === "SilverBadge") {
+                    // console.log(badge);
+                    setUserBadge(SilverBadge);
+                }
+                else {
+                    setUserBadge(BronzeBadge);
+                }
+
+            } catch (error) {
+                console.error("Error fetching badge:", error);
+            }
+        };
+
+        fetchBadge();
+    }, [userId, badge]);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
                 const response = await axios.post(`http://localhost:3001/get-user-stats`, { userId }, {
                     withCredentials: true,
+
                 });
                 setPoints(response.data.points);
                 setCitations(response.data.citationCount);
@@ -159,6 +195,8 @@ const ViewProfile = () => {
 
                 const name = currentUserName.full_name;
 
+
+
                 await axios.post('http://localhost:3001/store-notification', {
                     id: Date.now(),
                     senderId: currentUser.user_id,
@@ -223,15 +261,23 @@ const ViewProfile = () => {
                                 </div>
                             </div>
                             <div className="text-end mt-2">
-                                <div>
-                                    <p className="mb-0 text-muted small">Citations ----- <span>{citations}</span></p>
+
+                                <div className="d-flex">
+                                    <div className="ms-2">
+                                        <div>
+                                            <p className="mb-0 text-muted small">Citations ----- <span>{citations}</span></p>
+                                        </div>
+                                        <div>
+                                            <p className="mb-0 text-muted small">h-index ----- <span>{hIndex}</span></p>
+                                        </div>
+                                        <div>
+                                            <p className="mb-0 text-muted small">Points ----- <span>{points}</span></p>
+                                        </div>
+                                    </div>
+                                    <img className="ms-4" src={userBadge} alt="Badge" width="50" height="50"/>
                                 </div>
-                                <div>
-                                    <p className="mb-0 text-muted small">h-index ----- <span>{hIndex}</span></p>
-                                </div>
-                                <div>
-                                    <p className="mb-0 text-muted small">Points ----- <span>{points}</span></p>
-                                </div>
+                                
+
 
 
                                 <div className="d-flex mt-3 mb-5">
