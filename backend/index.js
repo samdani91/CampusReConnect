@@ -244,6 +244,80 @@ app.put('/update-user-details', authenticateToken, (req, res) => {
     });
 });
 
+app.post('/update-user-stats', authenticateToken, async (req, res) => {
+    const { userId, hIndex, citationCount } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+    }
+
+    try {
+        const query = `
+            UPDATE spl2.user 
+            SET h_index = ?, citation_count = ? 
+            WHERE user_id = ?
+        `;
+
+        const values = [hIndex, citationCount, userId];
+
+        db.query(query, values, (err, result) => {
+            if (err) {
+                console.error("Error updating user stats:", err);
+                return res.status(500).json({ error: "Internal server error" });
+            }
+
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ error: "User not found" });
+            }
+
+            // Call calculatePoints after updating stats
+            calculatePoints(userId, (calcErr, points) => {
+                if (calcErr) {
+                    console.error("Error calculating points:", calcErr);
+                    return res.status(500).json({ error: "Error updating points" });
+                }
+
+                res.status(200).json({ message: "Statistics and points updated successfully", points });
+            });
+        });
+
+    } catch (error) {
+        console.error("Error updating user stats:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+
+
+app.post('/get-user-stats', authenticateToken, (req, res) => {
+    const { userId } = req.body; // Extract userId from request body
+
+    if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const query = 'SELECT h_index, citation_count, points FROM spl2.user WHERE user_id = ?';
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching stats: ', err);
+            return res.status(500).json({ error: 'Error fetching stats' });
+        }
+
+        if (results.length > 0) {
+            const userStats = results[0];
+            res.json({
+                hIndex: userStats.h_index,
+                citationCount: userStats.citation_count,
+                points: userStats.points,
+            });
+        } else {
+            res.status(404).json({ error: 'User not found' });
+        }
+    });
+});
+
+
 app.put('/change-password', authenticateToken, (req, res) => {
     const user_id = req.user_id;
     const { passwords } = req.body;
@@ -977,6 +1051,61 @@ app.delete('/delete-community/:communityId', authenticateToken, async (req, res)
     } catch (error) {
         console.error('Error deleting community:', error);
         res.status(500).json({ message: 'Failed to delete community' });
+    }
+});
+
+app.get('/community/:communityId', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+
+    try {
+        const [rows] = await db.promise().execute(
+            'SELECT * FROM community WHERE community_id = ?',
+            [communityId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Community not found' });
+        }
+
+        const community = rows[0];
+        res.json(community);
+    } catch (error) {
+        console.error('Error fetching community details:', error);
+        res.status(500).json({ message: 'Failed to fetch community details' });
+    }
+});
+
+app.get('/community/:communityId/member', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+
+    try {
+        const [rows] = await db.promise().execute(`
+            SELECT 
+                u.user_id, 
+                u.full_name, 
+                u.department, 
+                u.is_student, 
+                c.moderator_id 
+            FROM 
+                user_community uc
+            JOIN 
+                user u ON uc.user_id = u.user_id
+            JOIN 
+                community c ON uc.community_id = c.community_id
+            WHERE 
+                uc.community_id = ?
+        `, [communityId]);
+
+        const members = rows.map(member => ({
+            ...member,
+            designation: member.is_student ? 'Student' : 'Faculty',
+            role: member.user_id === member.moderator_id ? 'Moderator' : 'Member'
+        }));
+
+        res.json({ members });
+    } catch (error) {
+        console.error('Error fetching community members:', error);
+        res.status(500).json({ message: 'Failed to fetch community members' });
     }
 });
 

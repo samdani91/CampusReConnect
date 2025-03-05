@@ -22,6 +22,28 @@ const ViewProfile = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [currentUserName, setCurrentUserName] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
+    const [points, setPoints] = useState(0);
+    const [citations, setCitations] = useState(0);
+    const [hIndex, setHIndex] = useState(0);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await axios.post(`http://localhost:3001/get-user-stats`, {userId}, {
+                    withCredentials: true,
+                    
+                });
+                setPoints(response.data.points);
+                setCitations(response.data.citationCount);
+                setHIndex(response.data.hIndex);
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+            }
+        };
+
+        fetchStats();
+    }, [userId]);
+
 
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
@@ -167,7 +189,7 @@ const ViewProfile = () => {
             case "Research":
                 return <ResearchTab isOwnProfile={isOwnProfile} userId={userId} />;
             case "Stats":
-                return <StatsTab userId={userId} />;
+                return <StatsTab isOwnProfile={isOwnProfile} userId={userId} />;
             default:
                 return <ProfileTab isOwnProfile={isOwnProfile} userId={userId} />;
         }
@@ -203,12 +225,16 @@ const ViewProfile = () => {
                                 </div>
                             </div>
                             <div className="text-end mt-2">
-                                <div>
-                                    <p className="mb-0 text-muted small">Research Interest Score ----- <span>0</span></p>
-                                </div>
-                                <div>
-                                    <p className="mb-0 text-muted small">Citations ----- <span>0</span></p>
-                                </div>
+                            <div>
+                                <p className="mb-0 text-muted small">Citations ----- <span>{citations}</span></p>
+                            </div>
+                            <div>
+                                <p className="mb-0 text-muted small">h-index ----- <span>{hIndex}</span></p>
+                            </div>
+                            <div>
+                                <p className="mb-0 text-muted small">Points ----- <span>{points}</span></p>
+                            </div>
+
 
                                 <div className="d-flex mt-3 mb-5">
                                     <div className="me-4" style={{ cursor: 'pointer' }} onClick={handleFollowersClick}>
