@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams,useNavigate } from "react-router-dom";
+import { useParams,useNavigate,useLocation } from "react-router-dom";
 import axios from "axios";
 import ProfileTab from "./ProfileTab";
 import ResearchTab from "./ResearchTab";
@@ -9,6 +9,7 @@ import "./style.css";
 
 const ViewProfile = () => {
     const { userId } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("Profile");
     const [userData, setUserData] = useState({ full_name: "Loading...", degree: "Loading..." });
@@ -21,6 +22,15 @@ const ViewProfile = () => {
     const [currentUser, setCurrentUser] = useState(null);
     const [currentUserName, setCurrentUserName] = useState(null);
     const [isFollowing, setIsFollowing] = useState(false);
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const tab = queryParams.get("tab");
+
+        if (tab) {
+            setActiveTab(tab); // Set the active tab based on the query parameter
+        }
+    }, [location]);
 
     useEffect(() => {
         if (currentUser && userId) {
