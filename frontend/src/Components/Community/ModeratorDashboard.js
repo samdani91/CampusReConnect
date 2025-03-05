@@ -10,6 +10,19 @@ function ModeratorDashboard() {
     const [requests, setRequests] = useState([]);
     const [posts, setPosts] = useState([]);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            try {
+                const response = await axios.get('http://localhost:3001/get-userId', { withCredentials: true });
+                setCurrentUserId(response.data.user_id);
+            } catch (error) {
+                console.error('Error fetching user ID:', error);
+            }
+        };
+        fetchUserId();
+    }, []);
 
     useEffect(() => {
         axios.get('http://localhost:3001/moderator/communities', { withCredentials: true })
@@ -59,7 +72,7 @@ function ModeratorDashboard() {
                     setRequests([]);
                 });
         }
-    }, [selectedCommunity,members]);
+    }, [selectedCommunity, members]);
 
     const handleCommunityChange = (e) => {
         setSelectedCommunity(e.target.value);
@@ -111,7 +124,7 @@ function ModeratorDashboard() {
         try {
             const userId = memberId;
             const communityId = selectedCommunity;
-            await axios.post('http://localhost:3001/remove-member', { userId,communityId }, { withCredentials: true });
+            await axios.post('http://localhost:3001/remove-member', { userId, communityId }, { withCredentials: true });
             setMembers(members.filter(member => member.user_id !== memberId));
 
             const community = communities.find(community => community.community_id == selectedCommunity);
@@ -248,9 +261,11 @@ function ModeratorDashboard() {
                                             </td>
                                             <td>{member.email}</td>
                                             <td>
-                                                <Button variant="danger" onClick={() => handleRemoveMember(member.user_id)}>
-                                                    Remove
-                                                </Button>
+                                                {currentUserId !== member.user_id  && (
+                                                    <Button variant="danger" onClick={() => handleRemoveMember(member.user_id)}>
+                                                        Remove
+                                                    </Button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
