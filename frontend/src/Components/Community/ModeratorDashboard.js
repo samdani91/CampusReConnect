@@ -26,22 +26,22 @@ function ModeratorDashboard() {
             .catch((error) => {
                 console.error("Error fetching communities:", error);
             });
-    }, [communities]);
+    }, []);
 
     useEffect(() => {
         if (selectedCommunity) {
-            axios.get(`http://localhost:3001/community/${selectedCommunity}/posts`, { withCredentials: true })
-                .then((res) => {
-                    if (res.data) {
-                        setPosts(res.data);
-                    } else {
-                        setPosts([]);
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error fetching posts:", error);
-                    setPosts([]);
-                });
+            // axios.get(`http://localhost:3001/community/${selectedCommunity}/posts`, { withCredentials: true })
+            //     .then((res) => {
+            //         if (res.data) {
+            //             setPosts(res.data);
+            //         } else {
+            //             setPosts([]);
+            //         }
+            //     })
+            //     .catch((error) => {
+            //         console.error("Error fetching posts:", error);
+            //         setPosts([]);
+            //     });
 
             axios.get(`http://localhost:3001/community/${selectedCommunity}/members`, { withCredentials: true })
                 .then((res) => {
@@ -59,7 +59,7 @@ function ModeratorDashboard() {
                     setRequests([]);
                 });
         }
-    }, [selectedCommunity]);
+    }, [selectedCommunity,members]);
 
     const handleCommunityChange = (e) => {
         setSelectedCommunity(e.target.value);
@@ -70,6 +70,18 @@ function ModeratorDashboard() {
             await axios.post('http://localhost:3001/approve-request', { userId: memberId, communityId: selectedCommunity }, { withCredentials: true });
             setMembers([...members, requests.find(request => request.user_id === memberId)]);
             setRequests(requests.filter(request => request.user_id !== memberId));
+
+            const community = communities.find(community => community.community_id == selectedCommunity);
+
+            await axios.post('http://localhost:3001/store-notification', {
+                id: Date.now(),
+                senderId: community.moderator_id,
+                receiverId: memberId,
+                content: ` Your join request of <b>${community.community_name}</b> community was approved.`,  // Insert the evaluated action
+            }, {
+                withCredentials: true
+            });
+
         } catch (error) {
             console.error('Error approving member:', error);
         }
@@ -79,6 +91,17 @@ function ModeratorDashboard() {
         try {
             await axios.delete('http://localhost:3001/reject-request', { data: { userId: memberId, communityId: selectedCommunity }, withCredentials: true });
             setRequests(requests.filter(request => request.user_id !== memberId));
+
+            const community = communities.find(community => community.community_id == selectedCommunity);
+
+            await axios.post('http://localhost:3001/store-notification', {
+                id: Date.now(),
+                senderId: community.moderator_id,
+                receiverId: memberId,
+                content: ` Your join request of <b>${community.community_name}</b> community was rejected.`,  // Insert the evaluated action
+            }, {
+                withCredentials: true
+            });
         } catch (error) {
             console.error('Error rejecting member:', error);
         }
@@ -86,8 +109,21 @@ function ModeratorDashboard() {
 
     const handleRemoveMember = async (memberId) => {
         try {
-            await axios.delete('http://localhost:3001/remove-member', { data: { userId: memberId, communityId: selectedCommunity }, withCredentials: true });
+            const userId = memberId;
+            const communityId = selectedCommunity;
+            await axios.post('http://localhost:3001/remove-member', { userId,communityId }, { withCredentials: true });
             setMembers(members.filter(member => member.user_id !== memberId));
+
+            const community = communities.find(community => community.community_id == selectedCommunity);
+
+            await axios.post('http://localhost:3001/store-notification', {
+                id: Date.now(),
+                senderId: community.moderator_id,
+                receiverId: memberId,
+                content: ` You were removed from <b>${community.community_name}</b> community.`,  // Insert the evaluated action
+            }, {
+                withCredentials: true
+            });
         } catch (error) {
             console.error('Error removing member:', error);
         }
