@@ -17,6 +17,7 @@ const { createPost, editPost, deletePost, makeComment, getComment } = require(".
 const searchUser = require("./Search/searchUser")
 const { generateSummary} = require("./geminiApi");
 const { calculatePoints } = require("./Gamification/calculatePoints");
+const { defineBadge } = require("./Gamification/defineBadge");
 const {createCommunity, leaveCommunity} = require("./Community");
 const db = require('./db');
 const { Server } = require('socket.io');
@@ -314,6 +315,24 @@ app.post('/get-user-stats', authenticateToken, (req, res) => {
         } else {
             res.status(404).json({ error: 'User not found' });
         }
+    });
+});
+
+app.post('/get-user-badge', authenticateToken, (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Call defineBadge to get the user's badge
+    defineBadge(userId, (err, badge) => {
+        if (err) {
+            console.error("Error fetching badge:", err);
+            return res.status(500).json({ error: err.message || "Internal server error" });
+        }
+
+        res.json({ badge });
     });
 });
 
