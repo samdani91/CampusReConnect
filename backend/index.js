@@ -808,11 +808,26 @@ app.post("/leave-community", authenticateToken, (req, res) => {
     });
 });
 
+app.post("/remove-member", authenticateToken, (req, res) => {
+    const { userId,communityId } = req.body;
+
+
+    leaveCommunity(userId, communityId, (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: "Internal server error" });
+        }
+        if (!result.success) {
+            return res.status(409).json({ message: result.message });
+        }
+        return res.status(200).json({ message: result.message });
+    });
+});
+
 app.get('/moderator/communities', authenticateToken, (req, res) => {
     const userId = req.user_id;
 
     const query = `
-        SELECT community_id, community_name, community_description 
+        SELECT * 
         FROM community
         WHERE moderator_id = ?
     `;
