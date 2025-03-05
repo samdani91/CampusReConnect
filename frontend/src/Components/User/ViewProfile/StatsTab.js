@@ -40,7 +40,8 @@ const StatsTab = ({ isOwnProfile, userId }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const numericValue = Math.max(0, parseInt(value, 10) || 0);
+    setFormData({ ...formData, [name]: numericValue });
   };
 
   const handleSave = async () => {
@@ -83,6 +84,7 @@ const StatsTab = ({ isOwnProfile, userId }) => {
               name="hIndex"
               value={formData.hIndex}
               onChange={handleInputChange}
+              min="0"
             />
           </div>
           <div className="mb-3">
@@ -93,6 +95,7 @@ const StatsTab = ({ isOwnProfile, userId }) => {
               name="citationCount"
               value={formData.citationCount}
               onChange={handleInputChange}
+              min="0"
             />
           </div>
           <div className="d-flex justify-content-end">
