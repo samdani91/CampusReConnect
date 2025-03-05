@@ -44,7 +44,7 @@ const Notification = () => {
                     <ul className="list-group">
                         {userNotifications.map((notification) => (
                             <li key={notification.notification_id} className="list-group-item">
-                                {notification.notification_content}
+                                <div dangerouslySetInnerHTML={{ __html: notification.notification_content }} />
                             </li>
                         ))}
                     </ul>

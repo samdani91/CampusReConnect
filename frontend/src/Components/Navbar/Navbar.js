@@ -91,6 +91,12 @@ export default function Navbar({ setUser, setShowNavbar }) {
         }
     };
 
+    const handleAddNewClick = () => {
+        if (currentUser) {
+            navigate(`/view-profile/${currentUser.user_id}?tab=Research`);
+        }
+    };
+
     return (
         <>
             <nav className="navbar navbar-expand-md navbar-light bg-light">
@@ -229,7 +235,7 @@ export default function Navbar({ setUser, setShowNavbar }) {
                             </div>
 
 
-                            <button className="btn btn-primary">Add New</button>
+                            <button className="btn btn-primary" onClick={handleAddNewClick}>Add New</button>
                         </div>
                     </div>
                 </div>

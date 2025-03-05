@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import ProfileTab from "./ProfileTab";
 import ResearchTab from "./ResearchTab";
@@ -13,6 +13,7 @@ import BronzeBadge from "../../../Badges/Bronze.png"; // Adjust path based on yo
 
 const ViewProfile = () => {
     const { userId } = useParams();
+    const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("Profile");
     const [userData, setUserData] = useState({ full_name: "Loading...", degree: "Loading..." });
@@ -78,6 +79,15 @@ const ViewProfile = () => {
         fetchStats();
     }, [userId]);
 
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const tab = queryParams.get("tab");
+
+        if (tab) {
+            setActiveTab(tab); // Set the active tab based on the query parameter
+        }
+    }, [location]);
 
     useEffect(() => {
         if (currentUser && userId) {
@@ -186,6 +196,7 @@ const ViewProfile = () => {
                 const name = currentUserName.full_name;
 
 
+
                 await axios.post('http://localhost:3001/store-notification', {
                     id: Date.now(),
                     senderId: currentUser.user_id,
@@ -250,6 +261,7 @@ const ViewProfile = () => {
                                 </div>
                             </div>
                             <div className="text-end mt-2">
+
                                 <div className="d-flex">
                                     <div className="ms-2">
                                         <div>
@@ -265,6 +277,7 @@ const ViewProfile = () => {
                                     <img className="ms-4" src={userBadge} alt="Badge" width="50" height="50"/>
                                 </div>
                                 
+
 
 
                                 <div className="d-flex mt-3 mb-5">
@@ -362,7 +375,11 @@ const ViewProfile = () => {
                                     >
                                         {followings.full_name}
                                     </span>
-                                    <button className="btn btn-danger " onClick={() => handleRemoveFollowing(followings.user_id)}>Remove</button>
+                                    {currentUser.user_id === userId && (
+                                        <button className="btn btn-danger" onClick={() => handleRemoveFollowing(followings.user_id)}>
+                                            Remove
+                                        </button>
+                                    )}
                                 </li>
 
                             ))}

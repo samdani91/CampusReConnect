@@ -5,7 +5,7 @@ import AddComment from './AddComment';
 import axios from 'axios';
 import "./Post.css"
 
-const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  postType, date, initialUpvotes, initialDownvotes, postUserId, onDeletePost }) => {
+const Post = ({ postId, postOwnerId, title, topic, description, authors, pdfUrl, pdfPath, postType, date, initialUpvotes, initialDownvotes, postUserId, onDeletePost }) => {
     const [voteStatus, setVoteStatus] = useState(null);
     const [upVotes, setUpVotes] = useState(initialUpvotes || 0);
     const [downVotes, setDownVotes] = useState(initialDownvotes || 0);
@@ -20,12 +20,17 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
     const [generatingSummary, setGeneratingSummary] = useState(false);
     const [summaryType, setSummaryType] = useState('post');
     const [showNoPdfModal, setShowNoPdfModal] = useState(false);
+    const [currentUserName, setCurrentUserName] = useState(null);
 
     useEffect(() => {
         const fetchUserId = async () => {
             try {
                 const response = await axios.get('http://localhost:3001/get-userId', { withCredentials: true });
                 setCurrentUserId(response.data.user_id);
+                const response2 = await axios.get("http://localhost:3001/get-profile", {
+                    withCredentials: true,
+                });
+                setCurrentUserName(response2.data);
             } catch (error) {
                 console.error('Error fetching user ID:', error);
             }
@@ -56,7 +61,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
         }
     };
 
-    const handleVote = (type) => {
+    const handleVote = async (type) => {
         let newUpVotes = upVotes;
         let newDownVotes = downVotes;
         let newVoteStatus = null;
@@ -88,6 +93,24 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
         localStorage.setItem(`voteStatus-${postId}`, newVoteStatus);
 
         updateVoteCount(postId, newUpVotes, newDownVotes);
+
+        const name = currentUserName.full_name;
+        const voteAction = type === 'up' ? 'upvoted' : 'downvoted';  // Evaluate the vote action
+
+        if (currentUserId !== postOwnerId) {
+            try {
+                await axios.post('http://localhost:3001/store-notification', {
+                    id: Date.now(),
+                    senderId: currentUserId,
+                    receiverId: postOwnerId,
+                    content: `${name} ${voteAction} your post <b>${title}</b>.`,  // Insert the evaluated action
+                }, {
+                    withCredentials: true
+                });
+            } catch (error) {
+                console.error('Error sending vote notification:', error);
+            }
+        }
     };
 
     const updateVoteCount = async (postId, upvotes, downvotes) => {
@@ -119,6 +142,21 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
                         },
                     }
                 );
+
+                const name = currentUserName.full_name;
+
+                if (currentUserId !== postOwnerId) {
+                    await axios.post('http://localhost:3001/store-notification', {
+                        id: Date.now(),
+                        senderId: currentUserId,
+                        receiverId: postOwnerId,
+                        content: `${name} Commented on your post <b>${title}</b>.`, // Wrap title in ** **
+                    }, {
+                        withCredentials: true
+                    });
+                }
+
+
                 setComments([...comments, response.data]);
                 setNewComment('');
             } catch (error) {
@@ -127,7 +165,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
         }
     };
 
-    const handleReply = async (commentId, replyText) => {
+    const handleReply = async (commentId, replyText, commentContent) => {
         if (replyText.trim() !== '') {
             try {
                 const response = await axios.post(
@@ -159,6 +197,20 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
 
                     return addReplyToComment(prevComments);
                 });
+
+                const parentComment = comments.find(comment => comment.comment_id === commentId);
+                const name = currentUserName.full_name;
+
+                if (parentComment && parentComment.user_id !== currentUserId) {
+                    await axios.post('http://localhost:3001/store-notification', {
+                        id: Date.now(),
+                        senderId: currentUserId,
+                        receiverId: parentComment.user_id,
+                        content: `${name} replied to your comment <b>${commentContent}</b> on post <b>${title}</b>.`,
+                    }, {
+                        withCredentials: true
+                    });
+                }
 
             } catch (error) {
                 console.error('Error adding reply:', error);
@@ -304,7 +356,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
                             <i className="bi bi-three-dots-vertical"></i>
                         </button>
 
-                        <ul className="dropdown-menu" aria-labelledby={`postDropdownMenuButton-${postId}`} style={{backgroundColor:"#deeaee"}}>
+                        <ul className="dropdown-menu" aria-labelledby={`postDropdownMenuButton-${postId}`} style={{ backgroundColor: "#deeaee" }}>
                             <li>
                                 <button className="dropdown-item" onClick={handlePostSummary}>
                                     📄 Post Summary
@@ -380,7 +432,7 @@ const Post = ({ postId, title, topic, description, authors, pdfUrl, pdfPath,  po
                     {showComments && (
                         <div>
                             {comments.map((comment) => (
-                                <Comment key={comment.comment_id} comment={comment} onReply={handleReply} onDelete={handleDeleteComment} currentUserId={currentUserId} />
+                                <Comment key={comment.comment_id} comment={comment} onReply={handleReply} onDelete={handleDeleteComment} currentUserId={currentUserId} currentUserName={currentUserName} postTitle={title} />
                             ))}
                             <AddComment
                                 onAdd={handleAddComment}

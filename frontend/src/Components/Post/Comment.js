@@ -1,9 +1,9 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import VoteButton from './VoteButton';
 import AddComment from './AddComment';
 import axios from 'axios';
 
-const Comment = ({ comment, onReply, onDelete, currentUserId }) => {
+const Comment = ({ comment, onReply, onDelete, currentUserId,currentUserName,postTitle }) => {
     const [replyText, setReplyText] = useState('');
     const [showReplyInput, setShowReplyInput] = useState(false);
     const [voteStatus, setVoteStatus] = useState(null);
@@ -57,6 +57,24 @@ const Comment = ({ comment, onReply, onDelete, currentUserId }) => {
                 { upvotes: newUpvotes, downvotes: newDownvotes },
                 { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
             );
+
+            const name = currentUserName.full_name;
+            const voteAction = type === 'up' ? 'upvoted' : 'downvoted';  // Evaluate the vote action
+
+            if (currentUserId !== comment.user_id) {
+                try {
+                    await axios.post('http://localhost:3001/store-notification', {
+                        id: Date.now(),
+                        senderId: currentUserId,
+                        receiverId: comment.user_id,
+                        content: `${name} ${voteAction} your comment <b>${comment.comment_content}</b> on post <b>${postTitle}</b>.`,  // Insert the evaluated action
+                    }, {
+                        withCredentials: true
+                    });
+                } catch (error) {
+                    console.error('Error sending vote notification:', error);
+                }
+            }
         } catch (error) {
             console.error('Error updating comment votes:', error);
         }
@@ -69,7 +87,7 @@ const Comment = ({ comment, onReply, onDelete, currentUserId }) => {
     };
 
     const handleActualReply = () => {
-        onReply(comment.comment_id, replyText);
+        onReply(comment.comment_id, replyText, comment.comment_content);
         setReplyText('');
         setShowReplyInput(false);
     };
@@ -97,7 +115,7 @@ const Comment = ({ comment, onReply, onDelete, currentUserId }) => {
                     upvotes={upvotes}
                     downvotes={downvotes}
                     voteStatus={voteStatus}
-                     // Pass commentId to VoteButton
+                // Pass commentId to VoteButton
                 />
 
                 <div>
