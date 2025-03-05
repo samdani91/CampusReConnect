@@ -1054,6 +1054,61 @@ app.delete('/delete-community/:communityId', authenticateToken, async (req, res)
     }
 });
 
+app.get('/community/:communityId', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+
+    try {
+        const [rows] = await db.promise().execute(
+            'SELECT * FROM community WHERE community_id = ?',
+            [communityId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: 'Community not found' });
+        }
+
+        const community = rows[0];
+        res.json(community);
+    } catch (error) {
+        console.error('Error fetching community details:', error);
+        res.status(500).json({ message: 'Failed to fetch community details' });
+    }
+});
+
+app.get('/community/:communityId/member', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+
+    try {
+        const [rows] = await db.promise().execute(`
+            SELECT 
+                u.user_id, 
+                u.full_name, 
+                u.department, 
+                u.is_student, 
+                c.moderator_id 
+            FROM 
+                user_community uc
+            JOIN 
+                user u ON uc.user_id = u.user_id
+            JOIN 
+                community c ON uc.community_id = c.community_id
+            WHERE 
+                uc.community_id = ?
+        `, [communityId]);
+
+        const members = rows.map(member => ({
+            ...member,
+            designation: member.is_student ? 'Student' : 'Faculty',
+            role: member.user_id === member.moderator_id ? 'Moderator' : 'Member'
+        }));
+
+        res.json({ members });
+    } catch (error) {
+        console.error('Error fetching community members:', error);
+        res.status(500).json({ message: 'Failed to fetch community members' });
+    }
+});
+
 app.get('/', (req, res) => {
     res.send('Backend Server Running');
 });

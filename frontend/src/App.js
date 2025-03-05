@@ -18,6 +18,7 @@ import Setting from './Components/User/Settings/Setting';
 import ViewProfile from './Components/User/ViewProfile/ViewProfile';
 import Navbar from './Components/Navbar/Navbar';
 import Community from './Components/Community/Community';
+import CommunityFeed from './Components/Community/CommunityFeed';
 import axios from 'axios';
 
 function App() {
@@ -90,6 +91,7 @@ function App() {
                         <Route path="/settings" element={<Setting />} />
                         <Route path="/view-profile/:userId" element={<ViewProfile />} />
                         <Route path="/community" element={<Community />} />
+                        <Route path="/community/:communityId/feed" element={<CommunityFeed />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
