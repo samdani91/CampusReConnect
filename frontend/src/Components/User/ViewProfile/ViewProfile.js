@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams,useNavigate,useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import ProfileTab from "./ProfileTab";
 import ResearchTab from "./ResearchTab";
@@ -29,9 +29,8 @@ const ViewProfile = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await axios.post(`http://localhost:3001/get-user-stats`, {userId}, {
+                const response = await axios.post(`http://localhost:3001/get-user-stats`, { userId }, {
                     withCredentials: true,
-                    
                 });
                 setPoints(response.data.points);
                 setCitations(response.data.citationCount);
@@ -159,15 +158,14 @@ const ViewProfile = () => {
                 setIsFollowing(true);
 
                 const name = currentUserName.full_name;
-                
 
                 await axios.post('http://localhost:3001/store-notification', {
                     id: Date.now(),
                     senderId: currentUser.user_id,
                     receiverId: userId,
                     content: `${name} started following you.`
-                },{
-                    withCredentials:true
+                }, {
+                    withCredentials: true
                 });
             }
         } catch (error) {
@@ -225,15 +223,15 @@ const ViewProfile = () => {
                                 </div>
                             </div>
                             <div className="text-end mt-2">
-                            <div>
-                                <p className="mb-0 text-muted small">Citations ----- <span>{citations}</span></p>
-                            </div>
-                            <div>
-                                <p className="mb-0 text-muted small">h-index ----- <span>{hIndex}</span></p>
-                            </div>
-                            <div>
-                                <p className="mb-0 text-muted small">Points ----- <span>{points}</span></p>
-                            </div>
+                                <div>
+                                    <p className="mb-0 text-muted small">Citations ----- <span>{citations}</span></p>
+                                </div>
+                                <div>
+                                    <p className="mb-0 text-muted small">h-index ----- <span>{hIndex}</span></p>
+                                </div>
+                                <div>
+                                    <p className="mb-0 text-muted small">Points ----- <span>{points}</span></p>
+                                </div>
 
 
                                 <div className="d-flex mt-3 mb-5">
@@ -320,7 +318,7 @@ const ViewProfile = () => {
                             {following.map((followings) => (
                                 <li key={followings.user_id} className="d-flex justify-content-between align-items-center border-bottom">
                                     <span
-                                        onClick={() => { seeProfile(followings.user_id)}}
+                                        onClick={() => { seeProfile(followings.user_id) }}
                                         className="text-decoration-none p-2 rounded fs-5 " // Add padding and rounded corners
                                         style={{
                                             transition: 'background-color 0.3s',
@@ -331,9 +329,13 @@ const ViewProfile = () => {
                                     >
                                         {followings.full_name}
                                     </span>
-                                    <button className="btn btn-danger " onClick={() => handleRemoveFollowing(followings.user_id)}>Remove</button>
+                                    {currentUser.user_id === userId && (
+                                        <button className="btn btn-danger" onClick={() => handleRemoveFollowing(followings.user_id)}>
+                                            Remove
+                                        </button>
+                                    )}
                                 </li>
-                                
+
                             ))}
                         </ul>
                         <button className="btn btn-primary" onClick={handleCloseModal}>Close</button>
