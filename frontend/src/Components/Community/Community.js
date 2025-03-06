@@ -1,4 +1,3 @@
-// src/components/CommunityPage.js
 import React, { useState, useEffect } from 'react';
 import CommunityList from './CommunityList';
 import CommunityForm from './CommunityForm';
@@ -6,6 +5,7 @@ import { Container, Row, Col, Tabs, Tab } from 'react-bootstrap';
 import axios from 'axios';
 import Footer from '../Home/Footer';
 import ModeratorDashboard from './ModeratorDashboard';
+import JoinedCommunityList from './JoinedCommunityList'; // Import the new component
 
 function Community() {
     const [activeTab, setActiveTab] = useState('list');
@@ -26,11 +26,11 @@ function Community() {
             }
         };
         fetchUserRole();
-    }, []);
+    },);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}> {/* Added flex container */}
-            <Container className="mt-4" style={{ flexGrow: 1 }}> {/* Added flexGrow */}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <Container className="mt-4" style={{ flexGrow: 1 }}>
                 <div className='card w-100 p-4'>
                     <Row className="text-center mb-4">
                         <Col>
@@ -43,6 +43,9 @@ function Community() {
                             <Tabs className="mt-2" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
                                 <Tab eventKey="list" title="Communities">
                                     <CommunityList />
+                                </Tab>
+                                <Tab eventKey="joined" title="Your Communities"> {/* New Tab */}
+                                    <JoinedCommunityList />
                                 </Tab>
                                 {!isStudent && (
                                     <Tab eventKey="create" title="Create Community">
