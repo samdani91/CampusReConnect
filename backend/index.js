@@ -635,12 +635,13 @@ app.get('/notifications/:userId', authenticateToken, async (req, res) => {
 //post
 
 app.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
-    const { publicationType, topic, title, authors, description } = req.body;
+    const { publicationType, topic, title, authors, description, communityId } = req.body;
     const user_id = req.user_id;  // Get user_id from the authentication middleware
     const file = req.file ? `uploads/${req.file.filename}` : null;  // Get file path (file name)
 
+
     // Call the createPost function to insert the post into the database
-    createPost(publicationType, user_id, topic, title, authors, description, file, (err, newPost) => {
+    createPost(publicationType, user_id, topic, title, authors, description, file, communityId, (err, newPost) => {
         if (err) {
             return res.status(500).json({ message: 'Error uploading post' });
         }
@@ -652,7 +653,7 @@ app.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
 
 app.get('/posts', authenticateToken, (req, res) => {
     // Query to fetch posts from the Post table
-    const query = 'SELECT * FROM post ORDER BY post_id DESC'; // Customize the query as needed
+    const query = 'SELECT * FROM post WHERE community_id IS NULL ORDER BY created_time DESC'; // Customize the query as needed
 
     db.query(query, (err, results) => {
         if (err) {
@@ -671,6 +672,20 @@ app.get('/get-posts/:userId', authenticateToken, (req, res) => {
     const query = 'SELECT * FROM post WHERE user_id = ? ORDER BY created_time DESC';
 
     db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching posts:', err);
+            return res.status(500).json({ message: 'Error fetching posts' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+app.get('/get-community-posts/:userId/:communityId', authenticateToken, (req, res) => {
+    const { userId,communityId } = req.params;
+
+    const query = 'SELECT * FROM post WHERE user_id = ? AND community_id = ? ORDER BY created_time DESC';
+
+    db.query(query, [userId,communityId], (err, results) => {
         if (err) {
             console.error('Error fetching posts:', err);
             return res.status(500).json({ message: 'Error fetching posts' });
