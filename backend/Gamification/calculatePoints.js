@@ -22,18 +22,15 @@ const calculatePoints = (userId, callback) => {
         }
 
 
-        const hIndex = result[0].h_index || 0;
-        const citationCount = result[0].citation_count || 0;
-        const totalPostUpvotes = result[0].post_upvotes || 0;
-        const totalPostDownvotes = result[0].post_downvotes || 0;
-        const totalCommentUpvotes = result[0].comment_upvotes || 0;
-        const totalCommentDownvotes = result[0].comment_downvotes || 0;
+        const hIndex = parseInt(result[0].h_index || 0, 10);
+        const citationCount = parseInt(result[0].citation_count || 0, 10);
+        const totalPostUpvotes = parseInt(result[0].post_upvotes || 0, 10);
+        const totalPostDownvotes = parseInt(result[0].post_downvotes || 0, 10);
+        const totalCommentUpvotes = parseInt(result[0].comment_upvotes || 0, 10);
+        const totalCommentDownvotes = parseInt(result[0].comment_downvotes || 0, 10);
 
-        // Calculate points
         const points = (10 * hIndex) + (1 * citationCount) + (20 * (totalPostUpvotes + totalCommentUpvotes - totalPostDownvotes - totalCommentDownvotes));
 
-
-        // Update the points column in the database
         const updateQuery = "UPDATE spl2.user SET points = ? WHERE user_id = ?";
         db.query(updateQuery, [points, userId], (updateErr) => {
             if (updateErr) {
