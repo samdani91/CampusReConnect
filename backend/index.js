@@ -297,24 +297,35 @@ app.post('/get-user-stats', authenticateToken, (req, res) => {
         return res.status(400).json({ error: "User ID is required" });
     }
 
-    const query = 'SELECT h_index, citation_count, points FROM spl2.user WHERE user_id = ?';
-
-    db.query(query, [userId], (err, results) => {
+    // First, calculate and update the user's points
+    calculatePoints(userId, (err, updatedPoints) => {
         if (err) {
-            console.error('Error fetching stats: ', err);
-            return res.status(500).json({ error: 'Error fetching stats' });
+            console.error("Error calculating points:", err);
+            return res.status(500).json({ error: "Error calculating points" });
         }
 
-        if (results.length > 0) {
-            const userStats = results[0];
-            res.json({
-                hIndex: userStats.h_index,
-                citationCount: userStats.citation_count,
-                points: userStats.points,
-            });
-        } else {
-            res.status(404).json({ error: 'User not found' });
-        }
+        console.log(`Updated points for user ${userId}: ${updatedPoints}`);
+
+        // Now fetch the updated user stats
+        const query = 'SELECT h_index, citation_count, points FROM spl2.user WHERE user_id = ?';
+
+        db.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error('Error fetching stats:', err);
+                return res.status(500).json({ error: 'Error fetching stats' });
+            }
+
+            if (results.length > 0) {
+                const userStats = results[0];
+                res.json({
+                    hIndex: userStats.h_index,
+                    citationCount: userStats.citation_count,
+                    points: userStats.points,
+                });
+            } else {
+                res.status(404).json({ error: 'User not found' });
+            }
+        });
     });
 });
 
@@ -803,41 +814,6 @@ app.post('/generate-paper-summary', async (req, res) => {
     } catch (error) {
         console.error('Error generating paper summary:', error);
         res.status(500).json({ message: 'Failed to generate paper summary' });
-    }
-});
-
-app.post('/get-points', authenticateToken, async (req, res) => {
-    const { userId } = req.body;
-
-    if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-    }
-
-    try {
-        calculatePoints(userId, (err) => {
-            if (err) {
-                console.error("Error calculating points:", err);
-                return res.status(500).json({ error: "Error calculating points" });
-            }
-
-            const query = "SELECT points FROM spl2.user WHERE user_id = ?";
-            db.query(query, [userId], (err, result) => {
-                if (err) {
-                    console.error("Database error:", err);
-                    return res.status(500).json({ error: "Internal server error" });
-                }
-
-                if (result.length === 0) {
-                    return res.status(404).json({ error: "User not found" });
-                }
-
-                const points = result[0].points || 0;
-                return res.json({ points });
-            });
-        });
-    } catch (error) {
-        console.error("Server error:", error);
-        return res.status(500).json({ error: "Server error" });
     }
 });
 

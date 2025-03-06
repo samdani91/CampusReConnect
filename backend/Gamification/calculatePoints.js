@@ -21,28 +21,15 @@ const calculatePoints = (userId, callback) => {
             return callback(new Error("User not found"), null);
         }
 
-        console.log('Query result:', result); // Log query result to check fetched data
+        const hIndex = parseInt(result[0].h_index || 0, 10);
+        const citationCount = parseInt(result[0].citation_count || 0, 10);
+        const totalPostUpvotes = parseInt(result[0].post_upvotes || 0, 10);
+        const totalPostDownvotes = parseInt(result[0].post_downvotes || 0, 10);
+        const totalCommentUpvotes = parseInt(result[0].comment_upvotes || 0, 10);
+        const totalCommentDownvotes = parseInt(result[0].comment_downvotes || 0, 10);
 
-        const hIndex = result[0].h_index || 0;
-        const citationCount = result[0].citation_count || 0;
-        const totalPostUpvotes = result[0].post_upvotes || 0;
-        const totalPostDownvotes = result[0].post_downvotes || 0;
-        const totalCommentUpvotes = result[0].comment_upvotes || 0;
-        const totalCommentDownvotes = result[0].comment_downvotes || 0;
-
-        console.log('hIndex:', hIndex); // Log h-index value
-        console.log('citationCount:', citationCount); // Log citation count value
-        console.log('post_upvotes:', totalPostUpvotes); // Log post upvotes
-        console.log('post_downvotes:', totalPostDownvotes); // Log post downvotes
-        console.log('comment_upvotes:', totalCommentUpvotes); // Log comment upvotes
-        console.log('comment_downvotes:', totalCommentDownvotes); // Log comment downvotes
-
-        // Calculate points
         const points = (10 * hIndex) + (1 * citationCount) + (20 * (totalPostUpvotes + totalCommentUpvotes - totalPostDownvotes - totalCommentDownvotes));
 
-        console.log('Calculated points:', points); // Log calculated points
-
-        // Update the points column in the database
         const updateQuery = "UPDATE spl2.user SET points = ? WHERE user_id = ?";
         db.query(updateQuery, [points, userId], (updateErr) => {
             if (updateErr) {
