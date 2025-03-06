@@ -40,7 +40,7 @@ function Community() {
                     </Row>
                     <Row>
                         <Col>
-                            <Tabs className="mt-2" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+                            <Tabs className="mt-2 d-flex justify-content-center" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
                                 <Tab eventKey="list" title="Communities">
                                     <CommunityList />
                                 </Tab>
