@@ -272,7 +272,7 @@ function ModeratorDashboard() {
                                 </tbody>
                             </Table>
 
-                            <h5 className='mt-3'>Manage Posts</h5>
+                            {/* <h5 className='mt-3'>Manage Posts</h5>
                             <Table striped bordered hover responsive>
                                 <thead>
                                     <tr>
@@ -282,7 +282,7 @@ function ModeratorDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {/* {posts.map((post) => (
+                                    {posts.map((post) => (
                                 <tr key={post.post_id}>
                                     <td>{post.title}</td>
                                     <td>{post.content}</td>
@@ -295,9 +295,9 @@ function ModeratorDashboard() {
                                         </Button>
                                     </td>
                                 </tr>
-                            ))} */}
+                            ))}
                                 </tbody>
-                            </Table>
+                            </Table> */}
                         </div>
                     )}
 
