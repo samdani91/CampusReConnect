@@ -291,22 +291,18 @@ app.post('/update-user-stats', authenticateToken, async (req, res) => {
 
 
 app.post('/get-user-stats', authenticateToken, (req, res) => {
-    const { userId } = req.body; // Extract userId from request body
+    const { userId } = req.body;
 
     if (!userId) {
         return res.status(400).json({ error: "User ID is required" });
     }
 
-    // First, calculate and update the user's points
     calculatePoints(userId, (err, updatedPoints) => {
         if (err) {
             console.error("Error calculating points:", err);
             return res.status(500).json({ error: "Error calculating points" });
         }
 
-        console.log(`Updated points for user ${userId}: ${updatedPoints}`);
-
-        // Now fetch the updated user stats
         const query = 'SELECT h_index, citation_count, points FROM spl2.user WHERE user_id = ?';
 
         db.query(query, [userId], (err, results) => {
