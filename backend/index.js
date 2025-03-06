@@ -914,6 +914,26 @@ app.get('/get-user-communities', authenticateToken, (req, res) => {
     });
 });
 
+app.get('/get-joined-communities', authenticateToken, (req, res) => {
+    const userId = req.user_id;
+
+    const query = `
+        SELECT c.community_id, c.community_name, c.community_description, c.moderator_id
+        FROM spl2.community c
+        JOIN spl2.user_community uc ON c.community_id = uc.community_id
+        WHERE uc.user_id = ?
+    `;
+
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching joined communities:', err);
+            return res.status(500).json({ message: 'Error fetching joined communities' });
+        }
+
+        res.status(200).json(results);
+    });
+});
+
 
 app.post("/leave-community", authenticateToken, (req, res) => {
     const userId = req.user_id;
