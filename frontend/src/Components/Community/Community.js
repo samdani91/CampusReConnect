@@ -29,11 +29,10 @@ function Community() {
     }, []);
 
     return (
-        <>
-            <Container className='vh-100'>
-                <div className='card w-100 p-4 mt-4'>
-
-                    <Row className="text-center mt-2 mb-4 w-100">
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}> {/* Added flex container */}
+            <Container className="mt-4" style={{ flexGrow: 1 }}> {/* Added flexGrow */}
+                <div className='card w-100 p-4'>
+                    <Row className="text-center mb-4">
                         <Col>
                             <h1>Welcome to Community</h1>
                             <p>Join or create communities and share your thoughts.</p>
@@ -61,7 +60,7 @@ function Community() {
                 </div>
             </Container>
             <Footer />
-        </>
+        </div>
     );
 }
 

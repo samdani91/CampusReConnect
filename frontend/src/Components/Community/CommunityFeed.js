@@ -4,6 +4,7 @@ import axios from 'axios';
 import MembersTab from './MembersTab';
 import PostTab from './PostTab';
 import Footer from '../Home/Footer';
+import DiscussionTab from './DiscussionTab';
 
 function CommunityFeed() {
     const { communityId } = useParams();
@@ -45,9 +46,8 @@ function CommunityFeed() {
     };
 
     return (
-        <>
-
-            <div className="container-lg mt-4 vh-100">
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <div className="container-lg mt-4" style={{ flexGrow: 1 }}>
                 <div className="card p-4 w-100">
                     <div className="card-title">
                         <h2>{community.community_name}</h2>
@@ -85,17 +85,15 @@ function CommunityFeed() {
                         </ul>
                     </div>
 
-                    {/* Render content based on activeTab */}
                     <div className="mt-3">
-                        {activeTab === 'discussion' && <div>{/* Discussion content */}</div>}
+                        {activeTab === 'discussion' && <DiscussionTab communityId={communityId} />}
                         {activeTab === 'members' && <MembersTab moderatorId={community.moderator_id} />}
-                        {activeTab === 'yourPosts' && <PostTab userId={currentUserId} communityId={communityId}/>}
+                        {activeTab === 'yourPosts' && <PostTab userId={currentUserId} communityId={communityId} />}
                     </div>
-
                 </div>
             </div>
             <Footer />
-        </>
+        </div>
     );
 }
 
