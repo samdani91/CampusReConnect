@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import ProfileTab from "./ProfileTab";
@@ -6,9 +6,9 @@ import ResearchTab from "./ResearchTab";
 import StatsTab from "./StatsTab";
 import Footer from '../../Home/Footer';
 import "./style.css";
-import GoldBadge from "../../../Badges/Gold.png"; // Adjust path based on your structure
-import SilverBadge from "../../../Badges/Silver.png"; // Adjust path based on your structure
-import BronzeBadge from "../../../Badges/Bronze.png"; // Adjust path based on your structure
+import GoldBadge from "../../../Badges/Gold.png";
+import SilverBadge from "../../../Badges/Silver.png";
+import BronzeBadge from "../../../Badges/Bronze.png"; 
 
 
 const ViewProfile = () => {
@@ -31,6 +31,7 @@ const ViewProfile = () => {
     const [hIndex, setHIndex] = useState(0);
     const [badge, setBadge] = useState("");
     const [userBadge, setUserBadge] = useState(null);
+    const previousBadgeRef = useRef("");
 
     useEffect(() => {
         const fetchBadge = async () => {
@@ -42,11 +43,9 @@ const ViewProfile = () => {
 
                 setBadge(response.data.badge);
                 if (badge === "GoldBadge") {
-                    // console.log(badge);
                     setUserBadge(GoldBadge);
                 }
                 else if (badge === "SilverBadge") {
-                    // console.log(badge);
                     setUserBadge(SilverBadge);
                 }
                 else {
@@ -60,6 +59,24 @@ const ViewProfile = () => {
 
         fetchBadge();
     }, [userId, badge]);
+
+    useEffect(() => {
+        console.log(badge, previousBadgeRef.current);
+
+        if (badge !== previousBadgeRef.current) { 
+            if (previousBadgeRef.current) {
+                axios.post('http://localhost:3001/store-notification', {
+                    id: Date.now(),
+                    senderId: "System",
+                    receiverId: userId,
+                    content: `Congratulations! You have unlocked the <b>${badge}</b>.`,
+                }, {
+                    withCredentials: true
+                });
+            }
+            previousBadgeRef.current = badge;
+        }
+    }, []);
 
     useEffect(() => {
         const fetchStats = async () => {
