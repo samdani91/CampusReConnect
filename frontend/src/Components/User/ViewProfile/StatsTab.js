@@ -44,6 +44,14 @@ const StatsTab = ({ isOwnProfile, userId }) => {
   };
 
   const handleSave = async () => {
+    const maxHIndex = Math.floor(Math.sqrt(formData.citationCount));
+
+    // Validate h-index
+    if (formData.hIndex > maxHIndex) {
+      setError(`Invalid h-index! Maximum allowed h-index for ${formData.citationCount} citations is ${maxHIndex}. Please enter a valid value.`);
+      return;
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:3001/update-user-stats",
@@ -56,9 +64,8 @@ const StatsTab = ({ isOwnProfile, userId }) => {
         setTimeout(() => setShowPopup(false), 3000);
         setOriginalData(formData);
         setIsEditing(false);
-
-        // Fetch updated stats after successful update
         fetchStats();
+        setError(null); // Clear previous errors
       }
     } catch (error) {
       setError(error.response?.data?.error || "Error updating stats");
@@ -68,6 +75,7 @@ const StatsTab = ({ isOwnProfile, userId }) => {
   const handleCancel = () => {
     setFormData(originalData);
     setIsEditing(false);
+    setError(null); // Clear any previous errors
   };
 
   return (
@@ -95,6 +103,10 @@ const StatsTab = ({ isOwnProfile, userId }) => {
               onChange={handleInputChange}
             />
           </div>
+
+          {/* Show error message if validation fails */}
+          {error && <div className="alert alert-danger">{error}</div>}
+
           <div className="d-flex justify-content-end">
             <button className="btn btn-danger me-2" onClick={handleCancel}>
               Cancel
