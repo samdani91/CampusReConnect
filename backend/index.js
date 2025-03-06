@@ -400,6 +400,51 @@ app.get('/user-list', authenticateToken, async (req, res) => {
     }
 });
 
+app.get('/active-user-list', authenticateToken, async (req, res) => {
+    try {
+        const query = `
+            SELECT * FROM user WHERE status = 'active';
+        `;
+
+        db.query(query, (err, results) => {
+            if (err) {
+                console.error('Error fetching active users:', err);
+                return res.status(500).json({ message: 'Error fetching active users' });
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({ message: 'No active users found' });
+            }
+
+            res.status(200).json(results);
+        });
+    } catch (error) {
+        console.error('Error fetching active users:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.get('/is-following/:userId', authenticateToken, (req, res) => {
+    const currentUserId = req.user_id;
+    const userIdToCheck = req.params.userId;
+
+    const query = `
+        SELECT EXISTS (
+            SELECT 1
+            FROM spl2.follow
+            WHERE followee_id = ? AND follower_id = ?
+        ) AS isFollowing;
+    `;
+
+    db.query(query, [userIdToCheck, currentUserId], (err, result) => {
+        if (err) {
+            console.error('Error checking follow status:', err);
+            return res.status(500).json({ message: 'Error checking follow status' });
+        }
+        res.json({ isFollowing: result[0].isFollowing });
+    });
+});
+
 app.get('/get-headerData/:userId', authenticateToken, (req, res) => {
     const user_id = req.params;
 

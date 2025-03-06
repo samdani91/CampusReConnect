@@ -20,6 +20,7 @@ import Navbar from './Components/Navbar/Navbar';
 import Community from './Components/Community/Community';
 import CommunityFeed from './Components/Community/CommunityFeed';
 import axios from 'axios';
+import AllResearchers from './Components/Home/AllResearchers';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -92,6 +93,7 @@ function App() {
                         <Route path="/view-profile/:userId" element={<ViewProfile />} />
                         <Route path="/community" element={<Community />} />
                         <Route path="/community/:communityId/feed" element={<CommunityFeed />} />
+                        <Route path="/all-researchers" element={<AllResearchers />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
