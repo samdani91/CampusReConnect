@@ -652,10 +652,24 @@ app.post('/upload', authenticateToken, upload.single('file'), (req, res) => {
 });
 
 app.get('/posts', authenticateToken, (req, res) => {
-    // Query to fetch posts from the Post table
-    const query = 'SELECT * FROM post WHERE community_id IS NULL ORDER BY created_time DESC'; // Customize the query as needed
+    const query = 'SELECT * FROM post WHERE community_id IS NULL ORDER BY created_time DESC';
 
     db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching posts:', err);
+            return res.status(500).json({ message: 'Error fetching posts' });
+        }
+
+        res.status(200).json(results);
+    });
+});
+
+app.get('/community-posts/:communityId', authenticateToken, (req, res) => {
+    const { communityId } = req.params;
+
+    const query = 'SELECT * FROM post WHERE community_id = ? ORDER BY created_time DESC'; // Customize the query as needed
+
+    db.query(query, [communityId],(err, results) => {
         if (err) {
             console.error('Error fetching posts:', err);
             return res.status(500).json({ message: 'Error fetching posts' });
