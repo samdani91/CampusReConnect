@@ -2,7 +2,7 @@ const db = require('../db');  // Ensure db connection is correctly imported
 const { v4: uuidv4 } = require('uuid');
 
 // Function to create a post in the database
-const createPost = (publicationType, user_id, topic, title, authors, description, file, callback) => {
+const createPost = (publicationType, user_id, topic, title, authors, description, file, communityId, callback) => {
     const post_id = uuidv4();
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');
@@ -31,7 +31,7 @@ const createPost = (publicationType, user_id, topic, title, authors, description
         1,   // Assuming visibility is always 1 (visible)
         0,   // Assuming upvotes start from 0
         0,   // Assuming downvotes start from 0
-        'default_community',  // Replace with actual community_id if needed
+        communityId,  // Replace with actual community_id if needed
         date,
         time,
     ];

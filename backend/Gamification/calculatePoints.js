@@ -21,6 +21,7 @@ const calculatePoints = (userId, callback) => {
             return callback(new Error("User not found"), null);
         }
 
+
         const hIndex = parseInt(result[0].h_index || 0, 10);
         const citationCount = parseInt(result[0].citation_count || 0, 10);
         const totalPostUpvotes = parseInt(result[0].post_upvotes || 0, 10);

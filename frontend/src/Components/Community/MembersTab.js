@@ -59,7 +59,7 @@ function MembersTab({ moderatorId }) {
                     </tbody>
                 </Table>
             ) : (
-                <p>No members found.</p>
+                <p className='text-center'>No members found.</p>
             )}
         </div>
     );

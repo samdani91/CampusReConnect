@@ -9,16 +9,13 @@ const defineBadge = (userId, callback) => {
             return callback(err, null);
         }
 
-        console.log(result);
-
         if (result.length === 0) {
             return callback(new Error("User not found"), null);
         }
 
-        // Ensure points is an integer, handle NULL case
-        const points = parseInt(result[0].points, 10) || 0;
-        console.log(`User ${userId} has ${points} points.`); // Debug log
 
+        const points = parseInt(result[0].points, 10) || 0;
+       
         let badge = "No Badge";
         if (points >= 1000) badge = "GoldBadge";
         else if (points >= 500) badge = "SilverBadge";
