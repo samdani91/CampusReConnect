@@ -13,7 +13,6 @@ function MembersTab({ moderatorId }) {
             try {
                 const response = await axios.get(`http://localhost:3001/community/${communityId}/member`, { withCredentials: true });
                 setMembers(response.data.members);
-                console.log(response.data.members)
             } catch (error) {
                 console.error('Error fetching members:', error);
                 setMembers([]);
