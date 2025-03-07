@@ -9,6 +9,8 @@ function CommunityList() {
     const [userCommunities, setUserCommunities] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [showJoinModal, setShowJoinModal] = useState(false);
+    const [showLeaveModal, setShowLeaveModal] = useState(false); 
+    const [selectedCommunity, setSelectedCommunity] = useState(null); 
     const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
@@ -26,7 +28,7 @@ function CommunityList() {
     useEffect(() => {
         fetchCommunities();
         fetchUserCommunities();
-        fetchPendingRequests(); // Fetch pending request IDs
+        fetchPendingRequests();
     }, [communities]);
 
     const fetchCommunities = async () => {
@@ -59,7 +61,7 @@ function CommunityList() {
     const handleRequestJoin = async (communityId) => {
         try {
             await axios.post('http://localhost:3001/request-join', { communityId }, { withCredentials: true });
-            setPendingRequests([...pendingRequests, communityId]); // Add to pending list
+            setPendingRequests([...pendingRequests, communityId]);
         } catch (error) {
             console.error('Error requesting join:', error);
         }
@@ -68,28 +70,35 @@ function CommunityList() {
     const handleCancelRequest = async (communityId) => {
         try {
             await axios.delete('http://localhost:3001/cancel-request', { data: { communityId }, withCredentials: true });
-            setPendingRequests(pendingRequests.filter(id => id !== communityId)); // Remove from pending list
+            setPendingRequests(pendingRequests.filter(id => id !== communityId));
         } catch (error) {
             console.error('Error cancelling request:', error);
         }
     };
 
-    const handleLeaveCommunity = async (communityId) => {
+    const handleLeaveCommunity = async () => {
+        if (!selectedCommunity) return;
+
         try {
-            await axios.post('http://localhost:3001/leave-community', { communityId }, { withCredentials: true });
-            setUserCommunities(userCommunities.filter(id => id !== communityId));
+            await axios.post('http://localhost:3001/leave-community', { communityId: selectedCommunity.community_id }, { withCredentials: true });
+            setUserCommunities(userCommunities.filter(id => id !== selectedCommunity.community_id));
+            setShowLeaveModal(false); 
         } catch (error) {
             console.error('Error leaving community:', error);
         }
-    }
+    };
+
     const handleCommunityClick = (community) => {
         if (userCommunities.includes(community.community_id)) {
-            navigate(`/community/${community.community_id}/feed`)
+            navigate(`/community/${community.community_id}/feed`);
         } else {
-            // User is not a member, show the modal
-            // setSelectedCommunity(community);
-            setShowJoinModal(true)
+            setShowJoinModal(true);
         }
+    };
+
+    const openLeaveModal = (community) => {
+        setSelectedCommunity(community);
+        setShowLeaveModal(true); 
     };
 
     return (
@@ -118,7 +127,7 @@ function CommunityList() {
                                             Joined
                                         </Button>
                                     ) : (
-                                        <Button variant="danger" style={{ width: '120px' }} onClick={() => handleLeaveCommunity(community.community_id)}>
+                                        <Button variant="danger" style={{ width: '120px' }} onClick={() => openLeaveModal(community)}>
                                             Leave
                                         </Button>
                                     )
@@ -155,8 +164,25 @@ function CommunityList() {
                 </div>
             )}
 
-
-
+            {showLeaveModal && (
+                <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Are you sure you want to leave this community?</h5>
+                            </div>
+                            <div className="modal-footer">
+                                <Button variant="secondary" onClick={() => setShowLeaveModal(false)}>
+                                    Cancel
+                                </Button>
+                                <Button variant="danger" onClick={handleLeaveCommunity}>
+                                    Leave
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
