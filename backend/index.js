@@ -1030,6 +1030,30 @@ app.get('/community/:communityId/members', authenticateToken, async (req, res) =
     }
 });
 
+app.get('/community/:communityId/posts', authenticateToken, async (req, res) => {
+    const { communityId } = req.params;
+
+    try {
+        const query = `
+            SELECT *
+            FROM post
+            WHERE community_id = ?;
+        `;
+
+        db.query(query, [communityId], (err, results) => {
+            if (err) {
+                console.error('Error fetching posts:', err);
+                return res.status(500).json({ message: 'Error fetching posts' });
+            }
+
+            res.status(200).json(results);
+        });
+    } catch (error) {
+        console.error('Error fetching posts:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 app.post('/request-join', authenticateToken, async (req, res) => {
     const { communityId } = req.body;
     const userId = req.user_id;
