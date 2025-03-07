@@ -1218,6 +1218,18 @@ app.get('/community/:communityId/member', authenticateToken, async (req, res) =>
     }
 });
 
+app.get('/community/:communityId/check-membership/:userId', authenticateToken, async (req, res) => {
+    const { communityId, userId } = req.params;
+    try {
+        const [membership] = await db.promise().execute('SELECT * FROM user_community WHERE community_id = ? AND user_id = ?', [communityId, userId]);
+        const isMember = membership.length > 0;
+        res.json({ isMember });
+    } catch (error) {
+        console.error('Error checking membership:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.get('/', (req, res) => {
     res.send('Backend Server Running');
 });

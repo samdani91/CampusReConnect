@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MembersTab from './MembersTab';
 import PostTab from './PostTab';
@@ -11,6 +11,22 @@ function CommunityFeed() {
     const [community, setCommunity] = useState(null);
     const [activeTab, setActiveTab] = useState('discussion'); // Default to 'discussion' tab
     const [currentUserId, setCurrentUserId] = useState(null);
+    const navigate = useNavigate();
+    const [members, setMembers] = useState([]);
+
+    useEffect(() => {
+        const fetchMembers = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3001/community/${communityId}/member`, { withCredentials: true });
+                setMembers(response.data.members);
+            } catch (error) {
+                console.error('Error fetching members:', error);
+                setMembers([]);
+            }
+        };
+
+        fetchMembers();
+    }, [members]);
 
     useEffect(() => {
         const fetchUserId = async () => {
@@ -36,6 +52,15 @@ function CommunityFeed() {
 
         fetchCommunityDetails();
     }, [communityId]);
+
+    useEffect(() => {
+        if (currentUserId && members.length > 0) {
+            const isMember = members.some(member => member.user_id === currentUserId);
+            if (!isMember) {
+                navigate("/community");
+            }
+        }
+    }, [currentUserId, members, navigate]);
 
     if (!community) {
         return <div>Loading...</div>;
