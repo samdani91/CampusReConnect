@@ -58,11 +58,14 @@ function JoinedCommunityList() {
         if (userCommunities.includes(community.community_id)) {
             navigate(`/community/${community.community_id}/feed`)
         } else {
-            // User is not a member, show the modal
             // setSelectedCommunity(community);
             setShowJoinModal(true)
         }
     };
+
+    if (communities.length === 0) {
+        return <p className="mt-4 text-center">Please join a community first.</p>;
+    }
 
     return (
         <>
