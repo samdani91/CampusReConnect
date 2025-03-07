@@ -23,7 +23,7 @@ function Chat() {
 	  }, [selfUserId]);
 
 
-	// Fetch messages
+
 	useEffect(() => {
 		if (selectedUser) {
 			axios
@@ -33,7 +33,7 @@ function Chat() {
 		}
 	}, [selectedUser]);
 
-	// Real-time listener for receiving updated messages
+
 	useEffect(() => {
 		if (!socket) {
 			const socket = io("ws://localhost:4000", { withCredentials: true });
@@ -94,7 +94,7 @@ function Chat() {
 							<>
 								<div className="card h-100 w-100">
 									<div
-										className="card-header d-flex align-items-center p-2 bg-primary text-white"
+										className="card-header d-flex align-items-center p-2  text-white"
 										style={{ borderBottom: "1px solid #dee2e6", height: "70px" }}
 									>
 										<div
@@ -109,7 +109,7 @@ function Chat() {
 											{selectedUser.name.charAt(0).toUpperCase()}
 										</div>
 										<div>
-											<h5 className="mb-0">{selectedUser.name}</h5> {/* Full username */}
+											<h5 className="mb-0">{selectedUser.name}</h5>
 											<small className="text-white">
 												{selectedUser.department}
 											</small>

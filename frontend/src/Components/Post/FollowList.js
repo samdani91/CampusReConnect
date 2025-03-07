@@ -108,51 +108,49 @@ const FollowList = () => {
   });
 
   return (
-    <div className="container">
-      <div className="card shadow-sm border-0">
-        <div className="card-header p-4 text-white" style={{backgroundColor:"#051129"}}>
-          <h5 className="mb-0">Who to follow</h5>
-        </div>
-        <ul className="list-group list-group-flush">
-          {sortedUsers && Array.isArray(sortedUsers) && sortedUsers.slice(0, 5).map((user) => (
-            currentUser && user.user_id !== currentUser.user_id && (
-              <li key={user.user_id} className="list-group-item  p-3 d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                  <div
-                    className="rounded-circle d-flex justify-content-center align-items-center me-2"
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      backgroundColor: 'gray',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '18px',
-                    }}
-                  >
-                    {getInitials(user.full_name)}
-                  </div>
-                  <div>
-                    <Link to={`/view-profile/${user.user_id}`} className="text-dark fw-bold">
-                      {user.full_name}
-                    </Link>
-                    <p className="text-muted small mb-0">{user.department}</p>
-                  </div>
-                </div>
-                <button
-                  className={`btn ${followStatus[user.user_id] ? 'btn-success' : 'btn-primary'} w-25`}
-                  onClick={() => handleFollowClick(user.user_id)}
+    <div className="card shadow-sm border-0">
+      <div className="card-header p-4 text-white" style={{ backgroundColor: "#051129" }}>
+        <h5 className="mb-0 fs-4 fs-md-5">Who to follow</h5>
+      </div>
+      <ul className="list-group list-group-flush">
+        {sortedUsers && Array.isArray(sortedUsers) && sortedUsers.slice(0, 5).map((user) => (
+          currentUser && user.user_id !== currentUser.user_id && (
+            <li key={user.user_id} className="list-group-item p-3 d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center">
+                <div
+                  className="rounded-circle d-flex justify-content-center align-items-center me-2"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: 'gray',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '18px',
+                  }}
                 >
-                  {followStatus[user.user_id] ? 'Following' : 'Follow'}
-                </button>
-              </li>
-            )
-          ))}
-        </ul>
-        <div className="card-footer text-center">
-          <button onClick={handleViewAllResearchers} className="btn btn-link">
-            View all researchers
-          </button>
-        </div>
+                  {getInitials(user.full_name)}
+                </div>
+                <div>
+                  <Link to={`/view-profile/${user.user_id}`} className="text-dark fw-bold fs-6 fs-sm-5">
+                    {user.full_name}
+                  </Link>
+                  <p className="text-muted small mb-0 fs-7">{user.department}</p>
+                </div>
+              </div>
+              <button
+                className={`btn ${followStatus[user.user_id] ? 'btn-success' : 'btn-primary'} w-25`}
+                onClick={() => handleFollowClick(user.user_id)}
+              >
+                {followStatus[user.user_id] ? 'Following' : 'Follow'}
+              </button>
+            </li>
+          )
+        ))}
+      </ul>
+      <div className="card-footer text-center">
+        <button onClick={handleViewAllResearchers} className="btn btn-link fs-6 fs-md-5">
+          View all researchers
+        </button>
       </div>
     </div>
   );

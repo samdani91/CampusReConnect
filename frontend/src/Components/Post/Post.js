@@ -341,7 +341,7 @@ const Post = ({ postId, postOwnerId, title, topic, description, authors, pdfUrl,
     };
 
     return (
-        <div className="card mb-2">
+        <div className="card mb-3">
             <div className="card-body text-start">
                 <div className="d-flex justify-content-between mb-3">
                     <h2 className="card-title mb-0">{title}</h2>
@@ -416,7 +416,7 @@ const Post = ({ postId, postOwnerId, title, topic, description, authors, pdfUrl,
 
                 <div className="d-flex justify-content-between align-items-center">
                     <VoteButton onVote={handleVote} upvotes={upVotes} downvotes={downVotes} voteStatus={voteStatus} />
-                    <button className="btn btn-primary" onClick={handleDownloadPdf}> {/* Use a button */}
+                    <button className="btn btn-primary w-25" onClick={handleDownloadPdf}> 
                         Download PDF
                     </button>
                 </div>
@@ -424,7 +424,7 @@ const Post = ({ postId, postOwnerId, title, topic, description, authors, pdfUrl,
                 <div className="mt-4">
                     <div className="d-flex justify-content-between align-items-center">
                         <h3>Comments</h3>
-                        <button className="btn btn-sm btn-outline-secondary" onClick={toggleComments}>
+                        <button className="btn   btn-outline-secondary mb-2" onClick={toggleComments}>
                             {showComments ? 'Hide Comments' : 'Show Comments'}
                         </button>
                     </div>

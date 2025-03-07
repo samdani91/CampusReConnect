@@ -56,7 +56,6 @@ export default function Feed() {
             <div className="d-flex flex-column w-50 right-side">
                 <div className="flex-grow-1">
                     <FollowList />
-                    {/* <Footer /> */}
                 </div>
             </div>
         </div>
