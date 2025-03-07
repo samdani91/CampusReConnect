@@ -99,7 +99,7 @@ const FollowList = () => {
         <ul className="list-group list-group-flush">
           {users && Array.isArray(users) && users.slice(0, 5).map((user) => (
             currentUser && user.user_id !== currentUser.user_id && (
-              <li key={user.user_id} className="list-group-item  p-4 d-flex justify-content-between align-items-center">
+              <li key={user.user_id} className="list-group-item  p-3 d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
                   {/* Display first letter(s) as the avatar */}
                   <div
