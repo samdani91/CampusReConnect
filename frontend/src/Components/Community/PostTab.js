@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddPost from "./AddPost";
-import Post from '../Post/Post'; // Import Post component
+import Post from '../Post/Post';
 import axios from 'axios';
 
-const PostTab = ({ userId,communityId }) => {
+const PostTab = ({ userId, communityId }) => {
     const [selectedItem, setSelectedItem] = useState("Posts");
     const [showAddPublication, setShowAddPublication] = useState(false);
     const [posts, setPosts] = useState([]);
@@ -23,7 +23,7 @@ const PostTab = ({ userId,communityId }) => {
             }
         };
         fetchPosts();
-    }, [userId]);
+    }, [userId, communityId]);
 
     const handlePostAdded = (newPost) => {
         if (editingPost) {
@@ -68,14 +68,14 @@ const PostTab = ({ userId,communityId }) => {
                                 title={post.title}
                                 topic={post.topic}
                                 description={post.description}
-                                authors={JSON.parse(post.authors)}
+                                authors={parseAuthors(post.authors)}
                                 pdfUrl={`http://localhost:3001/${post.attachment}`}
                                 pdfPath={post.attachment}
                                 postType={post.post_type}
                                 date={post.created_date}
                                 initialUpvotes={post.upvotes}
                                 initialDownvotes={post.downvotes}
-                                postUserId={post.user_id} // Pass the post's user ID
+                                postUserId={post.user_id} 
                             />
                             <button
                                 className="btn btn-sm btn-primary my-3 fs-6"
@@ -90,6 +90,15 @@ const PostTab = ({ userId,communityId }) => {
         }
 
         return null;
+    };
+
+    const parseAuthors = (authors) => {
+        try {
+            return authors ? JSON.parse(authors) : [];
+        } catch (error) {
+            console.error("Error parsing authors:", error);
+            return [];
+        }
     };
 
     return (
