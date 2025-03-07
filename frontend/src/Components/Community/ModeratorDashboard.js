@@ -10,6 +10,11 @@ function ModeratorDashboard() {
     const [requests, setRequests] = useState([]);
     const [posts, setPosts] = useState([]);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+    const [showRemoveMemberConfirmation, setShowRemoveMemberConfirmation] = useState(false);
+    const [showRemovePostConfirmation, setShowRemovePostConfirmation] = useState(false);
+    const [memberIdToRemove, setMemberIdToRemove] = useState(null);
+    const [postIdToRemove, setPostIdToRemove] = useState(null);
+
     const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
@@ -43,18 +48,18 @@ function ModeratorDashboard() {
 
     useEffect(() => {
         if (selectedCommunity) {
-            // axios.get(`http://localhost:3001/community/${selectedCommunity}/posts`, { withCredentials: true })
-            //     .then((res) => {
-            //         if (res.data) {
-            //             setPosts(res.data);
-            //         } else {
-            //             setPosts([]);
-            //         }
-            //     })
-            //     .catch((error) => {
-            //         console.error("Error fetching posts:", error);
-            //         setPosts([]);
-            //     });
+            axios.get(`http://localhost:3001/community/${selectedCommunity}/posts`, { withCredentials: true })
+                .then((res) => {
+                    if (res.data) {
+                        setPosts(res.data);
+                    } else {
+                        setPosts([]);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching posts:", error);
+                    setPosts([]);
+                });
 
             axios.get(`http://localhost:3001/community/${selectedCommunity}/members`, { withCredentials: true })
                 .then((res) => {
@@ -121,36 +126,67 @@ function ModeratorDashboard() {
     };
 
     const handleRemoveMember = async (memberId) => {
+        setMemberIdToRemove(memberId);
+        setShowRemoveMemberConfirmation(true);
+    };
+
+    const handleRemovePost = async (postId) => {
+        setPostIdToRemove(postId);
+        setShowRemovePostConfirmation(true);
+    };
+
+    const handleConfirmRemoveMember = async () => {
         try {
-            const userId = memberId;
+            const userId = memberIdToRemove;
             const communityId = selectedCommunity;
             await axios.post('http://localhost:3001/remove-member', { userId, communityId }, { withCredentials: true });
-            setMembers(members.filter(member => member.user_id !== memberId));
+            setMembers(members.filter(member => member.user_id !== memberIdToRemove));
 
             const community = communities.find(community => community.community_id == selectedCommunity);
 
             await axios.post('http://localhost:3001/store-notification', {
                 id: Date.now(),
                 senderId: community.moderator_id,
-                receiverId: memberId,
-                content: ` You were removed from <b>${community.community_name}</b> community.`,  // Insert the evaluated action
+                receiverId: memberIdToRemove,
+                content: ` You were removed from <b>${community.community_name}</b> community.`,
             }, {
                 withCredentials: true
             });
+
+            setMemberIdToRemove(null);
+            setShowRemoveMemberConfirmation(false);
         } catch (error) {
             console.error('Error removing member:', error);
+            setMemberIdToRemove(null);
+            setShowRemoveMemberConfirmation(false);
         }
     };
 
-    const handleApprovePost = async (postId) => {
-        // Implement approve post logic
-        console.log(`Approving post ${postId}`);
+    const handleConfirmRemovePost = async () => {
+        try {
+            await axios.delete(`http://localhost:3001/delete-post/${postIdToRemove}`, { withCredentials: true });
+            setPosts(prevPosts => prevPosts.filter(post => post.post_id !== postIdToRemove));
+            setPostIdToRemove(null);
+            setShowRemovePostConfirmation(false);
+        } catch (error) {
+            console.error('Error removing post:', error);
+            setPostIdToRemove(null);
+            setShowRemovePostConfirmation(false);
+        }
     };
 
-    const handleRejectPost = async (postId) => {
-        // Implement reject post logic
-        console.log(`Rejecting post ${postId}`);
+    const handleCancelRemoveMember = () => {
+        setMemberIdToRemove(null);
+        setShowRemoveMemberConfirmation(false);
     };
+
+    const handleCancelRemovePost = () => {
+        setPostIdToRemove(null);
+        setShowRemovePostConfirmation(false);
+    };
+
+
+
 
     const handleDeleteCommunity = async (selectedCommunity) => {
         try {
@@ -261,7 +297,7 @@ function ModeratorDashboard() {
                                             </td>
                                             <td>{member.email}</td>
                                             <td>
-                                                {currentUserId !== member.user_id  && (
+                                                {currentUserId !== member.user_id && (
                                                     <Button variant="danger" onClick={() => handleRemoveMember(member.user_id)}>
                                                         Remove
                                                     </Button>
@@ -272,7 +308,7 @@ function ModeratorDashboard() {
                                 </tbody>
                             </Table>
 
-                            {/* <h5 className='mt-3'>Manage Posts</h5>
+                            <h5 className='mt-3'>Manage Posts</h5>
                             <Table striped bordered hover responsive>
                                 <thead>
                                     <tr>
@@ -283,21 +319,56 @@ function ModeratorDashboard() {
                                 </thead>
                                 <tbody>
                                     {posts.map((post) => (
-                                <tr key={post.post_id}>
-                                    <td>{post.title}</td>
-                                    <td>{post.content}</td>
-                                    <td>
-                                        <Button variant="success" onClick={() => handleApprovePost(post.post_id)}>
-                                            Approve
-                                        </Button>{' '}
-                                        <Button variant="danger" onClick={() => handleRejectPost(post.post_id)}>
-                                            Reject
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
+                                        <tr key={post.post_id}>
+                                            <td>{post.title}</td>
+                                            <td>{post.description}</td>
+                                            <td>
+                                                <Button variant="danger" onClick={() => handleRemovePost(post.post_id)}>
+                                                    Remove
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
-                            </Table> */}
+                            </Table>
+                        </div>
+                    )}
+
+                    {showRemoveMemberConfirmation && (
+                        <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1">
+                            <div className="modal-dialog">
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h5 className="modal-title">Confirm Remove Member</h5>
+                                    </div>
+                                    <div className="modal-body">
+                                        <p>Are you sure you want to remove this member?</p>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" onClick={handleCancelRemoveMember}>No</button>
+                                        <button type="button" className="btn btn-danger" onClick={handleConfirmRemoveMember}>Yes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {showRemovePostConfirmation && (
+                        <div className="modal d-flex align-items-center justify-content-center" tabIndex="-1">
+                            <div className="modal-dialog">
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h5 className="modal-title">Confirm Remove Post</h5>
+                                    </div>
+                                    <div className="modal-body">
+                                        <p>Are you sure you want to remove this post?</p>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" onClick={handleCancelRemovePost}>No</button>
+                                        <button type="button" className="btn btn-danger" onClick={handleConfirmRemovePost}>Yes</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
