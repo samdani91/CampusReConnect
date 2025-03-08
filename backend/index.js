@@ -8,17 +8,17 @@ const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const { Login, SignUp, LogOut, ChangePassword } = require("./Authentication")
 const { ForgotPassword, verificationCodes, sendOtp } = require('./Authentication/sendCode');
-const { getProfileTab, updateProfileTab, getProfileHeader } = require("./User/Dashboard")
+const { getProfileTab, updateProfileTab, getProfileHeader, updateStats } = require("./User/Dashboard")
 const { getProfileSettings, updateProfileSettings, changePasswordSettings, deleteAccountSettings } = require("./User/Settings");
 const { followUser, unfollowUser, isFollowingUser, getFollowersCount, getFollowingCount, getFollowers, getFollowing } = require("./User/Follow");
 const { viewMessages, sendMessages, viewUserList, getUserStatus } = require("./Message")
 const { storeNotifications, getNotifications } = require("./Notification")
-const { createPost, editPost, deletePost, makeComment, getComment } = require("./Post");
+const { createPost, editPost, deletePost, makeComment, getComment,updatePostVote,updateCommentVote } = require("./Post");
 const searchUser = require("./Search/searchUser")
 const { generateSummary} = require("./geminiApi");
 const { calculatePoints } = require("./Gamification/calculatePoints");
 const { defineBadge } = require("./Gamification/defineBadge");
-const {createCommunity, leaveCommunity} = require("./Community");
+const {createCommunity, deleteCommunity, leaveCommunity, approveMember} = require("./Community");
 const db = require('./db');
 const { Server } = require('socket.io');
 
@@ -248,46 +248,13 @@ app.put('/update-user-details', authenticateToken, (req, res) => {
 app.post('/update-user-stats', authenticateToken, async (req, res) => {
     const { userId, hIndex, citationCount } = req.body;
 
-    if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-    }
-
-    try {
-        const query = `
-            UPDATE spl2.user 
-            SET h_index = ?, citation_count = ? 
-            WHERE user_id = ?
-        `;
-
-        const values = [hIndex, citationCount, userId];
-
-        db.query(query, values, (err, result) => {
-            if (err) {
-                console.error("Error updating user stats:", err);
-                return res.status(500).json({ error: "Internal server error" });
-            }
-
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ error: "User not found" });
-            }
-
-            // Call calculatePoints after updating stats
-            calculatePoints(userId, (calcErr, points) => {
-                if (calcErr) {
-                    console.error("Error calculating points:", calcErr);
-                    return res.status(500).json({ error: "Error updating points" });
-                }
-
-                res.status(200).json({ message: "Statistics and points updated successfully", points });
-            });
-        });
-
-    } catch (error) {
-        console.error("Error updating user stats:", error);
-        res.status(500).json({ error: "Internal server error" });
-    }
+    updateStats(userId, hIndex, citationCount, (err, result) => {
+        if (err) {
+            return res.status(err.status).json({ error: err.error });
+        }
+        res.status(200).json(result);
+    });
 });
-
 
 
 app.post('/get-user-stats', authenticateToken, (req, res) => {
@@ -781,10 +748,8 @@ app.put('/update-votes/:postId', authenticateToken, (req, res) => {
     const { postId } = req.params;
     const { upvotes, downvotes } = req.body;
 
-    const query = 'UPDATE post SET upvotes = ?, downvotes = ? WHERE post_id = ?';
-    db.query(query, [upvotes, downvotes, postId], (err, result) => {
+    updatePostVote(postId, upvotes, downvotes, (err, result) => {
         if (err) {
-            console.error('Error updating votes:', err);
             return res.status(500).json({ message: 'Error updating votes' });
         }
         res.status(200).json({ message: 'Votes updated successfully' });
@@ -863,13 +828,11 @@ app.put('/update-comment-votes/:commentId', authenticateToken, (req, res) => {
     const { commentId } = req.params;
     const { upvotes, downvotes } = req.body;
 
-    const query = 'UPDATE comment SET upvotes = ?, downvotes = ? WHERE comment_id = ?';
-    db.query(query, [upvotes, downvotes, commentId], (err, result) => {
+    updateCommentVote(commentId, upvotes, downvotes, (err, result) => {
         if (err) {
-            console.error('Error updating comment votes:', err);
-            return res.status(500).json({ message: 'Error updating comment votes' });
+            return res.status(500).json({ message: 'Error updating votes' });
         }
-        res.status(200).json({ message: 'Comment votes updated successfully' });
+        res.status(200).json({ message: 'Votes updated successfully' });
     });
 });
 
@@ -1102,17 +1065,9 @@ app.delete('/cancel-request', authenticateToken, async (req, res) => {
 app.post('/approve-request', authenticateToken, async (req, res) => {
     const { userId, communityId } = req.body;
     try {
-        await db.execute(
-            'INSERT INTO spl2.user_community (user_id, community_id) VALUES (?, ?)',
-            [userId, communityId]
-        );
-        await db.execute(
-            'DELETE FROM spl2.community_join_requests WHERE user_id = ? AND community_id = ?',
-            [userId, communityId]
-        );
-        res.json({ message: 'Request approved' });
+        const result = await approveMember(userId, communityId);
+        res.json(result); 
     } catch (error) {
-        console.error('Error approving request:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
@@ -1154,27 +1109,11 @@ app.delete('/delete-community/:communityId', authenticateToken, async (req, res)
     const { communityId } = req.params;
     const moderatorId = req.user_id; // Assuming you have middleware to set req.user_id
 
-    try {
-        // Check if the logged-in user is the moderator of the community
-        const [community] = await db.promise().execute(
-            'SELECT * FROM spl2.community WHERE community_id = ? AND moderator_id = ?',
-            [communityId, moderatorId]
-        );
-
-        if (community.length === 0) {
-            return res.status(403).json({ message: 'You are not authorized to delete this community' });
-        }
-
-        // Delete the community
-        await db.promise().execute(
-            'DELETE FROM spl2.community WHERE community_id = ?',
-            [communityId]
-        );
-
-        res.json({ message: 'Community deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting community:', error);
-        res.status(500).json({ message: 'Failed to delete community' });
+    const result = await deleteCommunity(communityId, moderatorId);
+    if (result.status) {
+        return res.status(result.status).json({ message: result.message });
+    } else {
+        return res.json({ message: result.message });
     }
 });
 
