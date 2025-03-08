@@ -1,8 +1,9 @@
 const db = require('../db');
+const bcrypt = require('bcrypt');
 const { isEmailExist, isStudentEmail, isFacultyEmail } = require('./checkExist');
 
 function ChangePassword(email, newPassword, res) {
-    isEmailExist(email, (err, exists) => {
+    isEmailExist(email, async(err, exists) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ message: 'Database error' });
@@ -11,8 +12,10 @@ function ChangePassword(email, newPassword, res) {
             return res.status(400).json({ message: 'User does not exist!' });
         }
 
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
         const query = "UPDATE user SET passwords = ? WHERE email = ?";
-        const values = [newPassword, email];
+        const values = [hashedPassword, email];
 
         db.query(query, values, (err, result) => {
             if (err) {

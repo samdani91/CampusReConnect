@@ -1,9 +1,10 @@
 const db = require("../../db");
+const bcrypt = require('bcrypt');
 
 const deleteAccountSettings = (user_id, password, callback) => {
     const sqlGetPassword = `SELECT passwords FROM user WHERE user_id = ?`;
 
-    db.query(sqlGetPassword, [user_id], (err, results) => {
+    db.query(sqlGetPassword, [user_id], async(err, results) => {
         if (err) {
             return callback(err, null);
         }
@@ -12,9 +13,11 @@ const deleteAccountSettings = (user_id, password, callback) => {
             return callback(null, { userNotFound: true });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const storedPassword = results[0].passwords;
 
-        if (password !== storedPassword) {
+        if (hashedPassword !== storedPassword) {
             return callback(null, { incorrectPassword: true });
         }
 
