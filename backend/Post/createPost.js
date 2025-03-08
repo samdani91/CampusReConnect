@@ -14,8 +14,8 @@ const createPost = (publicationType, user_id, topic, title, authors, description
     const time = now.toISOString().slice(0, 19).replace('T', ' '); //for datetime
 
     const query = `
-    INSERT INTO post (post_id, user_id, topic, post_type, title, authors, description, attachment, summary, visibility, upvotes, downvotes, community_id, created_date,created_time)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+    INSERT INTO post (post_id, user_id, topic, post_type, title, authors, description, attachment, upvotes, downvotes, community_id, created_date,created_time)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
     const values = [
@@ -27,8 +27,6 @@ const createPost = (publicationType, user_id, topic, title, authors, description
         authors,
         description,
         file,  // Save file path
-        '',  // Empty summary (if not provided)
-        1,   // Assuming visibility is always 1 (visible)
         0,   // Assuming upvotes start from 0
         0,   // Assuming downvotes start from 0
         communityId,  // Replace with actual community_id if needed
