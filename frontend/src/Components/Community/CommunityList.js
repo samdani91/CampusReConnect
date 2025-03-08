@@ -101,6 +101,10 @@ function CommunityList() {
         setShowLeaveModal(true); 
     };
 
+    if (communities.length === 0) {
+        return <p className="mt-4 text-center">No communities available!</p>;
+    }
+
     return (
         <>
             <Table striped bordered hover className='mt-2'>

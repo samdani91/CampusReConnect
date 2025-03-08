@@ -31,7 +31,7 @@ function Community() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
-            <Container className="mt-4" style={{ flexGrow: 1 }}>
+            <Container className="mt-4 vh-100" style={{ flexGrow: 1 }}>
                 <Row className="text-center mb-4">
                     <Col>
                         <Card className="text-center p-4 shadow-sm w-100 text-white" style={{ backgroundColor: "#051129" }}>
