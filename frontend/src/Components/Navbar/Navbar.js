@@ -2,16 +2,17 @@ import React, { useContext, useEffect, useState } from "react";
 import "./Navbar.css";
 import { useNavigate, Link, NavLink, useLocation } from "react-router-dom";
 import axios from "axios";
-import { NotificationContext } from "../Context/NotificationContext";
+
 
 export default function Navbar({ setUser, setShowNavbar }) {
-    const { hasUnseenNotifications, markNotificationsAsSeen } = useContext(NotificationContext);
     const navigate = useNavigate();
     const location = useLocation();
     const [activeLink, setActiveLink] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [unseenCount, setUnseenCount] = useState(0);
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
@@ -30,6 +31,25 @@ export default function Navbar({ setUser, setShowNavbar }) {
 
 
     useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3001/notifications/${currentUser?.user_id}`,{withCredentials:true});
+
+                setNotifications(response.data);
+                const unseenNotifications = response.data.filter(notification => !notification.seen);
+                setUnseenCount(unseenNotifications.length);
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        };
+
+        if (currentUser) {
+            fetchNotifications();
+        }
+    }, [currentUser,notifications]);
+
+
+    useEffect(() => {
         setActiveLink(location.pathname);
     }, [location]);
 
@@ -37,36 +57,44 @@ export default function Navbar({ setUser, setShowNavbar }) {
         const query = e.target.value;
         setSearchQuery(query);
 
-        if (query.length > 2) { // To make sure we search after 3 characters
+        if (query.length > 2) {
             searchUsers(query);
         } else {
-            setSearchResults([]); // Clear results when the query is less than 3 characters
+            setSearchResults([]); 
         }
     };
 
-    // Function to fetch users by name
+
     const searchUsers = async (query) => {
         try {
             const response = await axios.get(`http://localhost:3001/search-users`, {
                 params: { name: query },
                 withCredentials: true,
             });
-            setSearchResults(response.data);  // Set search results to state
+            setSearchResults(response.data); 
         } catch (error) {
             console.error('Error fetching users:', error);
-            setSearchResults([]);  // Clear search results on error
+            setSearchResults([]); 
         }
     };
 
     const handleUserClick = (userId) => {
-        // Navigate to the ViewProfile page for the selected user
         navigate(`/view-profile/${userId}`);
     };
 
 
 
-    const handleNotificationClick = () => {
-        markNotificationsAsSeen();
+    const handleNotificationClick = async() => {
+        try {
+            await axios.post(
+                "http://localhost:3001/mark-notifications-as-seen",
+                { user_id: currentUser?.user_id },
+                { withCredentials: true }
+            );
+            setUnseenCount(0);
+        } catch (error) {
+            console.error("Error marking notifications as seen:", error);
+        }
     };
 
     const handleSettings = () => {
@@ -195,7 +223,7 @@ export default function Navbar({ setUser, setShowNavbar }) {
                                 onClick={handleNotificationClick}
                             >
                                 <i className="bx bx-bell"></i>
-                                {hasUnseenNotifications && <span className="notification-badge">!</span>}
+                                {unseenCount > 0 && <span className="notification-badge">!</span>}
                             </NavLink>
 
                             <NavLink

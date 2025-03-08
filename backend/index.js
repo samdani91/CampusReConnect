@@ -683,6 +683,21 @@ app.get('/notifications/:userId', authenticateToken, async (req, res) => {
     }
 });
 
+// Mark notifications as seen
+app.post('/mark-notifications-as-seen', async (req, res) => {
+    const { user_id } = req.body;
+    try {
+        await db.query(
+            "UPDATE spl2.notification SET seen = TRUE WHERE receiver_id = ?",
+            [user_id]
+        );
+        res.status(200).send({ success: true });
+    } catch (err) {
+        console.error("Error marking notifications as seen:", err);
+        res.status(500).send({ error: "Internal server error" });
+    }
+});
+
 
 //post
 
