@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import AddPublication from "./AddPublication";
-import Post from '../../Post/Post'; // Import Post component
+import Post from '../../Post/Post';
 import axios from 'axios';
 
 const ResearchTab = ({ isOwnProfile, userId }) => {
@@ -87,10 +87,6 @@ const ResearchTab = ({ isOwnProfile, userId }) => {
             case "Research":
                 postsToRender = researches;
                 break;
-            case "Questions":
-                return <p>No questions added yet. Use this section to manage your questions.</p>;
-            case "Answers":
-                return <p>No answers added yet. Use this section to manage your answers.</p>;
             default:
                 return <p>No content available.</p>;
         }
@@ -133,7 +129,6 @@ const ResearchTab = ({ isOwnProfile, userId }) => {
 
     return (
         <div className="d-flex">
-            {/* ... (rest of your ResearchTab code) ... */}
             <div className="border-end p-3" style={{ width: "250px" }}>
                 <h6>Research Items</h6>
                 <ul className="list-unstyled mb-4">
@@ -152,40 +147,12 @@ const ResearchTab = ({ isOwnProfile, userId }) => {
                         </li>
                     ))}
                 </ul>
-                <h6>Questions</h6>
-                <ul className="list-unstyled mb-4">
-                    <li
-                        className={`p-2 ms-3 ${selectedItem === "Questions" ? "bg-primary text-white" : "text-dark"}`}
-                        style={{ cursor: "pointer", borderRadius: "5px" }}
-                        onClick={() => {
-                            setSelectedItem("Questions");
-                            setShowAddPublication(false);
-                            setEditingPost(null);
-                        }}
-                    >
-                        Questions
-                    </li>
-                </ul>
-                <h6>Answers</h6>
-                <ul className="list-unstyled">
-                    <li
-                        className={`p-2 ms-3 ${selectedItem === "Answers" ? "bg-primary text-white" : "text-dark"}`}
-                        style={{ cursor: "pointer", borderRadius: "5px" }}
-                        onClick={() => {
-                            setSelectedItem("Answers");
-                            setShowAddPublication(false);
-                            setEditingPost(null);
-                        }}
-                    >
-                        Answers
-                    </li>
-                </ul>
             </div>
 
             <div
                 className="p-4 flex-grow-1"
                 style={{
-                    maxHeight: '600px', // Adjust the height as needed
+                    maxHeight: '600px',
                     overflowY: 'auto',
                 }}
             >
@@ -194,8 +161,6 @@ const ResearchTab = ({ isOwnProfile, userId }) => {
                         {renderContent()}
                     </div>
                     {!showAddPublication &&
-                        selectedItem !== 'Questions' &&
-                        selectedItem !== 'Answers' &&
                         isOwnProfile && (
                             <button
                                 className="btn btn-primary mt-3"
