@@ -10,7 +10,6 @@ export default function Signup() {
     const [role, setRole] = useState();
     const [password, setPassword] = useState();
     const [password2, setPassword2] = useState();
-    const [error, setError] = useState();
     const [message, setMessage] = useState('');
     const [code, setOtp] = useState('');
     const [step, setStep] = useState(1);
@@ -19,9 +18,9 @@ export default function Signup() {
     const handleRegister = (e) => {
         e.preventDefault();
         if (password !== password2) {
-            setError("Passwords do not match");
+            setMessage("Passwords do not match!");
         } else {
-            setError("");
+            setMessage("");
 
             axios.post('http://localhost:3001/send-otp', { email })
                 .then(() => {
