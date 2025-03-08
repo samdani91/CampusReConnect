@@ -25,7 +25,7 @@ const Notification = () => {
         if (currentUser) {
             const fetchNotifications = async () => {
                 try {
-                    const response = await axios.get(`http://localhost:3001/notifications/${currentUser.user_id}`,{withCredentials:true});
+                    const response = await axios.get(`http://localhost:3001/notifications/${currentUser?.user_id}`, { withCredentials: true });
                     setUserNotifications(response.data);
                 } catch (error) {
                     console.error("Error fetching notifications:", error);
@@ -33,7 +33,12 @@ const Notification = () => {
             };
             fetchNotifications();
         }
-    }, [currentUser,userNotifications]);
+    }, [currentUser]);
+
+    const formatTimestamp = (timestamp) => {
+        const date = new Date(parseInt(timestamp)); 
+        return date.toLocaleString();
+    };
 
     return (
         <>
@@ -45,6 +50,10 @@ const Notification = () => {
                         {userNotifications.map((notification) => (
                             <li key={notification.notification_id} className="list-group-item">
                                 <div dangerouslySetInnerHTML={{ __html: notification.notification_content }} />
+                                <small className="text-muted">
+                                    {/* Display formatted time */}
+                                    {formatTimestamp(notification.notification_id)}
+                                </small>
                             </li>
                         ))}
                     </ul>
