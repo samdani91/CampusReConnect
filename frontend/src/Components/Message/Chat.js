@@ -95,7 +95,7 @@ function Chat() {
 								<div className="card h-100 w-100">
 									<div
 										className="card-header d-flex align-items-center p-2  text-white"
-										style={{ borderBottom: "1px solid #dee2e6", height: "70px" }}
+										style={{ borderBottom: "1px solid #dee2e6", height: "70px",backgroundColor:'#051129' }}
 									>
 										<div
 											className="rounded-circle bg-light text-black d-flex justify-content-center align-items-center"

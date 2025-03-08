@@ -36,7 +36,7 @@ function UserList({ setSelectedUser }) {
     <div className="card h-100" style={{
       width:"100%"
     }}>
-      <div className="card-header text-white d-flex align-items-center justify-content-center" style={{height:"72px",backgroundColor:'#05112'}}>
+      <div className="card-header text-white d-flex align-items-center justify-content-center" style={{height:"72px",backgroundColor:'#051129'}}>
         <strong>Chat List</strong>
       </div>
       <ul className="list-group list-group-flush overflow-auto h-100 userList">
