@@ -7,12 +7,9 @@ CREATE TABLE spl2.post (
     authors VARCHAR(100),
     description VARCHAR(10000),
     attachment VARCHAR(200),
-    summary VARCHAR(2000),
-    visibility BIT(1),
     upvotes INT(5),
     downvotes INT(5),
     created_date VARCHAR(50),
     created_time DATETIME,
     community_id VARCHAR(30)
-    -- FOREIGN KEY (user_id) REFERENCES spl2.user(user_id)  -- Assuming a Users table exists
 );

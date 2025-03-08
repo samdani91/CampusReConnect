@@ -8,7 +8,6 @@ CREATE TABLE spl2.comment (
     comment_content TEXT,
     created_date VARCHAR(50),
 
-    FOREIGN KEY (user_id) REFERENCES spl2.user(user_id),
-    FOREIGN KEY (post_id) REFERENCES spl2.post(post_id),
+    FOREIGN KEY (post_id) REFERENCES spl2.post(post_id) ON DELETE CASCADE,
     FOREIGN KEY (parent_comment_id) REFERENCES spl2.comment(comment_id) ON DELETE CASCADE
 );

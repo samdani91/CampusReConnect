@@ -1,5 +1,3 @@
--- DROP TABLE spl2.Message;
-
 CREATE TABLE spl2.Message (
     message_id VARCHAR(100) PRIMARY KEY,
     message_content VARCHAR(1000),
